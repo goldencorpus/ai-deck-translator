@@ -1,58 +1,87 @@
 #!/usr/bin/env python3
 """
-Main entry point for the Google Slides Translator application.
-Supports both command-line and web interfaces.
-"""
-import argparse
-import os
-import sys
-from dotenv import load_dotenv
+AI Deck Translator - Main entry point
 
-# Load environment variables from .env file if it exists
-load_dotenv()
+This script serves as the entry point for both CLI and web interfaces
+of the AI Deck Translator application.
+"""
+
+import argparse
+import sys
+import os
+
+from ai_deck_translator.web.app import create_app, run_web_app
+from ai_deck_translator.core.translator import translate_presentation
+from ai_deck_translator.utils.logging import logger
+from ai_deck_translator.config import config
+
+
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="AI Deck Translator - Translate presentations between languages"
+    )
+    parser.add_argument(
+        "--web", 
+        action="store_true", 
+        help="Launch web interface"
+    )
+    parser.add_argument(
+        "--host", 
+        type=str, 
+        default=config["web"]["host"],
+        help="Host for the web server (default: 127.0.0.1)"
+    )
+    parser.add_argument(
+        "--port", 
+        type=int, 
+        default=config["web"]["port"],
+        help="Port for the web server (default: 5000)"
+    )
+    parser.add_argument(
+        "--debug", 
+        action="store_true", 
+        help="Enable debug mode"
+    )
+    return parser.parse_args()
+
+
+def cli_interface():
+    """Run the command line interface."""
+    try:
+        # Get presentation ID
+        presentation_id = input("Enter presentation ID: ")
+        
+        # Get source and target languages
+        source_lang = input("Enter source language (e.g., en): ")
+        target_lang = input("Enter target language (e.g., ja): ")
+        
+        # Start translation
+        translate_presentation(presentation_id, source_lang, target_lang)
+    except KeyboardInterrupt:
+        logger.info("Operation cancelled by user")
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f"Error in CLI interface: {str(e)}")
+        sys.exit(1)
+
 
 def main():
-    """Main entry point function for the application"""
-    parser = argparse.ArgumentParser(description="Google Slides Translator")
-    parser.add_argument("--web", action="store_true", help="Launch the web UI")
-    parser.add_argument("--port", type=int, default=5000, help="Port for web UI (default: 5000)")
-    parser.add_argument("--host", default="127.0.0.1", help="Host for web UI (default: 127.0.0.1)")
-    parser.add_argument("--presentation-id", help="Google Slides presentation ID")
-    parser.add_argument("--source-lang", default="en", help="Source language code (default: en)")
-    parser.add_argument("--target-lang", default="ja", help="Target language code (default: ja)")
-    parser.add_argument("--api-key", help="Anthropic API key (optional, can use CLAUDE_API_KEY env var)")
-    parser.add_argument("--resume-file", help="Recovery file to resume from (optional)")
+    """Entry point for the application."""
+    args = parse_args()
     
-    args = parser.parse_args()
-    
-    if args.web:
-        # Import web interface module
-        from gslides_translator.web.app import create_app
-        
-        app = create_app()
-        print(f"Starting Web UI on http://{args.host}:{args.port}")
-        print("Press Ctrl+C to stop")
-        app.run(host=args.host, port=args.port, debug=False)
-    else:
-        # Import CLI module
-        from gslides_translator.core.translator import translate_slides
-        
-        # If presentation ID is not provided, prompt for it
-        presentation_id = args.presentation_id
-        if not presentation_id:
-            presentation_id = input("Enter Google Slides Presentation ID: ")
-        
-        # If API key is provided, set it as environment variable
-        if args.api_key:
-            os.environ["CLAUDE_API_KEY"] = args.api_key
-        
-        # Run the translation process
-        translate_slides(
-            presentation_id=presentation_id,
-            source_language=args.source_lang,
-            target_language=args.target_lang,
-            resume_file=args.resume_file
-        )
+    try:
+        if args.web:
+            # Run web interface
+            app = create_app()
+            run_web_app(app, host=args.host, port=args.port, debug=args.debug)
+        else:
+            # Run CLI interface
+            cli_interface()
+    except Exception as e:
+        logger.error(f"Application error: {str(e)}")
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     main() 

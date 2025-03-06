@@ -7,13 +7,13 @@ from unittest import mock
 
 import pytest
 
-from gslides_translator.config import (
+from ai_deck_translator.config import (
     DEFAULT_CONFIG,
     validate_config,
     load_config,
     save_config,
 )
-from gslides_translator.utils.exceptions import ConfigurationError
+from ai_deck_translator.utils.exceptions import ConfigurationError
 
 
 def test_validate_config_valid():
@@ -90,9 +90,9 @@ def test_save_config():
 @mock.patch.dict(os.environ, {"GSLIDES_MODEL": "claude-3-haiku-20240307"})
 def test_env_var_override():
     """Test that environment variables override config settings."""
-    from gslides_translator.config import get_config
+    from ai_deck_translator.config import get_config
     
     # Patch the home directory to avoid interference with user's actual config
-    with mock.patch("gslides_translator.config.CONFIG_DIR", "/tmp/nonexistent_dir"):
+    with mock.patch("ai_deck_translator.config.CONFIG_DIR", "/tmp/nonexistent_dir"):
         config = get_config()
         assert config["translation"]["model"] == "claude-3-haiku-20240307" 
