@@ -1,125 +1,98 @@
-"""
-Tests for the config module.
-"""
-import unittest
-from unittest.mock import patch, mock_open
+"""Tests for the configuration module."""
+
 import os
+import json
 import tempfile
-from gslides_translator.config import load_config, get_config
+from unittest import mock
 
-class TestConfig(unittest.TestCase):
-    """Test cases for the config module."""
-    
-    def setUp(self):
-        """Set up test fixtures."""
-        # Create a temporary directory for config files
-        self.temp_dir = tempfile.mkdtemp()
-        self.config_path = os.path.join(self.temp_dir, '.env')
-        
-        # Sample config data
-        self.config_data = """
-        ANTHROPIC_API_KEY=test_api_key
-        FLASK_SECRET_KEY=test_secret_key
-        """
-        
-        # Reset the config module's state
-        from gslides_translator import config
-        config._config = {}
-    
-    @patch('os.path.exists')
-    @patch('builtins.open', new_callable=mock_open)
-    def test_load_config(self, mock_file, mock_exists):
-        """Test loading config from a file."""
-        # Mock that the config file exists
-        mock_exists.return_value = True
-        
-        # Mock reading the config file
-        mock_file.return_value.read.return_value = self.config_data
-        
-        # Call the function
-        config = load_config(self.config_path)
-        
-        # Verify the config was read
-        mock_file.assert_called_with(self.config_path, 'r')
-        
-        # Verify the config was parsed correctly
-        self.assertEqual(config['ANTHROPIC_API_KEY'], 'test_api_key')
-        self.assertEqual(config['FLASK_SECRET_KEY'], 'test_secret_key')
-    
-    @patch('os.path.exists')
-    def test_load_config_no_file(self, mock_exists):
-        """Test loading config when the file doesn't exist."""
-        # Mock that the config file doesn't exist
-        mock_exists.return_value = False
-        
-        # Call the function
-        config = load_config(self.config_path)
-        
-        # Verify an empty config was returned
-        self.assertEqual(config, {})
-    
-    @patch('os.path.exists')
-    @patch('builtins.open', new_callable=mock_open)
-    def test_get_config(self, mock_file, mock_exists):
-        """Test getting a config value."""
-        # Mock that the config file exists
-        mock_exists.return_value = True
-        
-        # Mock reading the config file
-        mock_file.return_value.read.return_value = self.config_data
-        
-        # Call the function
-        api_key = get_config('ANTHROPIC_API_KEY')
-        
-        # Verify the config was read
-        mock_file.assert_called_with('.env', 'r')
-        
-        # Verify the correct value was returned
-        self.assertEqual(api_key, 'test_api_key')
-    
-    @patch('os.path.exists')
-    @patch('builtins.open', new_callable=mock_open)
-    def test_get_config_with_default(self, mock_file, mock_exists):
-        """Test getting a config value with a default."""
-        # Mock that the config file exists
-        mock_exists.return_value = True
-        
-        # Mock reading the config file
-        mock_file.return_value.read.return_value = self.config_data
-        
-        # Call the function with a key that doesn't exist
-        value = get_config('NONEXISTENT_KEY', default='default_value')
-        
-        # Verify the default value was returned
-        self.assertEqual(value, 'default_value')
-    
-    @patch('os.path.exists')
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('os.environ', {'ANTHROPIC_API_KEY': 'env_api_key'})
-    def test_get_config_from_env(self, mock_file, mock_exists):
-        """Test getting a config value from environment variables."""
-        # Mock that the config file doesn't exist
-        mock_exists.return_value = False
-        
-        # Call the function
-        api_key = get_config('ANTHROPIC_API_KEY')
-        
-        # Verify the correct value was returned from the environment
-        self.assertEqual(api_key, 'env_api_key')
-    
-    @patch('os.path.exists')
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('os.environ', {})
-    def test_get_config_missing(self, mock_file, mock_exists):
-        """Test getting a missing config value without a default."""
-        # Mock that the config file doesn't exist
-        mock_exists.return_value = False
-        
-        # Call the function
-        value = get_config('NONEXISTENT_KEY')
-        
-        # Verify None was returned
-        self.assertIsNone(value)
+import pytest
 
-if __name__ == '__main__':
-    unittest.main() 
+from gslides_translator.config import (
+    DEFAULT_CONFIG,
+    validate_config,
+    load_config,
+    save_config,
+)
+from gslides_translator.utils.exceptions import ConfigurationError
+
+
+def test_validate_config_valid():
+    """Test that a valid configuration passes validation."""
+    assert validate_config(DEFAULT_CONFIG) is True
+
+
+def test_validate_config_missing_section():
+    """Test that validation fails with missing sections."""
+    invalid_config = DEFAULT_CONFIG.copy()
+    invalid_config.pop("presentation")
+    
+    with pytest.raises(ConfigurationError):
+        validate_config(invalid_config)
+
+
+def test_load_config_nonexistent():
+    """Test that loading a nonexistent config falls back to defaults."""
+    config = load_config("nonexistent_file.json")
+    assert config == DEFAULT_CONFIG
+
+
+def test_load_config_invalid_json():
+    """Test that loading an invalid JSON file raises an error."""
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+        temp_file.write("This is not valid JSON")
+        temp_file_path = temp_file.name
+    
+    try:
+        with pytest.raises(ConfigurationError):
+            load_config(temp_file_path)
+    finally:
+        os.unlink(temp_file_path)
+
+
+def test_load_config_valid():
+    """Test that loading a valid config file works."""
+    custom_config = {
+        "presentation": {
+            "create_copy": False,
+            "copy_title_suffix": " (Custom)",
+        }
+    }
+    
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+        json.dump(custom_config, temp_file)
+        temp_file_path = temp_file.name
+    
+    try:
+        config = load_config(temp_file_path)
+        assert config["presentation"]["create_copy"] is False
+        assert config["presentation"]["copy_title_suffix"] == " (Custom)"
+        # Other values should come from defaults
+        assert "translation" in config
+        assert "api" in config
+    finally:
+        os.unlink(temp_file_path)
+
+
+def test_save_config():
+    """Test that saving configuration works."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        config_path = os.path.join(temp_dir, "config.json")
+        save_config(DEFAULT_CONFIG, config_path)
+        
+        assert os.path.exists(config_path)
+        
+        with open(config_path, "r") as f:
+            saved_config = json.load(f)
+        
+        assert saved_config == DEFAULT_CONFIG
+
+
+@mock.patch.dict(os.environ, {"GSLIDES_MODEL": "claude-3-haiku-20240307"})
+def test_env_var_override():
+    """Test that environment variables override config settings."""
+    from gslides_translator.config import get_config
+    
+    # Patch the home directory to avoid interference with user's actual config
+    with mock.patch("gslides_translator.config.CONFIG_DIR", "/tmp/nonexistent_dir"):
+        config = get_config()
+        assert config["translation"]["model"] == "claude-3-haiku-20240307" 
