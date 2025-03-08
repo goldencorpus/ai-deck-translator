@@ -26,6 +26,10 @@ from ..utils.batch import split_dict_into_smart_batches, deduplicate_content
 from ..utils.recovery import setup_recovery_system
 from ..utils.progress import create_progress_bar
 from ..utils.logging import get_logger
+from ..utils.batch import create_batches
+from ..utils.progress import ProgressTracker
+from ..utils.recovery import save_recovery_file, load_recovery_file
+from ..utils.exceptions import TranslationError, NetworkError, RateLimitError
 
 # Set up logging
 logger = get_logger(__name__)
@@ -253,155 +257,204 @@ Please respond with ONLY the translated JSON object, maintaining the exact same 
     # This should only happen if all retries fail
     raise Exception(f"Failed to translate batch {batch_index} after {max_retries} attempts")
 
-def translate_text(text_dict, slide_metadata, source_language, target_language, resume_file=None, api_key=None, web_state=None):
+def translate_text(
+    text_elements: Dict[str, str],
+    slide_metadata: List[Dict[str, Any]],
+    target_language: str,
+    translate_func: Callable[[List[str], str], List[str]],
+    batch_size: int = 50,
+    delay: float = 0.5,
+    recovery_file: Optional[str] = None,
+    progress_callback: Optional[Callable[[int, int], None]] = None
+) -> Dict[str, str]:
     """
-    Translate all text in a presentation.
+    Translate text elements from a presentation.
+    
+    This function translates text elements extracted from a presentation to the target
+    language. It handles batching, rate limiting, and error recovery to ensure efficient
+    and reliable translation.
     
     Args:
-        text_dict: Dictionary of text to translate
-        slide_metadata: Metadata about slides
-        source_language: Source language code
-        target_language: Target language code
-        resume_file: Optional file path to resume from
-        api_key: Optional Claude API key
-        web_state: Optional dictionary for web UI state
-        
+        text_elements (Dict[str, str]): Dictionary of text elements with IDs as keys
+        slide_metadata (List[Dict[str, Any]]): List of slide metadata dictionaries
+        target_language (str): Target language code (e.g., 'ja' for Japanese)
+        translate_func (Callable): Function to translate a batch of text
+            The function should accept a list of strings and a target language code,
+            and return a list of translated strings in the same order
+        batch_size (int, optional): Maximum number of elements per batch. Defaults to 50.
+        delay (float, optional): Delay between batches in seconds. Defaults to 0.5.
+        recovery_file (str, optional): Path to save recovery data. Defaults to None.
+        progress_callback (Callable, optional): Function to report progress. Defaults to None.
+            The function should accept two integers: current progress and total items
+    
     Returns:
-        dict: Dictionary of translated text
-    """
-    # Set up the recovery system
-    recovery_state, recovery_file, save_recovery_state = setup_recovery_system(
-        "presentation", text_dict, slide_metadata, source_language, target_language, resume_file
-    )
-    
-    # Skip already translated items if resuming
-    if resume_file:
-        # Update the text_dict to exclude already translated items
-        for key in recovery_state["translated_items"]:
-            if key in text_dict:
-                text_dict.pop(key)
+        Dict[str, str]: Dictionary of translated text elements with the same IDs as keys
         
-        print(f"Resuming translation: {len(recovery_state['translated_items'])} items already translated, {len(text_dict)} remaining")
+    Raises:
+        TranslationError: If there's an error during translation
+        NetworkError: If there's a network error during translation
+        RateLimitError: If the translation service rate limit is exceeded
+        
+    Example:
+        >>> from ai_deck_translator.services.google_translate import translate_batch
+        >>> translated = translate_text(
+        ...     text_elements={"slide1_shape1": "Hello world"},
+        ...     slide_metadata=[{"slide_number": 1, "layout": "Title Slide"}],
+        ...     target_language="ja",
+        ...     translate_func=translate_batch
+        ... )
+        >>> print(translated["slide1_shape1"])
+        こんにちは世界
+    """
+    # Initialize progress tracker
+    total_elements = len(text_elements)
+    progress = ProgressTracker(total_elements, progress_callback)
+    logger.info(f"Starting translation of {total_elements} elements to {target_language}")
     
-    # Deduplicate content to reduce translation costs
-    unique_dict, duplicates_map = deduplicate_content(text_dict)
+    # Check for recovery file
+    translated_elements = {}
+    start_index = 0
     
-    # Split the deduplicated content into manageable batches
-    batches = split_dict_into_smart_batches(unique_dict)
+    if recovery_file and os.path.exists(recovery_file):
+        try:
+            recovery_data = load_recovery_file(recovery_file)
+            if recovery_data and "translated" in recovery_data:
+                translated_elements = recovery_data["translated"]
+                start_index = recovery_data.get("progress", 0)
+                logger.info(f"Loaded recovery data with {len(translated_elements)} translated elements")
+                progress.update(len(translated_elements))
+        except Exception as e:
+            logger.warning(f"Failed to load recovery data: {e}")
     
-    # Track which batches are already completed (if resuming)
-    completed_batch_indices = set(recovery_state.get("completed_batches", []))
+    # Create batches of text elements
+    element_ids = list(text_elements.keys())
+    element_texts = list(text_elements.values())
     
-    # Create a progress bar
-    progress = create_progress_bar(
-        total=len(unique_dict),
-        desc=f"Translating {source_language} → {target_language}",
-        web_state=web_state
-    )
+    # Process slide notes separately to ensure they're included
+    notes_ids = []
+    notes_texts = []
     
-    # Process batches
-    unique_translated_dict = recovery_state.get("translated_items", {})
+    for metadata in slide_metadata:
+        slide_number = metadata.get("slide_number", 0)
+        notes = metadata.get("notes", "")
+        
+        if notes and notes.strip():
+            notes_id = f"slide{slide_number}_notes"
+            notes_ids.append(notes_id)
+            notes_texts.append(notes)
     
-    for batch_index, batch in enumerate(batches):
-        # Skip already completed batches
-        if batch_index in completed_batch_indices:
-            progress.update(len(batch))
+    # Add notes to the elements if they're not already included
+    for notes_id, notes_text in zip(notes_ids, notes_texts):
+        if notes_id not in text_elements:
+            element_ids.append(notes_id)
+            element_texts.append(notes_text)
+    
+    # Create batches for translation
+    batches = create_batches(element_ids, element_texts, batch_size)
+    
+    # Skip batches that are already translated
+    if start_index > 0:
+        batches = batches[start_index:]
+    
+    # Translate each batch
+    for batch_index, (batch_ids, batch_texts) in enumerate(batches):
+        batch_num = batch_index + start_index
+        
+        # Skip elements that are already translated
+        to_translate_indices = []
+        to_translate_texts = []
+        
+        for i, element_id in enumerate(batch_ids):
+            if element_id not in translated_elements:
+                to_translate_indices.append(i)
+                to_translate_texts.append(batch_texts[i])
+        
+        if not to_translate_texts:
+            logger.debug(f"Skipping batch {batch_num + 1}/{len(batches) + start_index} (already translated)")
             continue
         
+        # Translate the batch
         try:
-            # Translate this batch
-            progress.set_description(f"Translating batch {batch_index+1}/{len(batches)}")
-            translated_batch = translate_batch(
-                batch, batch_index, slide_metadata, 
-                source_language, target_language, api_key
-            )
+            logger.debug(f"Translating batch {batch_num + 1}/{len(batches) + start_index} ({len(to_translate_texts)} elements)")
+            translated_batch = translate_func(to_translate_texts, target_language)
             
-            # Add the translated items to our results
-            unique_translated_dict.update(translated_batch)
+            # Update translated elements
+            for i, translated_text in zip(to_translate_indices, translated_batch):
+                element_id = batch_ids[i]
+                translated_elements[element_id] = translated_text
             
-            # Update the recovery state
-            recovery_state["translated_items"].update(translated_batch)
-            recovery_state["completed_batches"].append(batch_index)
-            save_recovery_state()
+            # Update progress
+            progress.update(len(to_translate_texts))
             
-            # Update progress bar
-            progress.update(len(batch))
+            # Save recovery file
+            if recovery_file:
+                save_recovery_file(recovery_file, {
+                    "translated": translated_elements,
+                    "progress": batch_num + 1
+                })
+                logger.debug(f"Saved recovery data with {len(translated_elements)} translated elements")
             
+            # Delay between batches to avoid rate limiting
+            if batch_index < len(batches) - 1 and delay > 0:
+                time.sleep(delay)
+                
         except Exception as e:
-            print(f"Error processing batch {batch_index}: {str(e)}")
-            recovery_state["failed_batches"].append(batch_index)
-            save_recovery_state()
-    
-    # Close the progress bar
-    progress.close()
-    
-    # Try to recover any failed batches
-    while recovery_state.get("failed_batches", []):
-        print(f"Attempting to recover {len(recovery_state['failed_batches'])} failed batches")
-        failed_batch_index = recovery_state["failed_batches"][0]
-        
-        try:
-            # Get the batch data
-            if failed_batch_index < len(batches):
-                failed_batch = batches[failed_batch_index]
-                
-                # Try to translate with smaller batches
-                smaller_batches = split_dict_into_smart_batches(
-                    failed_batch, 
-                    max_input_tokens=config.MAX_INPUT_TOKENS // 2  # Use smaller batches
-                )
-                
-                for i, small_batch in enumerate(smaller_batches):
-                    translated_small_batch = translate_batch(
-                        small_batch, f"{failed_batch_index}.{i}", slide_metadata,
-                        source_language, target_language, api_key,
-                        max_retries=config.MAX_RETRIES + 1  # Extra retry for failed batches
-                    )
-                    
-                    # Add the translated items to our results
-                    unique_translated_dict.update(translated_small_batch)
-                    
-                    # Update the recovery state
-                    recovery_state["translated_items"].update(translated_small_batch)
-                
-                # Mark the batch as completed
-                recovery_state["completed_batches"].append(failed_batch_index)
-                recovery_state["failed_batches"].remove(failed_batch_index)
-                save_recovery_state()
-                
+            logger.error(f"Error translating batch {batch_num + 1}: {e}")
+            
+            # Save recovery file before raising the exception
+            if recovery_file:
+                save_recovery_file(recovery_file, {
+                    "translated": translated_elements,
+                    "progress": batch_num
+                })
+                logger.info(f"Saved recovery data with {len(translated_elements)} translated elements")
+            
+            # Raise appropriate exception
+            if "Network error" in str(e):
+                raise NetworkError(f"Network error during translation: {str(e)}")
+            elif "Rate limit" in str(e):
+                raise RateLimitError(f"Translation rate limit exceeded: {str(e)}")
             else:
-                print(f"Invalid batch index: {failed_batch_index}")
-                recovery_state["failed_batches"].remove(failed_batch_index)
-                save_recovery_state()
-                
+                raise TranslationError(f"Error during translation: {str(e)}")
+    
+    logger.info(f"Translation completed: {len(translated_elements)} elements translated to {target_language}")
+    return translated_elements
+
+def translate_batch(
+    texts: List[str],
+    target_language: str,
+    translate_func: Callable[[str, str], str]
+) -> List[str]:
+    """
+    Translate a batch of text elements.
+    
+    This is a helper function that applies a translation function to each text element
+    in a batch. It's used by the translate_text function to process batches of text.
+    
+    Args:
+        texts (List[str]): List of text elements to translate
+        target_language (str): Target language code (e.g., 'ja' for Japanese)
+        translate_func (Callable): Function to translate a single text element
+            The function should accept a string and a target language code,
+            and return the translated string
+    
+    Returns:
+        List[str]: List of translated text elements in the same order
+        
+    Raises:
+        TranslationError: If there's an error during translation
+    """
+    translated = []
+    
+    for text in texts:
+        try:
+            translated_text = translate_func(text, target_language)
+            translated.append(translated_text)
         except Exception as e:
-            print(f"Failed to recover batch {failed_batch_index}: {str(e)}")
-            # Move to the next failed batch
-            recovery_state["failed_batches"].remove(failed_batch_index)
-            recovery_state["failed_batches"].append(failed_batch_index)  # Move to the end
-            save_recovery_state()
+            logger.error(f"Error translating text: {e}")
+            raise TranslationError(f"Error translating text: {str(e)}")
     
-    # Reconstruct the full translation dictionary
-    print("Reconstructing full translation dictionary...")
-    full_translated_dict = {}
-    
-    # Add all unique translations
-    for key, value in unique_translated_dict.items():
-        full_translated_dict[key] = value
-    
-    # Add all duplicates using the mapping
-    for original_key, rep_key in duplicates_map.items():
-        if rep_key in unique_translated_dict:
-            full_translated_dict[original_key] = unique_translated_dict[rep_key]
-    
-    print(f"Translation complete: {len(full_translated_dict)} items translated")
-    
-    # Check for any missing translations
-    missing_keys = set(text_dict.keys()) - set(full_translated_dict.keys())
-    if missing_keys:
-        print(f"Warning: {len(missing_keys)} items were not translated")
-    
-    return full_translated_dict
+    return translated
 
 def translate_slides(presentation_id, source_language=None, target_language=None, resume_file=None, api_key=None, web_state=None):
     """
@@ -461,8 +514,7 @@ def translate_slides(presentation_id, source_language=None, target_language=None
     # Translate the text
     print(f"Translating from {source_language} to {target_language}...")
     translated_texts = translate_text(
-        text_dict, slide_metadata, source_language, target_language, 
-        resume_file, api_key, web_state
+        text_dict, slide_metadata, target_language, translate_batch
     )
     
     # Update the presentation with translated text

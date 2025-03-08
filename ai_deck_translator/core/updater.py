@@ -10,6 +10,7 @@ Public Functions:
 """
 import webbrowser
 from ..utils.logging import get_logger
+from ..utils.exceptions import NetworkError, PresentationError
 
 # Set up logging
 logger = get_logger(__name__)
@@ -40,6 +41,7 @@ def update_slides(slides_service, drive_service, presentation_id, translated_tex
         
     Raises:
         NetworkError: If there are network issues during API calls
+        PresentationError: If there are issues with the presentation structure
         
     Example:
         >>> from ai_deck_translator.auth.google_auth import authenticate_google
@@ -49,79 +51,131 @@ def update_slides(slides_service, drive_service, presentation_id, translated_tex
         ...                        {"objectId1": "Translated text 1"}, "ja")
         >>> print(f"New presentation: https://docs.google.com/presentation/d/{new_id}/edit")
     """
-    # First, get the original presentation 
-    presentation = slides_service.presentations().get(presentationId=presentation_id).execute()
-    original_title = presentation.get('title', 'Presentation')
-    new_title = f"{original_title} - {target_language}"
-    
-    # Get file metadata to copy the presentation
-    file_metadata = {
-        'name': new_title,
-        'mimeType': 'application/vnd.google-apps.presentation'
-    }
-    
-    # Copy the file using Drive API
-    copied_file = drive_service.files().copy(
-        fileId=presentation_id, 
-        body=file_metadata
-    ).execute()
-    
-    new_presentation_id = copied_file['id']
-    
-    # Now update the new presentation with translated texts
-    requests = []
-    for object_id, new_text in translated_texts.items():
-        # Check if it's a table cell (has the format objectId_r{row}_c{col})
-        if '_r' in object_id and '_c' in object_id:
-            # Parse the table cell coordinates
-            base_id, row_col = object_id.split('_r', 1)
-            row_idx, col_idx = row_col.split('_c')
+    try:
+        # First, get the original presentation 
+        logger.info(f"Getting original presentation: {presentation_id}")
+        presentation = slides_service.presentations().get(presentationId=presentation_id).execute()
+        original_title = presentation.get('title', 'Presentation')
+        new_title = f"{original_title} - {target_language}"
+        
+        # Get file metadata to copy the presentation
+        file_metadata = {
+            'name': new_title,
+            'mimeType': 'application/vnd.google-apps.presentation'
+        }
+        
+        # Copy the file using Drive API
+        logger.info(f"Creating copy of presentation with title: {new_title}")
+        copied_file = drive_service.files().copy(
+            fileId=presentation_id, 
+            body=file_metadata
+        ).execute()
+        
+        new_presentation_id = copied_file['id']
+        logger.info(f"Created new presentation with ID: {new_presentation_id}")
+        
+        # Now update the new presentation with translated texts
+        requests = []
+        notes_requests = []
+        
+        # Process regular text elements
+        for object_id, new_text in translated_texts.items():
+            # Skip notes for now, we'll handle them separately
+            if "_notes" in object_id:
+                continue
+                
+            # Check if it's a table cell (has the format objectId_r{row}_c{col})
+            if '_r' in object_id and '_c' in object_id:
+                # Parse the table cell coordinates
+                base_id, row_col = object_id.split('_r', 1)
+                row_idx, col_idx = row_col.split('_c')
+                
+                # For table cells, we need to use different update format
+                requests.append({
+                    'tableText': {
+                        'tableObjectId': base_id,
+                        'tableRowIndex': int(row_idx),
+                        'tableColumnIndex': int(col_idx),
+                        'text': new_text
+                    }
+                })
+            else:
+                # For regular shapes, use replaceAllText
+                requests.append({
+                    'replaceAllShapesWithText': {
+                        'containsText': {
+                            'text': '*',
+                            'matchCase': False
+                        },
+                        'pageObjectIds': [],
+                        'replaceText': new_text,
+                        'objectIds': [object_id]
+                    }
+                })
+        
+        # Process slide notes
+        for object_id, new_text in translated_texts.items():
+            if "_notes" in object_id and "slide" in object_id:
+                # Extract slide number from the object ID
+                slide_number = int(object_id.split("slide")[1].split("_")[0])
+                
+                # Get the slide ID
+                slide_id = presentation.get('slides', [])[slide_number - 1].get('objectId')
+                
+                if slide_id:
+                    notes_requests.append({
+                        'replaceAllText': {
+                            'replaceText': new_text,
+                            'pageObjectIds': [slide_id],
+                            'containsText': {
+                                'text': '*',
+                                'matchCase': False
+                            }
+                        }
+                    })
+        
+        # Apply the updates in batches to avoid exceeding API limits
+        batch_size = 100  # Google Slides API has a limit of 100 requests per batch
+        
+        # Update regular text elements
+        for i in range(0, len(requests), batch_size):
+            batch = requests[i:i + batch_size]
+            logger.info(f"Applying batch update {i//batch_size + 1}/{(len(requests) + batch_size - 1)//batch_size}")
             
-            # For table cells, we need to use different update format
-            requests.append({
-                "deleteText": {
-                    "objectId": base_id,
-                    "cellLocation": {
-                        "rowIndex": int(row_idx),
-                        "columnIndex": int(col_idx)
-                    },
-                    "textRange": {"type": "ALL"}
-                }
-            })
-            requests.append({
-                "insertText": {
-                    "objectId": base_id,
-                    "cellLocation": {
-                        "rowIndex": int(row_idx),
-                        "columnIndex": int(col_idx)
-                    },
-                    "insertionIndex": 0,
-                    "text": new_text
-                }
-            })
+            try:
+                slides_service.presentations().batchUpdate(
+                    presentationId=new_presentation_id,
+                    body={'requests': batch}
+                ).execute()
+            except Exception as e:
+                logger.error(f"Error applying batch update: {e}")
+                raise NetworkError(f"Failed to update presentation: {str(e)}")
+        
+        # Update slide notes
+        if notes_requests:
+            logger.info(f"Updating {len(notes_requests)} slide notes")
+            
+            for i in range(0, len(notes_requests), batch_size):
+                batch = notes_requests[i:i + batch_size]
+                
+                try:
+                    slides_service.presentations().batchUpdate(
+                        presentationId=new_presentation_id,
+                        body={'requests': batch}
+                    ).execute()
+                except Exception as e:
+                    logger.warning(f"Error updating slide notes: {e}")
+                    # Continue even if notes update fails
+        
+        # Open the presentation in the browser
+        presentation_url = f"https://docs.google.com/presentation/d/{new_presentation_id}/edit"
+        logger.info(f"Opening translated presentation: {presentation_url}")
+        webbrowser.open(presentation_url)
+        
+        return new_presentation_id
+    except Exception as e:
+        logger.error(f"Error updating presentation: {e}")
+        if "Network" in str(e):
+            raise NetworkError(f"Network error updating presentation: {str(e)}")
         else:
-            # Regular text elements
-            requests.append({"deleteText": {"objectId": object_id, "textRange": {"type": "ALL"}}})
-            requests.append({"insertText": {"objectId": object_id, "insertionIndex": 0, "text": new_text}})
-    
-    # Process requests in batches since there might be a limit on request size
-    batch_size = 100  # Adjust batch size as needed
-    for i in range(0, len(requests), batch_size):
-        batch_requests = requests[i:i + batch_size]
-        try:
-            slides_service.presentations().batchUpdate(
-                presentationId=new_presentation_id, 
-                body={"requests": batch_requests}
-            ).execute()
-        except Exception as e:
-            print(f"Error in update batch {i//batch_size + 1}: {e}")
-            # Print the first few problematic requests for debugging
-            problem_batch = requests[i:i+min(5, batch_size)]
-            print(f"Problem might be in these requests: {problem_batch}")
-    
-    # Open the new presentation in browser
-    presentation_url = f"https://docs.google.com/presentation/d/{new_presentation_id}/edit"
-    print(f"Opening translated presentation: {presentation_url}")
-    webbrowser.open(presentation_url)
-    
-    return new_presentation_id 
+            raise PresentationError(f"Error updating presentation: {str(e)}") 

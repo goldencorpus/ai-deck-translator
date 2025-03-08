@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Progress - AI Deck Translator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .progress {
+            height: 25px;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+        }
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .status-running {
+            color: #0d6efd;
+        }
+        .status-completed {
+            color: #198754;
+        }
+        .status-failed {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="mb-4">
+            <h1 class="text-center">AI Deck Translator</h1>
+            <p class="lead text-center">Translation Progress</p>
+        </header>
+
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Translation Status</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div id="status-container">
+                            {% if state.status == "running" %}
+                                <div class="status-icon status-running">⚙️</div>
+                                <h3>Translation in Progress</h3>
+                                <p>Please wait while your presentation is being translated...</p>
+                            {% elif state.status == "completed" %}
+                                <div class="status-icon status-completed">✅</div>
+                                <h3>Translation Completed</h3>
+                                <p>Your presentation has been successfully translated!</p>
+                            {% elif state.status == "failed" %}
+                                <div class="status-icon status-failed">❌</div>
+                                <h3>Translation Failed</h3>
+                                <p>{{ state.error }}</p>
+                            {% else %}
+                                <div class="status-icon">⏳</div>
+                                <h3>Preparing Translation</h3>
+                                <p>Setting up the translation process...</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="progress mt-4 mb-3">
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ state.percent }}%;" aria-valuenow="{{ state.percent }}" aria-valuemin="0" aria-valuemax="100">{{ state.percent }}%</div>
+                        </div>
+                        <p id="progress-text">{{ state.progress }} of {{ state.total }} elements translated</p>
+
+                        <div id="action-buttons" class="mt-4">
+                            {% if state.status == "completed" %}
+                                <a href="/download" class="btn btn-primary">Download Translated Presentation</a>
+                            {% endif %}
+                            <a href="/" class="btn btn-outline-secondary">Back to Home</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to update progress
+        function updateProgress() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update progress bar
+                    const progressBar = document.getElementById('progress-bar');
+                    progressBar.style.width = data.percent + '%';
+                    progressBar.setAttribute('aria-valuenow', data.percent);
+                    progressBar.textContent = data.percent + '%';
+                    
+                    // Update progress text
+                    document.getElementById('progress-text').textContent = 
+                        `${data.progress} of ${data.total} elements translated`;
+                    
+                    // Update status container
+                    const statusContainer = document.getElementById('status-container');
+                    
+                    if (data.status === 'running') {
+                        statusContainer.innerHTML = `
+                            <div class="status-icon status-running">⚙️</div>
+                            <h3>Translation in Progress</h3>
+                            <p>Please wait while your presentation is being translated...</p>
+                        `;
+                    } else if (data.status === 'completed') {
+                        statusContainer.innerHTML = `
+                            <div class="status-icon status-completed">✅</div>
+                            <h3>Translation Completed</h3>
+                            <p>Your presentation has been successfully translated!</p>
+                        `;
+                        
+                        // Show download button
+                        document.getElementById('action-buttons').innerHTML = `
+                            <a href="/download" class="btn btn-primary">Download Translated Presentation</a>
+                            <a href="/" class="btn btn-outline-secondary">Back to Home</a>
+                        `;
+                        
+                        // Stop polling
+                        clearInterval(progressInterval);
+                    } else if (data.status === 'failed') {
+                        statusContainer.innerHTML = `
+                            <div class="status-icon status-failed">❌</div>
+                            <h3>Translation Failed</h3>
+                            <p>${data.error || 'An error occurred during translation.'}</p>
+                        `;
+                        
+                        // Update action buttons
+                        document.getElementById('action-buttons').innerHTML = `
+                            <a href="/" class="btn btn-outline-secondary">Back to Home</a>
+                        `;
+                        
+                        // Stop polling
+                        clearInterval(progressInterval);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating progress:', error);
+                });
+        }
+        
+        // Update progress immediately and then every 2 seconds
+        updateProgress();
+        const progressInterval = setInterval(updateProgress, 2000);
+    </script>
+</body>
+</html> 
