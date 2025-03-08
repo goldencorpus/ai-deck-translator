@@ -8,6 +8,7 @@ with customizable callbacks for integration with different interfaces.
 Public Classes:
     CustomTqdm: A custom progress bar wrapper for command-line interfaces
     WebUITqdm: A progress bar wrapper for web interfaces
+    ProgressTracker: A simple progress tracker for translation processes
 
 Public Functions:
     create_progress_bar: Factory function to create the appropriate progress bar
@@ -18,6 +19,77 @@ from ..utils.logging import get_logger
 
 # Set up logging
 logger = get_logger(__name__)
+
+class ProgressTracker:
+    """
+    A simple progress tracker for translation processes.
+    
+    This class provides a simple interface for tracking progress during translation
+    processes. It supports callback functions for integration with different UIs.
+    
+    Attributes:
+        total (int): Total number of items to process
+        current (int): Current number of processed items
+        callback (callable, optional): Callback function for progress updates
+    """
+    
+    def __init__(self, total: int, callback: Optional[Callable[[int, int], None]] = None):
+        """
+        Initialize the progress tracker.
+        
+        Args:
+            total (int): Total number of items to process
+            callback (callable, optional): Callback function for progress updates.
+                The function should accept two integers: current progress and total items.
+        
+        Raises:
+            ValueError: If total is negative
+        """
+        if total < 0:
+            raise ValueError("Total must be a non-negative integer")
+            
+        self.total = total
+        self.current = 0
+        self.callback = callback
+        
+        logger.debug(f"Created progress tracker (total: {total})")
+    
+    def update(self, n: int = 1):
+        """
+        Update the progress tracker.
+        
+        Args:
+            n (int, optional): Number of items to increment by (default: 1)
+            
+        Raises:
+            ValueError: If n is negative
+        """
+        if n < 0:
+            raise ValueError("Update increment must be non-negative")
+            
+        self.current += n
+        
+        # Call the callback if registered
+        if self.callback:
+            self.callback(self.current, self.total)
+            
+        logger.debug(f"Progress updated: {self.current}/{self.total} ({int(100 * self.current / self.total) if self.total > 0 else 0}%)")
+    
+    def reset(self):
+        """
+        Reset the progress tracker.
+        """
+        self.current = 0
+        logger.debug("Progress tracker reset")
+    
+    def is_complete(self) -> bool:
+        """
+        Check if the progress is complete.
+        
+        Returns:
+            bool: True if the progress is complete, False otherwise
+        """
+        return self.current >= self.total
 
 class CustomTqdm:
     """

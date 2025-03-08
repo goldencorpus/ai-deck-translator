@@ -8,6 +8,7 @@ to reduce API costs and improve efficiency.
 Public Functions:
     split_dict_into_smart_batches: Split a dictionary into batches based on token count
     deduplicate_content: Deduplicate content to reduce translation costs
+    create_batches: Create batches of elements for processing
 """
 from typing import Dict, List, Any, Tuple
 from ..utils.logging import get_logger
@@ -16,6 +17,48 @@ from .. import config
 
 # Set up logging
 logger = get_logger(__name__)
+
+def create_batches(ids: List[str], texts: List[str], batch_size: int) -> List[Tuple[List[str], List[str]]]:
+    """
+    Create batches of elements for processing.
+    
+    This function takes lists of IDs and texts and splits them into batches of the
+    specified size. Each batch contains a tuple of (ids, texts) for that batch.
+    
+    Args:
+        ids (List[str]): List of element IDs
+        texts (List[str]): List of text elements corresponding to the IDs
+        batch_size (int): Maximum number of elements per batch
+        
+    Returns:
+        List[Tuple[List[str], List[str]]]: List of batches, where each batch is a tuple
+            containing a list of IDs and a list of texts
+            
+    Raises:
+        ValidationError: If the input lists have different lengths or batch_size is invalid
+        
+    Example:
+        >>> ids = ["id1", "id2", "id3", "id4", "id5"]
+        >>> texts = ["text1", "text2", "text3", "text4", "text5"]
+        >>> batches = create_batches(ids, texts, 2)
+        >>> print(f"Created {len(batches)} batches")
+    """
+    # Validate input
+    if len(ids) != len(texts):
+        raise ValidationError("IDs and texts lists must have the same length")
+    
+    if batch_size <= 0:
+        raise ValidationError("Batch size must be a positive integer")
+    
+    # Create batches
+    batches = []
+    for i in range(0, len(ids), batch_size):
+        batch_ids = ids[i:i + batch_size]
+        batch_texts = texts[i:i + batch_size]
+        batches.append((batch_ids, batch_texts))
+    
+    logger.debug(f"Created {len(batches)} batches from {len(ids)} elements (batch size: {batch_size})")
+    return batches
 
 def split_dict_into_smart_batches(input_dict: Dict[str, str], max_input_tokens: int = None, prompt_tokens: int = None) -> List[Dict[str, str]]:
     """
