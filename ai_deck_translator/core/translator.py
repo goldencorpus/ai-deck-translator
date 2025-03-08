@@ -31,6 +31,7 @@ from ..utils.progress import ProgressTracker
 from ..utils.recovery import save_recovery_file, load_recovery_file
 from ..utils.exceptions import TranslationError, NetworkError, RateLimitError
 from ..utils.translation_memory import lookup_translation, save_translation
+from ..utils.glossary import find_terms_in_text, apply_glossary_to_text
 
 # Set up logging
 logger = get_logger(__name__)
@@ -269,7 +270,8 @@ def translate_text(
     recovery_file: Optional[str] = None,
     progress_callback: Optional[Callable[[int, int], None]] = None,
     use_translation_memory: bool = True,
-    update_translation_memory: bool = True
+    update_translation_memory: bool = True,
+    use_glossary: bool = True
 ) -> Dict[str, str]:
     """
     Translate text elements from a presentation.
@@ -293,6 +295,7 @@ def translate_text(
             The function should accept two integers: current progress and total items
         use_translation_memory (bool, optional): Whether to use the translation memory. Defaults to True.
         update_translation_memory (bool, optional): Whether to update the translation memory. Defaults to True.
+        use_glossary (bool, optional): Whether to use the glossary for consistent terminology. Defaults to True.
     
     Returns:
         Dict[str, str]: Dictionary of translated text elements with the same IDs as keys
@@ -418,6 +421,16 @@ def translate_text(
             for i, translated_text in zip(to_translate_indices, translated_batch):
                 element_id = batch_ids[i]
                 original_text = batch_texts[i]
+                
+                # Apply glossary to the translated text if enabled
+                if use_glossary:
+                    translated_text = apply_glossary_to_text(
+                        original_text, 
+                        source_language, 
+                        target_language, 
+                        translated_text
+                    )
+                
                 translated_elements[element_id] = translated_text
                 
                 # Update translation memory
@@ -483,7 +496,9 @@ def translate_text(
 def translate_batch(
     texts: List[str],
     target_language: str,
-    translate_func: Callable[[str, str], str]
+    translate_func: Callable[[str, str], str],
+    source_language: str = "en",
+    use_glossary: bool = True
 ) -> List[str]:
     """
     Translate a batch of text elements.
@@ -497,6 +512,8 @@ def translate_batch(
         translate_func (Callable): Function to translate a single text element
             The function should accept a string and a target language code,
             and return the translated string
+        source_language (str, optional): Source language code. Defaults to "en".
+        use_glossary (bool, optional): Whether to use the glossary. Defaults to True.
     
     Returns:
         List[str]: List of translated text elements in the same order
@@ -508,7 +525,18 @@ def translate_batch(
     
     for text in texts:
         try:
+            # Translate the text
             translated_text = translate_func(text, target_language)
+            
+            # Apply glossary if enabled
+            if use_glossary:
+                translated_text = apply_glossary_to_text(
+                    text, 
+                    source_language, 
+                    target_language, 
+                    translated_text
+                )
+            
             translated.append(translated_text)
         except Exception as e:
             logger.error(f"Error translating text: {e}")

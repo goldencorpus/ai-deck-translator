@@ -21,9 +21,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 black isort mypy
+        pip install flake8 black isort
+        # Install package dependencies first
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        # Install the package in development mode
         pip install -e .
+        
+    - name: Create .env file
+      run: |
+        echo "CLAUDE_API_KEY=dummy_key_for_testing" > .env
         
     - name: Lint with flake8
       run: |
@@ -34,11 +40,11 @@ jobs:
         
     - name: Check formatting with black
       run: |
-        black --check ai_deck_translator/
+        black --check --diff ai_deck_translator/
         
     - name: Check imports with isort
       run: |
-        isort --check-only --profile black ai_deck_translator/
+        isort --check-only --profile black --diff ai_deck_translator/
         
     - name: Type check with mypy
       run: |

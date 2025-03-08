@@ -50,7 +50,7 @@ This document outlines the development roadmap, future features, and technical i
 ### Phase 2: Feature Enhancement (Q3 2023) - IN PROGRESS
 - [ ] Add support for preserving non-text elements during translation
 - [x] Implement custom translation memory for frequently used terms
-- [ ] Create translation glossary feature for consistent terminology
+- [x] Create translation glossary feature for consistent terminology
 - [ ] Add option to exclude specific slides from translation
 - [x] Implement slide notes translation
 - [ ] Create visual diff preview of translation changes
@@ -69,13 +69,13 @@ This document outlines the development roadmap, future features, and technical i
    - [x] Add pre-translation lookup to reuse existing translations
    - [x] Create management interface for the translation memory
 
-3. **Glossary Feature**: IN PROGRESS
-   - [ ] Create glossary data structure and storage
-   - [ ] Implement term recognition in text
-   - [ ] Add glossary-aware translation instructions
-   - [ ] Develop glossary management interface
+3. **Glossary Feature**: COMPLETED
+   - [x] Create glossary data structure and storage
+   - [x] Implement term recognition in text
+   - [x] Add glossary-aware translation instructions
+   - [x] Develop glossary management interface
 
-4. **Selective Translation**:
+4. **Selective Translation**: IN PROGRESS
    - [ ] Add slide selection interface in CLI and web UI
    - [ ] Modify extraction process to filter selected slides
    - [ ] Update progress reporting for partial translations
@@ -113,7 +113,6 @@ This document outlines the development roadmap, future features, and technical i
 - **Multi-API Support**: Add support for multiple translation APIs (Google, Azure, DeepL) as alternatives to Claude.
 - **Translation Quality Metrics**: Implement quality scoring for translations with suggestions for improvements.
 - **Interactive Web Editor**: Add ability to manually edit translations before applying them to slides.
-- **Terminology Management**: Create a system to manage and enforce consistent terminology across translations.
 - **Batch Scheduler**: Schedule multiple translation jobs to run sequentially or at specific times.
 - **Custom Style Preservation**: Better handling of custom styles, fonts, and formatting during translation.
 - **PDF Export**: Add option to automatically export translated presentations as PDF.
