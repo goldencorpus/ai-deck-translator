@@ -1,6 +1,38 @@
-# Development Plan for Google Slides Translator
+# Development Plan for AI Deck Translator
 
-This document outlines the development roadmap, future features, and technical improvements for the Google Slides Translator project.
+This document outlines the development roadmap, future features, and technical improvements for the AI Deck Translator project.
+
+## Code Reorganization Plan
+
+### Current State
+- The project currently has two implementations:
+  1. Standalone scripts in the root directory (including PPTX functionality)
+  2. A structured package in `gslides_translator/` (Google Slides functionality only)
+
+### Reorganization Steps
+1. **Rename Package**:
+   - [x] Rename `gslides_translator` to `ai_deck_translator` to reflect the new project name
+   - [x] Update all imports and references accordingly
+
+2. **Integrate PPTX Functionality**:
+   - [x] Create a new `pptx` module in the package
+   - [x] Move PPTX extraction functionality from standalone scripts
+   - [x] Move PPTX translation functionality from standalone scripts
+   - [x] Move PPTX updating functionality from standalone scripts
+   - [x] Ensure all PPTX-specific utilities are preserved
+
+3. **Archive Old Code**:
+   - [x] Move standalone scripts to an `archive` directory
+   - [x] Keep for reference until confident all functionality is preserved
+
+4. **Update Entry Points**:
+   - [x] Update `run.py` to support both Google Slides and PPTX functionality
+   - [x] Ensure CLI and web interfaces support both formats
+
+5. **Update Documentation**:
+   - [x] Update README with new project name and structure
+   - [x] Document both Google Slides and PPTX functionality
+   - [x] Update usage examples for both formats
 
 ## Roadmap
 

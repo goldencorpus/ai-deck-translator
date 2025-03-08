@@ -7,14 +7,14 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
 setup(
-    name="gslides_translator",
-    version="1.0.0",
+    name="ai_deck_translator",
+    version="2.0.0",
     author="AI Deck Translator Team",
     author_email="your.email@example.com",
-    description="Translate Google Slides presentations between different languages",
+    description="Translate presentations (Google Slides and PowerPoint) between different languages",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/gslides-translator",
+    url="https://github.com/yourusername/ai-deck-translator",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -25,7 +25,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "gslides-translator=gslides_translator.run:main",
+            "ai-deck-translator=ai_deck_translator.run:main",
         ],
     },
     include_package_data=True,
