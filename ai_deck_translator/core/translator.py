@@ -30,6 +30,7 @@ from ..utils.batch import create_batches
 from ..utils.progress import ProgressTracker
 from ..utils.recovery import save_recovery_file, load_recovery_file
 from ..utils.exceptions import TranslationError, NetworkError, RateLimitError
+from ..utils.translation_memory import lookup_translation, save_translation
 
 # Set up logging
 logger = get_logger(__name__)
@@ -262,10 +263,13 @@ def translate_text(
     slide_metadata: List[Dict[str, Any]],
     target_language: str,
     translate_func: Callable[[List[str], str], List[str]],
+    source_language: str = "en",
     batch_size: int = 50,
     delay: float = 0.5,
     recovery_file: Optional[str] = None,
-    progress_callback: Optional[Callable[[int, int], None]] = None
+    progress_callback: Optional[Callable[[int, int], None]] = None,
+    use_translation_memory: bool = True,
+    update_translation_memory: bool = True
 ) -> Dict[str, str]:
     """
     Translate text elements from a presentation.
@@ -281,11 +285,14 @@ def translate_text(
         translate_func (Callable): Function to translate a batch of text
             The function should accept a list of strings and a target language code,
             and return a list of translated strings in the same order
+        source_language (str, optional): Source language code. Defaults to "en".
         batch_size (int, optional): Maximum number of elements per batch. Defaults to 50.
         delay (float, optional): Delay between batches in seconds. Defaults to 0.5.
         recovery_file (str, optional): Path to save recovery data. Defaults to None.
         progress_callback (Callable, optional): Function to report progress. Defaults to None.
             The function should accept two integers: current progress and total items
+        use_translation_memory (bool, optional): Whether to use the translation memory. Defaults to True.
+        update_translation_memory (bool, optional): Whether to update the translation memory. Defaults to True.
     
     Returns:
         Dict[str, str]: Dictionary of translated text elements with the same IDs as keys
@@ -349,8 +356,37 @@ def translate_text(
             element_ids.append(notes_id)
             element_texts.append(notes_text)
     
-    # Create batches for translation
-    batches = create_batches(element_ids, element_texts, batch_size)
+    # Check translation memory for existing translations
+    if use_translation_memory:
+        logger.info("Checking translation memory for existing translations")
+        memory_hits = 0
+        
+        for i, (element_id, element_text) in enumerate(zip(element_ids, element_texts)):
+            if element_id not in translated_elements:  # Skip already translated elements
+                # Look up in translation memory
+                translation = lookup_translation(element_text, source_language, target_language)
+                if translation:
+                    translated_elements[element_id] = translation
+                    memory_hits += 1
+                    progress.update(1)
+        
+        if memory_hits > 0:
+            logger.info(f"Found {memory_hits} translations in memory")
+    
+    # Create batches for translation (only for elements not found in memory)
+    remaining_ids = []
+    remaining_texts = []
+    
+    for element_id, element_text in zip(element_ids, element_texts):
+        if element_id not in translated_elements:
+            remaining_ids.append(element_id)
+            remaining_texts.append(element_text)
+    
+    if not remaining_ids:
+        logger.info("All elements found in translation memory, no need for API translation")
+        return translated_elements
+    
+    batches = create_batches(remaining_ids, remaining_texts, batch_size)
     
     # Skip batches that are already translated
     if start_index > 0:
@@ -381,7 +417,31 @@ def translate_text(
             # Update translated elements
             for i, translated_text in zip(to_translate_indices, translated_batch):
                 element_id = batch_ids[i]
+                original_text = batch_texts[i]
                 translated_elements[element_id] = translated_text
+                
+                # Update translation memory
+                if update_translation_memory:
+                    # Determine context from element_id
+                    context = {"element_id": element_id}
+                    if element_id.startswith("slide"):
+                        slide_number = int(element_id.split("_")[0][5:])
+                        context["slide_number"] = slide_number
+                        
+                        # Add more context from slide metadata
+                        for metadata in slide_metadata:
+                            if metadata.get("slide_number") == slide_number:
+                                context["slide_layout"] = metadata.get("layout", "")
+                                break
+                    
+                    # Save to translation memory
+                    save_translation(
+                        original_text, 
+                        translated_text, 
+                        source_language, 
+                        target_language,
+                        context
+                    )
             
             # Update progress
             progress.update(len(to_translate_texts))

@@ -36,27 +36,54 @@ This document outlines the development roadmap, future features, and technical i
 
 ## Roadmap
 
-### Phase 1: Refinement (Q2 2023)
-- [ ] Finalize public API boundaries across all modules
-- [ ] Add complete docstrings for all public functions
-- [ ] Create consistent error handling strategy across modules
-- [ ] Review and update function signatures for consistency
-- [ ] Implement logging system throughout application
-- [ ] Remove debug statements and unused code
-- [ ] Add input validation for all user-provided inputs
-- [ ] Create comprehensive CLI help documentation
-- [ ] Improve progress reporting granularity
+### Phase 1: Refinement (Q2 2023) - COMPLETED
+- [x] Finalize public API boundaries across all modules
+- [x] Add complete docstrings for all public functions
+- [x] Create consistent error handling strategy across modules
+- [x] Review and update function signatures for consistency
+- [x] Implement logging system throughout application
+- [x] Remove debug statements and unused code
+- [x] Add input validation for all user-provided inputs
+- [x] Create comprehensive CLI help documentation
+- [x] Improve progress reporting granularity
 
-### Phase 2: Feature Enhancement (Q3 2023)
+### Phase 2: Feature Enhancement (Q3 2023) - IN PROGRESS
 - [ ] Add support for preserving non-text elements during translation
-- [ ] Implement custom translation memory for frequently used terms
+- [x] Implement custom translation memory for frequently used terms
 - [ ] Create translation glossary feature for consistent terminology
 - [ ] Add option to exclude specific slides from translation
-- [ ] Implement slide notes translation
-- [ ] Add support for speaker notes translation
+- [x] Implement slide notes translation
 - [ ] Create visual diff preview of translation changes
 - [ ] Implement batch processing for multiple presentations
 - [ ] Add language auto-detection option
+
+#### Phase 2 Implementation Plan
+1. **Slide Notes Translation**: COMPLETED
+   - [x] Extend extractor modules to capture slide notes
+   - [x] Update translator modules to include notes in translation batches
+   - [x] Modify updater modules to apply translated notes
+
+2. **Translation Memory**: COMPLETED
+   - [x] Design translation memory data structure
+   - [x] Implement storage and retrieval mechanisms
+   - [x] Add pre-translation lookup to reuse existing translations
+   - [x] Create management interface for the translation memory
+
+3. **Glossary Feature**: IN PROGRESS
+   - [ ] Create glossary data structure and storage
+   - [ ] Implement term recognition in text
+   - [ ] Add glossary-aware translation instructions
+   - [ ] Develop glossary management interface
+
+4. **Selective Translation**:
+   - [ ] Add slide selection interface in CLI and web UI
+   - [ ] Modify extraction process to filter selected slides
+   - [ ] Update progress reporting for partial translations
+
+5. **Visual Diff Preview**:
+   - [ ] Implement side-by-side comparison of original and translated text
+   - [ ] Create visual representation of changes
+   - [ ] Add preview option before applying translations
 
 ### Phase 3: User Experience & Accessibility (Q4 2023)
 - [ ] Implement dual-mode web interface (novice/expert toggle)
@@ -87,7 +114,6 @@ This document outlines the development roadmap, future features, and technical i
 - **Translation Quality Metrics**: Implement quality scoring for translations with suggestions for improvements.
 - **Interactive Web Editor**: Add ability to manually edit translations before applying them to slides.
 - **Terminology Management**: Create a system to manage and enforce consistent terminology across translations.
-- **Translation Memory**: Implement a translation memory to reuse previous translations and improve consistency.
 - **Batch Scheduler**: Schedule multiple translation jobs to run sequentially or at specific times.
 - **Custom Style Preservation**: Better handling of custom styles, fonts, and formatting during translation.
 - **PDF Export**: Add option to automatically export translated presentations as PDF.
@@ -179,8 +205,20 @@ This document outlines the development roadmap, future features, and technical i
 - Core functionality implementation
 - Basic documentation
 
-### v0.2.0 (Planned: 2023-07-15)
+### v0.2.0 (2023-07-15)
 - Refined package structure
 - Enhanced error handling
 - Improved documentation
 - Better test coverage
+
+### v1.0.0 (2023-12-01)
+- Complete refactoring of codebase
+- Structured package with clear API boundaries
+- Comprehensive documentation
+- Support for both Google Slides and PowerPoint
+
+### v2.0.0 (2024-03-08)
+- Renamed to AI Deck Translator
+- Integrated PPTX functionality into structured package
+- Improved error handling and logging
+- Enhanced CLI and web interfaces
