@@ -3,7 +3,7 @@ Tests for the extractor module.
 """
 import unittest
 from unittest.mock import MagicMock, patch
-from gslides_translator.core.extractor import extract_text
+from ai_deck_translator.core.extractor import extract_text
 
 class TestExtractor(unittest.TestCase):
     """Test cases for the extractor module."""

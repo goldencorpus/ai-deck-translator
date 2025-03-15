@@ -13,7 +13,7 @@ Modules:
 
 Usage:
     # For Google Slides
-    from ai_deck_translator import translator
+    from ai_deck_translator.core import translator
     translator.translate_slides(presentation_id, source_lang, target_lang)
     
     # For PowerPoint files
@@ -25,10 +25,11 @@ __version__ = "2.0.0"
 __author__ = "Emmanuel Prouveze"
 __license__ = "MIT"
 
-# Import key modules for convenience
-from ai_deck_translator.core.translator import translate_slides
-from ai_deck_translator.core.extractor import extract_text
-from ai_deck_translator.core.updater import update_slides
+# Import key modules for convenience - commented out to avoid circular imports
+# These can be imported directly by users as shown in the usage examples above
+# from ai_deck_translator.core.translator import translate_slides
+# from ai_deck_translator.core.extractor import extract_text
+# from ai_deck_translator.core.updater import update_slides
 
 # These will be available after implementing the PPTX module
 # from ai_deck_translator.pptx.translator import translate_pptx

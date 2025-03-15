@@ -2,7 +2,7 @@
 Tests for the __init__.py module.
 """
 import unittest
-import gslides_translator
+import ai_deck_translator
 
 class TestInit(unittest.TestCase):
     """Test cases for the __init__.py module."""
@@ -25,24 +25,24 @@ class TestInit(unittest.TestCase):
     def test_imports(self):
         """Test that the package imports work correctly."""
         # Test importing the main modules
-        from gslides_translator import config
-        from gslides_translator import run
+        from ai_deck_translator import config
+        from ai_deck_translator import run
         
         # Test importing the core modules
-        from gslides_translator.core import extractor
-        from gslides_translator.core import translator
-        from gslides_translator.core import updater
+        from ai_deck_translator.core import extractor
+        from ai_deck_translator.core import translator
+        from ai_deck_translator.core import updater
         
         # Test importing the auth modules
-        from gslides_translator.auth import google_auth
+        from ai_deck_translator.auth import google_auth
         
         # Test importing the utils modules
-        from gslides_translator.utils import batch
-        from gslides_translator.utils import progress
-        from gslides_translator.utils import recovery
+        from ai_deck_translator.utils import batch
+        from ai_deck_translator.utils import progress
+        from ai_deck_translator.utils import recovery
         
         # Test importing the web modules
-        from gslides_translator.web import app
+        from ai_deck_translator.web import app
         
         # Verify the imports worked
         self.assertIsNotNone(config)

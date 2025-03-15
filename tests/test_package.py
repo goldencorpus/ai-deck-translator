@@ -4,7 +4,7 @@ Tests for the package structure.
 import unittest
 import importlib
 import pkgutil
-import gslides_translator
+import ai_deck_translator
 
 class TestPackage(unittest.TestCase):
     """Test cases for the package structure."""
@@ -15,24 +15,24 @@ class TestPackage(unittest.TestCase):
         self.assertIsNotNone(gslides_translator)
         
         # Test core modules
-        self.assertIsNotNone(importlib.import_module('gslides_translator.core.extractor'))
-        self.assertIsNotNone(importlib.import_module('gslides_translator.core.translator'))
-        self.assertIsNotNone(importlib.import_module('gslides_translator.core.updater'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.core.extractor'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.core.translator'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.core.updater'))
         
         # Test auth modules
-        self.assertIsNotNone(importlib.import_module('gslides_translator.auth.google_auth'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.auth.google_auth'))
         
         # Test utils modules
-        self.assertIsNotNone(importlib.import_module('gslides_translator.utils.batch'))
-        self.assertIsNotNone(importlib.import_module('gslides_translator.utils.progress'))
-        self.assertIsNotNone(importlib.import_module('gslides_translator.utils.recovery'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.utils.batch'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.utils.progress'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.utils.recovery'))
         
         # Test web modules
-        self.assertIsNotNone(importlib.import_module('gslides_translator.web.app'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.web.app'))
         
         # Test config and run modules
-        self.assertIsNotNone(importlib.import_module('gslides_translator.config'))
-        self.assertIsNotNone(importlib.import_module('gslides_translator.run'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.config'))
+        self.assertIsNotNone(importlib.import_module('ai_deck_translator.run'))
     
     def test_package_structure(self):
         """Test that the package structure is correct."""
@@ -47,20 +47,20 @@ class TestPackage(unittest.TestCase):
         
         # Check for required modules and packages
         required_modules = [
-            'gslides_translator.core',
-            'gslides_translator.core.extractor',
-            'gslides_translator.core.translator',
-            'gslides_translator.core.updater',
-            'gslides_translator.auth',
-            'gslides_translator.auth.google_auth',
-            'gslides_translator.utils',
-            'gslides_translator.utils.batch',
-            'gslides_translator.utils.progress',
-            'gslides_translator.utils.recovery',
-            'gslides_translator.web',
-            'gslides_translator.web.app',
-            'gslides_translator.config',
-            'gslides_translator.run'
+            'ai_deck_translator.core',
+            'ai_deck_translator.core.extractor',
+            'ai_deck_translator.core.translator',
+            'ai_deck_translator.core.updater',
+            'ai_deck_translator.auth',
+            'ai_deck_translator.auth.google_auth',
+            'ai_deck_translator.utils',
+            'ai_deck_translator.utils.batch',
+            'ai_deck_translator.utils.progress',
+            'ai_deck_translator.utils.recovery',
+            'ai_deck_translator.web',
+            'ai_deck_translator.web.app',
+            'ai_deck_translator.config',
+            'ai_deck_translator.run'
         ]
         
         for module in required_modules:

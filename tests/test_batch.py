@@ -2,7 +2,7 @@
 Tests for the batch utilities module.
 """
 import unittest
-from gslides_translator.utils.batch import split_dict_into_smart_batches, deduplicate_content
+from ai_deck_translator.utils.batch import split_dict_into_smart_batches, deduplicate_content
 
 class TestBatch(unittest.TestCase):
     """Test cases for the batch utilities module."""

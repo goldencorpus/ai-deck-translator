@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock, mock_open
 import os
 import json
 import tempfile
-from gslides_translator.auth.google_auth import authenticate_google
+from ai_deck_translator.auth.google_auth import authenticate_google
 
 class TestGoogleAuth(unittest.TestCase):
     """Test cases for the Google authentication module."""

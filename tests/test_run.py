@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import sys
 import argparse
-from gslides_translator.run import parse_args, main
+from ai_deck_translator.run import parse_args, main
 
 class TestRun(unittest.TestCase):
     """Test cases for the run module."""
@@ -87,8 +87,8 @@ class TestRun(unittest.TestCase):
         # Verify the arguments were parsed correctly
         self.assertEqual(args.command, 'list-recovery')
     
-    @patch('gslides_translator.core.translator.translate_slides')
-    @patch('gslides_translator.config.get_config')
+    @patch('ai_deck_translator.core.translator.translate_slides')
+    @patch('ai_deck_translator.config.get_config')
     def test_main_translate(self, mock_get_config, mock_translate_slides):
         """Test the main function with the translate command."""
         # Set up the command line arguments
@@ -117,7 +117,7 @@ class TestRun(unittest.TestCase):
             resume_file=None
         )
     
-    @patch('gslides_translator.web.app.create_app')
+    @patch('ai_deck_translator.web.app.create_app')
     def test_main_web(self, mock_create_app):
         """Test the main function with the web command."""
         # Set up the command line arguments
@@ -134,7 +134,7 @@ class TestRun(unittest.TestCase):
         mock_create_app.assert_called_once()
         mock_app.run.assert_called_once_with(host='0.0.0.0', port=8080, debug=True)
     
-    @patch('gslides_translator.utils.recovery.list_recovery_files')
+    @patch('ai_deck_translator.utils.recovery.list_recovery_files')
     def test_main_list_recovery(self, mock_list_recovery):
         """Test the main function with the list-recovery command."""
         # Set up the command line arguments

@@ -20,6 +20,8 @@ setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Topic :: Text Processing :: Linguistic",
+        "Topic :: Utilities",
     ],
     python_requires=">=3.6",
     install_requires=requirements,

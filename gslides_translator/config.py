@@ -10,6 +10,13 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 
+# Load dotenv before any imports that might use environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv is optional
+
 from gslides_translator.utils.exceptions import ConfigurationError
 from gslides_translator.utils.logging import logger
 

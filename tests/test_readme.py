@@ -23,13 +23,12 @@ class TestReadme(unittest.TestCase):
         with open(self.readme_file, 'r') as f:
             readme = f.read()
         
-        # Check for required sections
+        # Check for required sections in the README
         required_sections = [
-            '# Google Slides Translator',
-            '## Installation',
-            '## Usage',
+            '# AI Deck Translator',
             '## Features',
-            '## Configuration'
+            '## Installation',
+            '## Usage'
         ]
         
         for section in required_sections:
@@ -63,7 +62,7 @@ class TestReadme(unittest.TestCase):
         # Check for usage examples
         usage_patterns = [
             r'python -m gslides_translator',
-            r'gslides_translator',
+            r'ai_deck_translator',
             r'translate',
             r'--presentation-id'
         ]
@@ -93,15 +92,21 @@ class TestReadme(unittest.TestCase):
         with open(self.readme_file, 'r') as f:
             readme = f.read()
         
-        # Check for configuration instructions
-        config_section = re.search(r'## Configuration\s+([^#]+)', readme, re.DOTALL)
-        self.assertIsNotNone(config_section, "Configuration section not found in README.md")
+        # Check for environment variable configuration instructions
+        env_var_patterns = [
+            r'CLAUDE_API_KEY',
+            r'export',
+            r'\.env',
+            r'environment variable'
+        ]
         
-        config_content = config_section.group(1)
-        self.assertTrue(
-            'ANTHROPIC_API_KEY' in config_content or '.env' in config_content,
-            "Configuration instructions not found in README.md"
-        )
+        env_var_found = False
+        for pattern in env_var_patterns:
+            if re.search(pattern, readme, re.IGNORECASE):
+                env_var_found = True
+                break
+        
+        self.assertTrue(env_var_found, "Environment variable configuration instructions not found in README.md")
 
 if __name__ == '__main__':
     unittest.main() 

@@ -7,7 +7,7 @@ import os
 import json
 import tempfile
 import shutil
-from gslides_translator.utils.recovery import setup_recovery_system, list_recovery_files
+from ai_deck_translator.utils.recovery import setup_recovery_system, list_recovery_files
 
 class TestRecovery(unittest.TestCase):
     """Test cases for the recovery utilities module."""
@@ -16,7 +16,7 @@ class TestRecovery(unittest.TestCase):
         """Set up test fixtures."""
         # Create a temporary directory for recovery files
         self.temp_dir = tempfile.mkdtemp()
-        self.patcher = patch('gslides_translator.utils.recovery.RECOVERY_DIR', self.temp_dir)
+        self.patcher = patch('ai_deck_translator.utils.recovery.RECOVERY_DIR', self.temp_dir)
         self.mock_recovery_dir = self.patcher.start()
         
         # Sample data for tests

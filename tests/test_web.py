@@ -8,7 +8,7 @@ import sys
 import json
 import threading
 import time
-from gslides_translator.web.app import create_app, translate_with_progress, CaptureStdout
+from ai_deck_translator.web.app import create_app, translate_with_progress, CaptureStdout
 
 class TestWebInterface(unittest.TestCase):
     """Test cases for the web interface module."""
@@ -22,7 +22,7 @@ class TestWebInterface(unittest.TestCase):
         self.client = app.test_client()
         
         # Reset the global translation state
-        from gslides_translator.web.app import translation_state
+        from ai_deck_translator.web.app import translation_state
         translation_state.clear()
         translation_state.update({
             'running': False,
@@ -41,7 +41,7 @@ class TestWebInterface(unittest.TestCase):
         self.assertIn(b'Google Slides Translator', response.data)
         self.assertIn(b'Translation Settings', response.data)
     
-    @patch('gslides_translator.web.app.translate_with_progress')
+    @patch('ai_deck_translator.web.app.translate_with_progress')
     def test_start_translation_valid(self, mock_translate):
         """Test starting a translation with valid input."""
         # Set up the mock
@@ -82,7 +82,7 @@ class TestWebInterface(unittest.TestCase):
     def test_start_translation_already_running(self):
         """Test starting a translation when one is already running."""
         # Set the translation state to running
-        from gslides_translator.web.app import translation_state
+        from ai_deck_translator.web.app import translation_state
         translation_state['running'] = True
         
         # Make a request to start a translation
@@ -99,7 +99,7 @@ class TestWebInterface(unittest.TestCase):
     def test_get_progress(self):
         """Test getting the translation progress."""
         # Set the translation state
-        from gslides_translator.web.app import translation_state
+        from ai_deck_translator.web.app import translation_state
         translation_state.update({
             'running': True,
             'progress': 50,
@@ -118,7 +118,7 @@ class TestWebInterface(unittest.TestCase):
         self.assertEqual(data['console_output'], ['Processing...', 'Translating...'])
         self.assertEqual(data['result_url'], 'https://docs.google.com/presentation/d/test')
     
-    @patch('gslides_translator.utils.recovery.list_recovery_files')
+    @patch('ai_deck_translator.utils.recovery.list_recovery_files')
     def test_list_recovery_files(self, mock_list_recovery):
         """Test listing recovery files."""
         # Set up the mock
@@ -163,14 +163,14 @@ class TestWebInterface(unittest.TestCase):
         # Verify the output was captured
         self.assertEqual(console_output, ["Test output", "Another line"])
     
-    @patch('gslides_translator.core.translator.translate_slides')
+    @patch('ai_deck_translator.core.translator.translate_slides')
     def test_translate_with_progress(self, mock_translate_slides):
         """Test that translate_with_progress updates the translation state correctly."""
         # Set up the mock
         mock_translate_slides.return_value = "https://docs.google.com/presentation/d/test"
         
         # Get the translation state
-        from gslides_translator.web.app import translation_state
+        from ai_deck_translator.web.app import translation_state
         
         # Call the function in a thread so it doesn't block
         thread = threading.Thread(target=translate_with_progress, kwargs={

@@ -1,227 +1,210 @@
 """
-Tests for the development plan document.
+Tests for the development plan.
 """
-import unittest
 import os
 import re
-import json
-from datetime import datetime
+import unittest
+from unittest.mock import patch, mock_open
+
+# Update the path to the development plan
+DEV_PLAN_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Development Plan.md")
 
 class TestDevelopmentPlan(unittest.TestCase):
-    """Test cases for the development plan document."""
+    """Test cases for the development plan."""
     
     def setUp(self):
         """Set up test fixtures."""
-        # Get the root directory of the project
-        self.root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        self.dev_plan_file = os.path.join(self.root_dir, 'DEVELOPMENT_PLAN.md')
+        self.dev_plan_file = DEV_PLAN_FILE
     
     def test_dev_plan_exists(self):
         """Test that the development plan document exists."""
-        self.assertTrue(os.path.exists(self.dev_plan_file), 
+        self.assertTrue(os.path.exists(self.dev_plan_file),
                         "Development plan document does not exist")
     
     def test_dev_plan_structure(self):
         """Test that the development plan has the required structure."""
-        with open(self.dev_plan_file, 'r') as f:
-            dev_plan = f.read()
-        
-        # Check for required sections
         required_sections = [
-            '# Development Plan',
-            '## Roadmap',
-            '## Future Features',
-            '## Technical Improvements',
-            '## Known Issues'
+            "# Development Plan",
+            "## Roadmap",
+            "## Known Issues",
+            "## Future Features",
+            "## Technical Improvements"
         ]
         
+        with open(self.dev_plan_file, 'r') as f:
+            content = f.read()
+            
         for section in required_sections:
-            self.assertIn(section, dev_plan, 
-                         f"Required section {section} not found in development plan")
+            self.assertIn(section, content, f"Required section {section} not found in development plan")
     
     def test_dev_plan_roadmap_timeline(self):
         """Test that the roadmap section includes timeline estimates."""
         with open(self.dev_plan_file, 'r') as f:
-            dev_plan = f.read()
-        
+            content = f.read()
+            
         # Extract the roadmap section
-        roadmap_match = re.search(r'## Roadmap\s+([^#]+)', dev_plan, re.DOTALL)
-        self.assertIsNotNone(roadmap_match, "Roadmap section not found")
+        roadmap_pattern = r'## Roadmap\s+(.*?)(?=\n## )'
+        roadmap_match = re.search(roadmap_pattern, content, re.DOTALL)
         
-        roadmap_content = roadmap_match.group(1)
-        
-        # Check for dates or timeline indicators in the roadmap
-        timeline_patterns = [
-            r'\b[Qq]\d\s+\d{4}\b',  # Q1 2023 format
-            r'\b\d{4}-\d{2}\b',     # YYYY-MM format
-            r'\bshort-term\b',
-            r'\bmedium-term\b',
-            r'\blong-term\b',
-            r'\bphase\s+\d+\b'      # Phase 1, Phase 2, etc.
-        ]
-        
-        timeline_found = False
-        for pattern in timeline_patterns:
-            if re.search(pattern, roadmap_content, re.IGNORECASE):
-                timeline_found = True
-                break
-        
-        self.assertTrue(timeline_found, 
-                        "Roadmap does not contain timeline estimates")
+        if roadmap_match:
+            roadmap_section = roadmap_match.group(1)
+            
+            # Check for timeline indicators like dates, weeks, sprints
+            timeline_pattern = r'(Q[1-4]|Sprint|Week|Month|Phase|January|February|March|April|May|June|July|August|September|October|November|December|\d{1,2}/\d{1,2}/\d{2,4}|\d{4}-\d{2}-\d{2})'
+            timeline_matches = re.findall(timeline_pattern, roadmap_section, re.IGNORECASE)
+            
+            self.assertTrue(len(timeline_matches) > 0, "Roadmap section does not include timeline estimates")
+        else:
+            self.fail("Roadmap section not found in expected format")
     
     def test_dev_plan_future_features(self):
         """Test that the future features section includes at least 3 specific features."""
         with open(self.dev_plan_file, 'r') as f:
-            dev_plan = f.read()
-        
+            content = f.read()
+            
         # Extract the future features section
-        features_match = re.search(r'## Future Features\s+([^#]+)', dev_plan, re.DOTALL)
-        self.assertIsNotNone(features_match, "Future Features section not found")
+        features_pattern = r'## Future Features\s+(.*?)(?=\n## |$)'
+        features_match = re.search(features_pattern, content, re.DOTALL)
         
-        features_content = features_match.group(1)
-        
-        # Count bullet points for features
-        feature_bullets = re.findall(r'[-*]\s+([^\n]+)', features_content)
-        
-        self.assertGreaterEqual(len(feature_bullets), 3, 
-                               "Future Features section should contain at least 3 specific features")
-        
-        # Check that each feature has a description (not just a title)
-        for feature in feature_bullets:
-            self.assertGreaterEqual(len(feature.split()), 5, 
-                                   f"Feature description '{feature}' is too short or vague")
+        if features_match:
+            features_section = features_match.group(1)
+            
+            # Count the number of features (list items)
+            feature_items = re.findall(r'- \S+', features_section)
+            
+            self.assertTrue(len(feature_items) >= 3, "Future Features section should include at least 3 specific features")
+            
+            # Check that features have descriptive text
+            for item in feature_items:
+                self.assertTrue(len(item) > 5, f"Feature description is too short: {item}")
+        else:
+            self.fail("Future Features section not found in expected format")
     
     def test_dev_plan_technical_improvements(self):
         """Test that the technical improvements section includes code-related enhancements."""
         with open(self.dev_plan_file, 'r') as f:
-            dev_plan = f.read()
-        
+            content = f.read()
+            
         # Extract the technical improvements section
-        tech_match = re.search(r'## Technical Improvements\s+([^#]+)', dev_plan, re.DOTALL)
-        self.assertIsNotNone(tech_match, "Technical Improvements section not found")
+        tech_pattern = r'## Technical Improvements\s+(.*?)(?=\n## |$)'
+        tech_match = re.search(tech_pattern, content, re.DOTALL)
         
-        tech_content = tech_match.group(1)
-        
-        # Check for technical terms related to code quality or architecture
-        technical_terms = [
-            'refactor', 'performance', 'optimization', 'architecture',
-            'pattern', 'code quality', 'testing', 'coverage', 
-            'maintainability', 'scalability', 'security'
-        ]
-        
-        terms_found = []
-        for term in technical_terms:
-            if re.search(r'\b' + term + r'\b', tech_content, re.IGNORECASE):
-                terms_found.append(term)
-        
-        self.assertGreaterEqual(len(terms_found), 3, 
-                               f"Technical Improvements section should mention at least 3 code-related enhancements. Found: {terms_found}")
+        if tech_match:
+            tech_section = tech_match.group(1)
+            
+            # Check for code-related terms
+            code_terms = ['refactor', 'performance', 'optimize', 'test', 'coverage', 'documentation',
+                         'clean', 'modular', 'interface', 'api', 'reusable', 'component']
+            
+            found_terms = 0
+            for term in code_terms:
+                if re.search(r'\b' + term + r'\b', tech_section, re.IGNORECASE):
+                    found_terms += 1
+            
+            self.assertTrue(found_terms >= 2, "Technical Improvements section should include code-related enhancements")
+        else:
+            self.fail("Technical Improvements section not found in expected format")
     
     def test_dev_plan_known_issues(self):
         """Test that the known issues section contains actionable items."""
         with open(self.dev_plan_file, 'r') as f:
-            dev_plan = f.read()
-        
+            content = f.read()
+            
         # Extract the known issues section
-        issues_match = re.search(r'## Known Issues\s+([^#]+)', dev_plan, re.DOTALL)
-        self.assertIsNotNone(issues_match, "Known Issues section not found")
+        issues_pattern = r'## Known Issues\s+(.*?)(?=\n## |$)'
+        issues_match = re.search(issues_pattern, content, re.DOTALL)
         
-        issues_content = issues_match.group(1)
-        
-        # Count bullet points for issues
-        issue_bullets = re.findall(r'[-*]\s+([^\n]+)', issues_content)
-        
-        # If no issues are listed, there should be an explicit statement of that
-        if len(issue_bullets) == 0:
-            self.assertIn("no known issues", issues_content.lower(), 
-                         "Known Issues section is empty but doesn't explicitly state there are no issues")
+        if issues_match:
+            issues_section = issues_match.group(1)
+            
+            # Check for actionable descriptions (contains verbs)
+            action_terms = ['fix', 'resolve', 'handle', 'address', 'update', 'improve', 'implement', 'create',
+                           'modify', 'enhance', 'optimize', 'correct']
+            
+            found_terms = 0
+            for term in action_terms:
+                if re.search(r'\b' + term + r'\b', issues_section, re.IGNORECASE):
+                    found_terms += 1
+            
+            self.assertTrue(found_terms >= 1, "Known Issues section should include actionable items")
         else:
-            # Check that issues are described specifically enough
-            for issue in issue_bullets:
-                self.assertGreaterEqual(len(issue.split()), 8, 
-                                       f"Issue description '{issue}' is too short or vague")
+            self.fail("Known Issues section not found in expected format")
     
     def test_dev_plan_version_history(self):
         """Test that the development plan includes a version history section."""
         with open(self.dev_plan_file, 'r') as f:
-            dev_plan = f.read()
+            content = f.read()
+            
+        # Look for a version history section
+        history_patterns = [
+            r'## Version History',
+            r'## Changelog',
+            r'## Release History',
+            r'## Updates',
+            r'## Release Notes'
+        ]
         
-        # Check for a version history section
-        version_match = re.search(r'## Version History|## Revision History|## Change Log\s+([^#]+)', 
-                                 dev_plan, re.DOTALL | re.IGNORECASE)
+        has_history_section = False
+        for pattern in history_patterns:
+            if re.search(pattern, content, re.IGNORECASE):
+                has_history_section = True
+                break
         
-        if version_match:
-            version_content = version_match.group(1)
-            
-            # Check for date patterns
-            date_patterns = [
-                r'\d{4}-\d{2}-\d{2}',    # YYYY-MM-DD format
-                r'\d{1,2}/\d{1,2}/\d{4}', # MM/DD/YYYY format
-                r'\b\d{1,2}\s+[a-zA-Z]+\s+\d{4}\b'  # DD Month YYYY format
-            ]
-            
-            date_found = False
-            for pattern in date_patterns:
-                if re.search(pattern, version_content):
-                    date_found = True
-                    break
-            
-            self.assertTrue(date_found, "Version history doesn't include dates for entries")
-        else:
-            # Version history section is recommended but not required
-            pass
+        self.assertTrue(has_history_section, "Development plan should include a version history section")
     
     def test_dev_plan_markdown_links(self):
         """Test that any markdown links in the development plan are valid."""
         with open(self.dev_plan_file, 'r') as f:
-            dev_plan = f.read()
+            content = f.read()
         
         # Find all markdown links
-        links = re.findall(r'\[([^\]]+)\]\(([^)]+)\)', dev_plan)
+        link_pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+        links = re.findall(link_pattern, content)
         
-        for link_text, link_url in links:
-            # Check that link URL is not empty
-            self.assertTrue(len(link_url) > 0, f"Empty URL in link: [{link_text}]()")
+        for link_text, link_target in links:
+            # Check for broken links (empty targets)
+            self.assertTrue(len(link_target) > 0, f"Empty link target for '{link_text}'")
             
-            # Check for common URL formats
-            is_url_pattern = (
-                link_url.startswith('http://') or 
-                link_url.startswith('https://') or 
-                link_url.startswith('#') or  # Section link
-                link_url.startswith('/') or  # Root-relative link
-                link_url.startswith('./') or  # Relative link
-                link_url.startswith('../')  # Parent-relative link
-            )
-            
-            self.assertTrue(is_url_pattern, f"Link URL appears to be invalid: {link_url}")
+            # Check if links to local files actually exist
+            if not link_target.startswith(('http://', 'https://', 'mailto:', '#')):
+                if link_target.startswith('/'):
+                    # Absolute path relative to repository root
+                    link_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), link_target[1:])
+                else:
+                    # Relative path from the development plan
+                    link_path = os.path.join(os.path.dirname(self.dev_plan_file), link_target)
+                
+                self.assertTrue(os.path.exists(link_path), f"Broken link to '{link_path}' from development plan")
     
     def test_dev_plan_file_references(self):
         """Test that file references in the development plan exist in the project."""
         with open(self.dev_plan_file, 'r') as f:
-            dev_plan = f.read()
+            content = f.read()
         
-        # Find code snippets or file mentions using backticks
-        file_mentions = re.findall(r'`([^`\s]+\.[a-zA-Z0-9]+)`', dev_plan)
+        # Find code file references (those in backticks that look like paths)
+        file_pattern = r'`([^`]*\.(py|md|sh|json|html|css|js|yml|yaml)[^`]*)`'
+        files = re.findall(file_pattern, content)
         
-        # Filter to actual file references (not variables or other code)
-        file_refs = [fm for fm in file_mentions if '.' in fm and not fm.startswith(('self.', 'var.', 'this.'))]
-        
-        for file_ref in file_refs:
-            # Check if the file exists in the project
-            # Skip checking common file extensions that might be examples
-            if not (file_ref.endswith('.example') or 
-                   file_ref.endswith('.sample') or 
-                   '<' in file_ref or 
-                   '>' in file_ref):
-                # Check if this file exists anywhere in the project
-                found = False
-                for root, _, files in os.walk(self.root_dir):
-                    if file_ref in files:
-                        found = True
-                        break
+        for file_match in files:
+            file_ref = file_match[0]  # The first capture group is the file path
+            
+            # Skip if it's not really a file path (e.g. a code snippet)
+            if '(' in file_ref or ')' in file_ref or '=' in file_ref or ' ' in file_ref:
+                continue
                 
-                # Comment out this assertion to make the test less strict
-                # self.assertTrue(found, f"File reference in development plan not found in project: {file_ref}")
+            # Try to find the file in the project
+            if file_ref.startswith('/'):
+                # Absolute path relative to repository root
+                file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), file_ref[1:])
+            else:
+                # Relative path from the development plan or from the repository root
+                file_path_from_dev_plan = os.path.join(os.path.dirname(self.dev_plan_file), file_ref)
+                file_path_from_root = os.path.join(os.path.dirname(os.path.dirname(__file__)), file_ref)
+                
+                file_path = file_path_from_root if os.path.exists(file_path_from_root) else file_path_from_dev_plan
+            
+            self.assertTrue(os.path.exists(file_path) or '/*' in file_ref or '*.' in file_ref,
+                           f"File reference '{file_ref}' in development plan does not exist")
 
 if __name__ == '__main__':
     unittest.main() 

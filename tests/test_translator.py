@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import MagicMock, patch, mock_open
 import json
 import os
-from gslides_translator.core.translator import (
+from ai_deck_translator.core.translator import (
     repair_json, extract_json_blocks, translate_batch, translate_text
 )
 
@@ -85,11 +85,11 @@ class TestTranslator(unittest.TestCase):
         # Verify the result
         self.assertEqual(result, {"obj1": "Translated text 1", "obj2": "Translated text 2"})
     
-    @patch('gslides_translator.core.translator.translate_batch')
-    @patch('gslides_translator.utils.batch.deduplicate_content')
-    @patch('gslides_translator.utils.batch.split_dict_into_smart_batches')
-    @patch('gslides_translator.utils.recovery.setup_recovery_system')
-    @patch('gslides_translator.utils.progress.create_progress_bar')
+    @patch('ai_deck_translator.core.translator.translate_batch')
+    @patch('ai_deck_translator.utils.batch.deduplicate_content')
+    @patch('ai_deck_translator.utils.batch.split_dict_into_smart_batches')
+    @patch('ai_deck_translator.utils.recovery.setup_recovery_system')
+    @patch('ai_deck_translator.utils.progress.create_progress_bar')
     def test_translate_text(self, mock_progress, mock_recovery, mock_split, mock_deduplicate, mock_translate_batch):
         """Test that text is translated correctly with proper recovery and progress tracking."""
         # Set up mocks
@@ -135,10 +135,10 @@ class TestTranslator(unittest.TestCase):
         # Verify the result
         self.assertEqual(result, {"obj1": "Translated text 1", "obj2": "Translated text 2"})
     
-    @patch('gslides_translator.core.translator.translate_text')
-    @patch('gslides_translator.core.extractor.extract_text')
-    @patch('gslides_translator.core.updater.update_slides')
-    @patch('gslides_translator.auth.google_auth.authenticate_google')
+    @patch('ai_deck_translator.core.translator.translate_text')
+    @patch('ai_deck_translator.core.extractor.extract_text')
+    @patch('ai_deck_translator.core.updater.update_slides')
+    @patch('ai_deck_translator.auth.google_auth.authenticate_google')
     def test_translate_slides(self, mock_auth, mock_update, mock_extract, mock_translate):
         """Test the full slide translation process."""
         # This would be a more comprehensive integration test

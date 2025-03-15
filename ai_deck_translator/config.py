@@ -10,6 +10,13 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
+# Load dotenv before any imports that might use environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv is optional
+
 from ai_deck_translator.utils.exceptions import ConfigurationError
 from ai_deck_translator.utils.logging import logger
 

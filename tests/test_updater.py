@@ -3,7 +3,7 @@ Tests for the updater module.
 """
 import unittest
 from unittest.mock import MagicMock, patch
-from gslides_translator.core.updater import update_slides
+from ai_deck_translator.core.updater import update_slides
 
 class TestUpdater(unittest.TestCase):
     """Test cases for the updater module."""
@@ -50,7 +50,7 @@ class TestUpdater(unittest.TestCase):
             }
         ]
     
-    @patch('gslides_translator.utils.progress.create_progress_bar')
+    @patch('ai_deck_translator.utils.progress.create_progress_bar')
     def test_update_slides(self, mock_progress):
         """Test that slides are updated correctly."""
         # Set up mock progress bar
@@ -87,7 +87,7 @@ class TestUpdater(unittest.TestCase):
             self.assertIn('text', request['insertText'])
             self.assertIn('insertionIndex', request['insertText'])
     
-    @patch('gslides_translator.utils.progress.create_progress_bar')
+    @patch('ai_deck_translator.utils.progress.create_progress_bar')
     def test_update_slides_with_web_state(self, mock_progress):
         """Test that slides are updated correctly with web state."""
         # Set up mock progress bar
@@ -109,7 +109,7 @@ class TestUpdater(unittest.TestCase):
         # Verify the batch update was called
         self.mock_slides_service.presentations().batchUpdate.assert_called_once()
     
-    @patch('gslides_translator.utils.progress.create_progress_bar')
+    @patch('ai_deck_translator.utils.progress.create_progress_bar')
     def test_update_slides_empty_text_dict(self, mock_progress):
         """Test that no updates are made when text_dict is empty."""
         # Set up mock progress bar
@@ -127,7 +127,7 @@ class TestUpdater(unittest.TestCase):
         # Verify the batch update was not called
         self.mock_slides_service.presentations().batchUpdate.assert_not_called()
     
-    @patch('gslides_translator.utils.progress.create_progress_bar')
+    @patch('ai_deck_translator.utils.progress.create_progress_bar')
     def test_update_slides_missing_metadata(self, mock_progress):
         """Test that slides are updated correctly even with missing metadata."""
         # Set up mock progress bar

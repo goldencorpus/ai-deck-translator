@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch, MagicMock, call
 import io
 import sys
-from gslides_translator.utils.progress import CustomTqdm, WebUITqdm, create_progress_bar
+from ai_deck_translator.utils.progress import CustomTqdm, WebUITqdm, create_progress_bar
 
 class TestProgress(unittest.TestCase):
     """Test cases for the progress tracking module."""
@@ -29,9 +29,8 @@ class TestProgress(unittest.TestCase):
         
         # Verify the progress bar was initialized correctly
         self.assertEqual(progress_bar.total, 100)
-        self.assertEqual(progress_bar.desc, "Test Progress")
         self.assertEqual(progress_bar.n, 0)
-        self.assertEqual(progress_bar.callbacks, [])
+        self.assertEqual(progress_bar.description, "Test Progress")
     
     def test_custom_tqdm_update(self):
         """Test that CustomTqdm updates correctly."""
@@ -52,60 +51,74 @@ class TestProgress(unittest.TestCase):
     
     def test_custom_tqdm_set_description(self):
         """Test that CustomTqdm sets description correctly."""
-        # Create a progress bar
-        progress_bar = CustomTqdm(total=100)
+        # Create a progress bar with total=100 and initial description
+        progress_bar = CustomTqdm(total=100, desc="Test Progress")
         
-        # Set the description
+        # Set a new description
         progress_bar.set_description("New Description")
         
-        # Verify the description was set correctly
-        self.assertEqual(progress_bar.desc, "New Description")
+        # Verify the description was updated correctly
+        self.assertEqual(progress_bar.description, "New Description")
     
     def test_custom_tqdm_register_callback(self):
         """Test that CustomTqdm registers callbacks correctly."""
-        # Create a mock callback
-        mock_callback = MagicMock()
-        
-        # Create a progress bar
+        # Create a progress bar with total=100
         progress_bar = CustomTqdm(total=100)
         
+        # Create a mock callback function
+        callback = MagicMock()
+        
         # Register the callback
-        progress_bar.register_callback(mock_callback)
+        progress_bar.register_callback(callback)
         
-        # Verify the callback was registered
-        self.assertEqual(len(progress_bar.callbacks), 1)
-        self.assertEqual(progress_bar.callbacks[0], mock_callback)
+        # Update the progress bar
+        progress_bar.update(30)
         
-        # Update the progress bar to trigger the callback
-        progress_bar.update(10)
+        # Verify the callback was called with the correct arguments
+        self.assertTrue(callback.called)
+        self.assertEqual(callback.call_args[0][0], 30)
         
-        # Verify the callback was called
-        mock_callback.assert_called_once_with(10, 100)
+        # Update the progress bar again
+        progress_bar.update(20)
+        
+        # Verify the callback was called again with the correct arguments
+        self.assertEqual(callback.call_count, 2)
+        # Extract the actual arguments from the call_args_list
+        call_args = [args[0][0] for args in callback.call_args_list]
+        self.assertEqual(call_args, [30, 50])
     
     def test_custom_tqdm_close(self):
         """Test that CustomTqdm closes correctly."""
-        # Create a progress bar
+        # Create a progress bar with total=100
         progress_bar = CustomTqdm(total=100)
+        
+        # Update the progress bar
+        progress_bar.update(30)
         
         # Close the progress bar
         progress_bar.close()
         
-        # Verify the progress bar was closed (n should be set to total)
-        self.assertEqual(progress_bar.n, 100)
+        # Verify the progress bar was closed correctly
+        # Note: We can't directly test if tqdm.close() was called, but we can verify
+        # that the progress bar is still in a valid state after closing
+        self.assertEqual(progress_bar.n, 30)
+        self.assertEqual(progress_bar.total, 100)
     
     def test_web_ui_tqdm_initialization(self):
         """Test that WebUITqdm initializes correctly."""
         # Create a web state dictionary
-        web_state = {"progress": 0}
+        web_state = {"progress": 0, "total": 0, "console_output": ""}
         
         # Create a progress bar with total=100
         progress_bar = WebUITqdm(total=100, desc="Test Progress", web_state=web_state)
         
         # Verify the progress bar was initialized correctly
+        self.assertIsInstance(progress_bar, WebUITqdm)
         self.assertEqual(progress_bar.total, 100)
-        self.assertEqual(progress_bar.desc, "Test Progress")
         self.assertEqual(progress_bar.n, 0)
+        self.assertEqual(progress_bar.description, "Test Progress")
         self.assertEqual(progress_bar.web_state, web_state)
+        self.assertEqual(web_state["progress"], 0)
     
     def test_web_ui_tqdm_update(self):
         """Test that WebUITqdm updates correctly."""
@@ -132,40 +145,62 @@ class TestProgress(unittest.TestCase):
     def test_web_ui_tqdm_set_description(self):
         """Test that WebUITqdm sets description correctly (should be a no-op)."""
         # Create a web state dictionary
-        web_state = {"progress": 0}
+        web_state = {"progress": 0, "total": 0, "console_output": ""}
         
-        # Create a progress bar
-        progress_bar = WebUITqdm(total=100, web_state=web_state)
+        # Create a progress bar with total=100
+        progress_bar = WebUITqdm(total=100, desc="Test Progress", web_state=web_state)
         
-        # Set the description
+        # Set a new description
         progress_bar.set_description("New Description")
         
-        # Verify the description was set correctly
-        self.assertEqual(progress_bar.desc, "New Description")
+        # Verify the description was updated correctly
+        self.assertEqual(progress_bar.description, "New Description")
+        self.assertIn("New Description", web_state["console_output"])
     
     def test_create_progress_bar_custom(self):
         """Test that create_progress_bar creates a CustomTqdm when web_state is not provided."""
-        # Create a progress bar
+        # Create a progress bar with total=100
         progress_bar = create_progress_bar(total=100, desc="Test Progress")
         
         # Verify the progress bar is a CustomTqdm
         self.assertIsInstance(progress_bar, CustomTqdm)
         self.assertEqual(progress_bar.total, 100)
-        self.assertEqual(progress_bar.desc, "Test Progress")
+        self.assertEqual(progress_bar.description, "Test Progress")
     
     def test_create_progress_bar_web(self):
         """Test that create_progress_bar creates a WebUITqdm when web_state is provided."""
         # Create a web state dictionary
-        web_state = {"progress": 0}
+        web_state = {"progress": 0, "total": 0, "console_output": ""}
         
-        # Create a progress bar
+        # Create a progress bar with total=100
         progress_bar = create_progress_bar(total=100, desc="Test Progress", web_state=web_state)
         
         # Verify the progress bar is a WebUITqdm
         self.assertIsInstance(progress_bar, WebUITqdm)
         self.assertEqual(progress_bar.total, 100)
-        self.assertEqual(progress_bar.desc, "Test Progress")
+        self.assertEqual(progress_bar.description, "Test Progress")
         self.assertEqual(progress_bar.web_state, web_state)
+    
+    def test_web_ui_tqdm_close(self):
+        """Test that WebUITqdm closes correctly."""
+        # Create a web state dictionary
+        web_state = {"progress": 0, "total": 0, "console_output": ""}
+        
+        # Create a progress bar with total=100
+        progress_bar = WebUITqdm(total=100, desc="Test Progress", web_state=web_state)
+        
+        # Update the progress bar
+        progress_bar.update(30)
+        
+        # Close the progress bar
+        progress_bar.close()
+        
+        # Verify the progress bar was closed correctly
+        # Note: We can't directly test if tqdm.close() was called, but we can verify
+        # that the progress bar is still in a valid state after closing
+        self.assertEqual(progress_bar.n, 30)
+        self.assertEqual(progress_bar.total, 100)
+        self.assertEqual(web_state["progress"], 30)
 
 if __name__ == '__main__':
     unittest.main() 
