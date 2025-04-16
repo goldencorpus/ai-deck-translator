@@ -1,0 +1,1299 @@
+﻿2025-04-16T15:16:10.7251463Z Current runner version: '2.323.0'
+2025-04-16T15:16:10.7276560Z ##[group]Operating System
+2025-04-16T15:16:10.7277335Z Ubuntu
+2025-04-16T15:16:10.7277777Z 24.04.2
+2025-04-16T15:16:10.7278342Z LTS
+2025-04-16T15:16:10.7278776Z ##[endgroup]
+2025-04-16T15:16:10.7279295Z ##[group]Runner Image
+2025-04-16T15:16:10.7279930Z Image: ubuntu-24.04
+2025-04-16T15:16:10.7280410Z Version: 20250413.1.0
+2025-04-16T15:16:10.7281422Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250413.1/images/ubuntu/Ubuntu2404-Readme.md
+2025-04-16T15:16:10.7282937Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250413.1
+2025-04-16T15:16:10.7283862Z ##[endgroup]
+2025-04-16T15:16:10.7284321Z ##[group]Runner Image Provisioner
+2025-04-16T15:16:10.7284948Z 2.0.422.1
+2025-04-16T15:16:10.7285386Z ##[endgroup]
+2025-04-16T15:16:10.7286399Z ##[group]GITHUB_TOKEN Permissions
+2025-04-16T15:16:10.7288739Z Contents: read
+2025-04-16T15:16:10.7289279Z Metadata: read
+2025-04-16T15:16:10.7289990Z Packages: read
+2025-04-16T15:16:10.7290537Z ##[endgroup]
+2025-04-16T15:16:10.7292986Z Secret source: Actions
+2025-04-16T15:16:10.7294042Z Prepare workflow directory
+2025-04-16T15:16:10.7626710Z Prepare all required actions
+2025-04-16T15:16:10.7663884Z Getting action download info
+2025-04-16T15:16:11.2758908Z ##[group]Download immutable action package 'actions/checkout@v3'
+2025-04-16T15:16:11.2760026Z Version: 3.6.0
+2025-04-16T15:16:11.2760937Z Digest: sha256:942562b9c7d4b1f2557f1da21f4d3eb4eb4fd01f2ad78b2a6e187d1b193e0a0f
+2025-04-16T15:16:11.2762527Z Source commit SHA: f43a0e5ff2bd294095638e18286ca9a3d1956744
+2025-04-16T15:16:11.2763706Z ##[endgroup]
+2025-04-16T15:16:11.3794392Z ##[group]Download immutable action package 'actions/setup-python@v4'
+2025-04-16T15:16:11.3795199Z Version: 4.8.0
+2025-04-16T15:16:11.3795981Z Digest: sha256:7e597ce284e0b40cf85abcb7aa2474fa843336422b823ce21b6643f3a262b88d
+2025-04-16T15:16:11.3796921Z Source commit SHA: b64ffcaf5b410884ad320a9cfac8866006a109aa
+2025-04-16T15:16:11.3797601Z ##[endgroup]
+2025-04-16T15:16:11.6000161Z Complete job name: lint
+2025-04-16T15:16:11.6666729Z ##[group]Run actions/checkout@v3
+2025-04-16T15:16:11.6667526Z with:
+2025-04-16T15:16:11.6667932Z   repository: eprouveze/ai-deck-translator
+2025-04-16T15:16:11.6668642Z   token: ***
+2025-04-16T15:16:11.6669015Z   ssh-strict: true
+2025-04-16T15:16:11.6669402Z   persist-credentials: true
+2025-04-16T15:16:11.6669841Z   clean: true
+2025-04-16T15:16:11.6670228Z   sparse-checkout-cone-mode: true
+2025-04-16T15:16:11.6670676Z   fetch-depth: 1
+2025-04-16T15:16:11.6671049Z   fetch-tags: false
+2025-04-16T15:16:11.6671410Z   lfs: false
+2025-04-16T15:16:11.6671765Z   submodules: false
+2025-04-16T15:16:11.6672138Z   set-safe-directory: true
+2025-04-16T15:16:11.6672908Z ##[endgroup]
+2025-04-16T15:16:11.8699714Z Syncing repository: eprouveze/ai-deck-translator
+2025-04-16T15:16:11.8701480Z ##[group]Getting Git version info
+2025-04-16T15:16:11.8702247Z Working directory is '/home/runner/work/ai-deck-translator/ai-deck-translator'
+2025-04-16T15:16:11.8703609Z [command]/usr/bin/git version
+2025-04-16T15:16:11.8783187Z git version 2.49.0
+2025-04-16T15:16:11.8814223Z ##[endgroup]
+2025-04-16T15:16:11.8834218Z Temporarily overriding HOME='/home/runner/work/_temp/e0377c6a-1ad8-4833-8ac7-0395da4eee61' before making global git config changes
+2025-04-16T15:16:11.8836588Z Adding repository directory to the temporary git global config as a safe directory
+2025-04-16T15:16:11.8838984Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ai-deck-translator/ai-deck-translator
+2025-04-16T15:16:11.8878277Z Deleting the contents of '/home/runner/work/ai-deck-translator/ai-deck-translator'
+2025-04-16T15:16:11.8882410Z ##[group]Initializing the repository
+2025-04-16T15:16:11.8886569Z [command]/usr/bin/git init /home/runner/work/ai-deck-translator/ai-deck-translator
+2025-04-16T15:16:11.8957519Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-04-16T15:16:11.8958817Z hint: is subject to change. To configure the initial branch name to use in all
+2025-04-16T15:16:11.8959993Z hint: of your new repositories, which will suppress this warning, call:
+2025-04-16T15:16:11.8960627Z hint:
+2025-04-16T15:16:11.8961102Z hint: 	git config --global init.defaultBranch <name>
+2025-04-16T15:16:11.8961643Z hint:
+2025-04-16T15:16:11.8962159Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-04-16T15:16:11.8963234Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-04-16T15:16:11.8963921Z hint:
+2025-04-16T15:16:11.8964496Z hint: 	git branch -m <name>
+2025-04-16T15:16:11.8965780Z Initialized empty Git repository in /home/runner/work/ai-deck-translator/ai-deck-translator/.git/
+2025-04-16T15:16:11.8976094Z [command]/usr/bin/git remote add origin https://github.com/eprouveze/ai-deck-translator
+2025-04-16T15:16:11.9009962Z ##[endgroup]
+2025-04-16T15:16:11.9011109Z ##[group]Disabling automatic garbage collection
+2025-04-16T15:16:11.9013616Z [command]/usr/bin/git config --local gc.auto 0
+2025-04-16T15:16:11.9041743Z ##[endgroup]
+2025-04-16T15:16:11.9043130Z ##[group]Setting up auth
+2025-04-16T15:16:11.9048216Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-04-16T15:16:11.9079614Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-04-16T15:16:11.9422500Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-04-16T15:16:11.9450181Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-04-16T15:16:11.9679582Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-04-16T15:16:11.9713792Z ##[endgroup]
+2025-04-16T15:16:11.9714555Z ##[group]Fetching the repository
+2025-04-16T15:16:11.9721968Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +88b23e9f9ab1d2146a3e157d3832bfe0dbc0094e:refs/remotes/origin/v2
+2025-04-16T15:16:12.5993437Z remote: Enumerating objects: 5354, done.        
+2025-04-16T15:16:12.5994618Z remote: Counting objects:   0% (1/5354)        
+2025-04-16T15:16:12.5995361Z remote: Counting objects:   1% (54/5354)        
+2025-04-16T15:16:12.5996085Z remote: Counting objects:   2% (108/5354)        
+2025-04-16T15:16:12.5996801Z remote: Counting objects:   3% (161/5354)        
+2025-04-16T15:16:12.5997528Z remote: Counting objects:   4% (215/5354)        
+2025-04-16T15:16:12.5998269Z remote: Counting objects:   5% (268/5354)        
+2025-04-16T15:16:12.5999022Z remote: Counting objects:   6% (322/5354)        
+2025-04-16T15:16:12.5999717Z remote: Counting objects:   7% (375/5354)        
+2025-04-16T15:16:12.6000357Z remote: Counting objects:   8% (429/5354)        
+2025-04-16T15:16:12.6001017Z remote: Counting objects:   9% (482/5354)        
+2025-04-16T15:16:12.6293139Z remote: Counting objects:  10% (536/5354)        
+2025-04-16T15:16:12.6295850Z remote: Counting objects:  11% (589/5354)        
+2025-04-16T15:16:12.6297645Z remote: Counting objects:  12% (643/5354)        
+2025-04-16T15:16:12.6298776Z remote: Counting objects:  13% (697/5354)        
+2025-04-16T15:16:12.6300250Z remote: Counting objects:  14% (750/5354)        
+2025-04-16T15:16:12.6301631Z remote: Counting objects:  15% (804/5354)        
+2025-04-16T15:16:12.6303225Z remote: Counting objects:  16% (857/5354)        
+2025-04-16T15:16:12.6304514Z remote: Counting objects:  17% (911/5354)        
+2025-04-16T15:16:12.6305404Z remote: Counting objects:  18% (964/5354)        
+2025-04-16T15:16:12.6306251Z remote: Counting objects:  19% (1018/5354)        
+2025-04-16T15:16:12.6307095Z remote: Counting objects:  20% (1071/5354)        
+2025-04-16T15:16:12.6307931Z remote: Counting objects:  21% (1125/5354)        
+2025-04-16T15:16:12.6309268Z remote: Counting objects:  22% (1178/5354)        
+2025-04-16T15:16:12.6310189Z remote: Counting objects:  23% (1232/5354)        
+2025-04-16T15:16:12.6311107Z remote: Counting objects:  24% (1285/5354)        
+2025-04-16T15:16:12.6312095Z remote: Counting objects:  25% (1339/5354)        
+2025-04-16T15:16:12.6313308Z remote: Counting objects:  26% (1393/5354)        
+2025-04-16T15:16:12.6314342Z remote: Counting objects:  27% (1446/5354)        
+2025-04-16T15:16:12.6315474Z remote: Counting objects:  28% (1500/5354)        
+2025-04-16T15:16:12.6316589Z remote: Counting objects:  29% (1553/5354)        
+2025-04-16T15:16:12.6317624Z remote: Counting objects:  30% (1607/5354)        
+2025-04-16T15:16:12.6318636Z remote: Counting objects:  31% (1660/5354)        
+2025-04-16T15:16:12.6319680Z remote: Counting objects:  32% (1714/5354)        
+2025-04-16T15:16:12.6320752Z remote: Counting objects:  33% (1767/5354)        
+2025-04-16T15:16:12.6321821Z remote: Counting objects:  34% (1821/5354)        
+2025-04-16T15:16:12.6323062Z remote: Counting objects:  35% (1874/5354)        
+2025-04-16T15:16:12.6324193Z remote: Counting objects:  36% (1928/5354)        
+2025-04-16T15:16:12.6325388Z remote: Counting objects:  37% (1981/5354)        
+2025-04-16T15:16:12.6326577Z remote: Counting objects:  38% (2035/5354)        
+2025-04-16T15:16:12.6327767Z remote: Counting objects:  39% (2089/5354)        
+2025-04-16T15:16:12.6328993Z remote: Counting objects:  40% (2142/5354)        
+2025-04-16T15:16:12.6330238Z remote: Counting objects:  41% (2196/5354)        
+2025-04-16T15:16:12.6331519Z remote: Counting objects:  42% (2249/5354)        
+2025-04-16T15:16:12.6332956Z remote: Counting objects:  43% (2303/5354)        
+2025-04-16T15:16:12.6334242Z remote: Counting objects:  44% (2356/5354)        
+2025-04-16T15:16:12.6335504Z remote: Counting objects:  45% (2410/5354)        
+2025-04-16T15:16:12.6336765Z remote: Counting objects:  46% (2463/5354)        
+2025-04-16T15:16:12.6338048Z remote: Counting objects:  47% (2517/5354)        
+2025-04-16T15:16:12.6339524Z remote: Counting objects:  48% (2570/5354)        
+2025-04-16T15:16:12.6340918Z remote: Counting objects:  49% (2624/5354)        
+2025-04-16T15:16:12.6342308Z remote: Counting objects:  50% (2677/5354)        
+2025-04-16T15:16:12.6343968Z remote: Counting objects:  51% (2731/5354)        
+2025-04-16T15:16:12.6345345Z remote: Counting objects:  52% (2785/5354)        
+2025-04-16T15:16:12.6346750Z remote: Counting objects:  53% (2838/5354)        
+2025-04-16T15:16:12.6348163Z remote: Counting objects:  54% (2892/5354)        
+2025-04-16T15:16:12.6349566Z remote: Counting objects:  55% (2945/5354)        
+2025-04-16T15:16:12.6350938Z remote: Counting objects:  56% (2999/5354)        
+2025-04-16T15:16:12.6352317Z remote: Counting objects:  57% (3052/5354)        
+2025-04-16T15:16:12.6353871Z remote: Counting objects:  58% (3106/5354)        
+2025-04-16T15:16:12.6355244Z remote: Counting objects:  59% (3159/5354)        
+2025-04-16T15:16:12.6356629Z remote: Counting objects:  60% (3213/5354)        
+2025-04-16T15:16:12.6358020Z remote: Counting objects:  61% (3266/5354)        
+2025-04-16T15:16:12.6359387Z remote: Counting objects:  62% (3320/5354)        
+2025-04-16T15:16:12.6360741Z remote: Counting objects:  63% (3374/5354)        
+2025-04-16T15:16:12.6362090Z remote: Counting objects:  64% (3427/5354)        
+2025-04-16T15:16:12.6363608Z remote: Counting objects:  65% (3481/5354)        
+2025-04-16T15:16:12.6364980Z remote: Counting objects:  66% (3534/5354)        
+2025-04-16T15:16:12.6366351Z remote: Counting objects:  67% (3588/5354)        
+2025-04-16T15:16:12.6367764Z remote: Counting objects:  68% (3641/5354)        
+2025-04-16T15:16:12.6369113Z remote: Counting objects:  69% (3695/5354)        
+2025-04-16T15:16:12.6370449Z remote: Counting objects:  70% (3748/5354)        
+2025-04-16T15:16:12.6371780Z remote: Counting objects:  71% (3802/5354)        
+2025-04-16T15:16:12.6373247Z remote: Counting objects:  72% (3855/5354)        
+2025-04-16T15:16:12.6374733Z remote: Counting objects:  73% (3909/5354)        
+2025-04-16T15:16:12.6376023Z remote: Counting objects:  74% (3962/5354)        
+2025-04-16T15:16:12.6377322Z remote: Counting objects:  75% (4016/5354)        
+2025-04-16T15:16:12.6378632Z remote: Counting objects:  76% (4070/5354)        
+2025-04-16T15:16:12.6379936Z remote: Counting objects:  77% (4123/5354)        
+2025-04-16T15:16:12.6381226Z remote: Counting objects:  78% (4177/5354)        
+2025-04-16T15:16:12.6382538Z remote: Counting objects:  79% (4230/5354)        
+2025-04-16T15:16:12.6384159Z remote: Counting objects:  80% (4284/5354)        
+2025-04-16T15:16:12.6385519Z remote: Counting objects:  81% (4337/5354)        
+2025-04-16T15:16:12.6386857Z remote: Counting objects:  82% (4391/5354)        
+2025-04-16T15:16:12.6388200Z remote: Counting objects:  83% (4444/5354)        
+2025-04-16T15:16:12.6389564Z remote: Counting objects:  84% (4498/5354)        
+2025-04-16T15:16:12.6390912Z remote: Counting objects:  85% (4551/5354)        
+2025-04-16T15:16:12.6392266Z remote: Counting objects:  86% (4605/5354)        
+2025-04-16T15:16:12.6393788Z remote: Counting objects:  87% (4658/5354)        
+2025-04-16T15:16:12.6395115Z remote: Counting objects:  88% (4712/5354)        
+2025-04-16T15:16:12.6396430Z remote: Counting objects:  89% (4766/5354)        
+2025-04-16T15:16:12.6397747Z remote: Counting objects:  90% (4819/5354)        
+2025-04-16T15:16:12.6399067Z remote: Counting objects:  91% (4873/5354)        
+2025-04-16T15:16:12.6400386Z remote: Counting objects:  92% (4926/5354)        
+2025-04-16T15:16:12.6401708Z remote: Counting objects:  93% (4980/5354)        
+2025-04-16T15:16:12.6403127Z remote: Counting objects:  94% (5033/5354)        
+2025-04-16T15:16:12.6404450Z remote: Counting objects:  95% (5087/5354)        
+2025-04-16T15:16:12.6405968Z remote: Counting objects:  96% (5140/5354)        
+2025-04-16T15:16:12.6407435Z remote: Counting objects:  97% (5194/5354)        
+2025-04-16T15:16:12.6408743Z remote: Counting objects:  98% (5247/5354)        
+2025-04-16T15:16:12.6410286Z remote: Counting objects:  99% (5301/5354)        
+2025-04-16T15:16:12.6411610Z remote: Counting objects: 100% (5354/5354)        
+2025-04-16T15:16:12.6413105Z remote: Counting objects: 100% (5354/5354), done.        
+2025-04-16T15:16:12.6414523Z remote: Compressing objects:   0% (1/4152)        
+2025-04-16T15:16:12.6415844Z remote: Compressing objects:   1% (42/4152)        
+2025-04-16T15:16:12.6417180Z remote: Compressing objects:   2% (84/4152)        
+2025-04-16T15:16:12.6418543Z remote: Compressing objects:   3% (125/4152)        
+2025-04-16T15:16:12.6419920Z remote: Compressing objects:   4% (167/4152)        
+2025-04-16T15:16:12.6421698Z remote: Compressing objects:   5% (208/4152)        
+2025-04-16T15:16:12.6423718Z remote: Compressing objects:   6% (250/4152)        
+2025-04-16T15:16:12.6425856Z remote: Compressing objects:   7% (291/4152)        
+2025-04-16T15:16:12.6427606Z remote: Compressing objects:   8% (333/4152)        
+2025-04-16T15:16:12.6429009Z remote: Compressing objects:   9% (374/4152)        
+2025-04-16T15:16:12.6430397Z remote: Compressing objects:  10% (416/4152)        
+2025-04-16T15:16:12.6431765Z remote: Compressing objects:  11% (457/4152)        
+2025-04-16T15:16:12.6433384Z remote: Compressing objects:  12% (499/4152)        
+2025-04-16T15:16:12.6473384Z remote: Compressing objects:  13% (540/4152)        
+2025-04-16T15:16:12.6519568Z remote: Compressing objects:  14% (582/4152)        
+2025-04-16T15:16:12.6521392Z remote: Compressing objects:  15% (623/4152)        
+2025-04-16T15:16:12.6525022Z remote: Compressing objects:  16% (665/4152)        
+2025-04-16T15:16:12.6528150Z remote: Compressing objects:  17% (706/4152)        
+2025-04-16T15:16:12.6533130Z remote: Compressing objects:  18% (748/4152)        
+2025-04-16T15:16:12.6536154Z remote: Compressing objects:  19% (789/4152)        
+2025-04-16T15:16:12.6568892Z remote: Compressing objects:  20% (831/4152)        
+2025-04-16T15:16:12.6586276Z remote: Compressing objects:  21% (872/4152)        
+2025-04-16T15:16:12.6610866Z remote: Compressing objects:  22% (914/4152)        
+2025-04-16T15:16:12.6615031Z remote: Compressing objects:  23% (955/4152)        
+2025-04-16T15:16:12.6647611Z remote: Compressing objects:  24% (997/4152)        
+2025-04-16T15:16:12.6650046Z remote: Compressing objects:  25% (1038/4152)        
+2025-04-16T15:16:12.6666079Z remote: Compressing objects:  26% (1080/4152)        
+2025-04-16T15:16:12.6688822Z remote: Compressing objects:  27% (1122/4152)        
+2025-04-16T15:16:12.6690606Z remote: Compressing objects:  28% (1163/4152)        
+2025-04-16T15:16:12.6692161Z remote: Compressing objects:  29% (1205/4152)        
+2025-04-16T15:16:12.6719033Z remote: Compressing objects:  30% (1246/4152)        
+2025-04-16T15:16:12.6720908Z remote: Compressing objects:  31% (1288/4152)        
+2025-04-16T15:16:12.6741779Z remote: Compressing objects:  32% (1329/4152)        
+2025-04-16T15:16:12.6761169Z remote: Compressing objects:  33% (1371/4152)        
+2025-04-16T15:16:12.6776419Z remote: Compressing objects:  34% (1412/4152)        
+2025-04-16T15:16:12.6778295Z remote: Compressing objects:  35% (1454/4152)        
+2025-04-16T15:16:12.6779987Z remote: Compressing objects:  36% (1495/4152)        
+2025-04-16T15:16:12.6790724Z remote: Compressing objects:  37% (1537/4152)        
+2025-04-16T15:16:12.6821678Z remote: Compressing objects:  38% (1578/4152)        
+2025-04-16T15:16:12.6855436Z remote: Compressing objects:  39% (1620/4152)        
+2025-04-16T15:16:12.6880077Z remote: Compressing objects:  40% (1661/4152)        
+2025-04-16T15:16:12.6893301Z remote: Compressing objects:  41% (1703/4152)        
+2025-04-16T15:16:12.6920191Z remote: Compressing objects:  42% (1744/4152)        
+2025-04-16T15:16:12.6922572Z remote: Compressing objects:  43% (1786/4152)        
+2025-04-16T15:16:12.6924769Z remote: Compressing objects:  44% (1827/4152)        
+2025-04-16T15:16:12.6939819Z remote: Compressing objects:  45% (1869/4152)        
+2025-04-16T15:16:12.6983118Z remote: Compressing objects:  46% (1910/4152)        
+2025-04-16T15:16:12.6996447Z remote: Compressing objects:  47% (1952/4152)        
+2025-04-16T15:16:12.7010826Z remote: Compressing objects:  48% (1993/4152)        
+2025-04-16T15:16:12.7019416Z remote: Compressing objects:  49% (2035/4152)        
+2025-04-16T15:16:12.7021725Z remote: Compressing objects:  50% (2076/4152)        
+2025-04-16T15:16:12.7024911Z remote: Compressing objects:  51% (2118/4152)        
+2025-04-16T15:16:12.7049600Z remote: Compressing objects:  52% (2160/4152)        
+2025-04-16T15:16:12.7051239Z remote: Compressing objects:  53% (2201/4152)        
+2025-04-16T15:16:12.7053128Z remote: Compressing objects:  54% (2243/4152)        
+2025-04-16T15:16:12.7061846Z remote: Compressing objects:  55% (2284/4152)        
+2025-04-16T15:16:12.7063395Z remote: Compressing objects:  56% (2326/4152)        
+2025-04-16T15:16:12.7064760Z remote: Compressing objects:  57% (2367/4152)        
+2025-04-16T15:16:12.7215098Z remote: Compressing objects:  58% (2409/4152)        
+2025-04-16T15:16:12.7216860Z remote: Compressing objects:  59% (2450/4152)        
+2025-04-16T15:16:12.7218498Z remote: Compressing objects:  60% (2492/4152)        
+2025-04-16T15:16:12.7220187Z remote: Compressing objects:  61% (2533/4152)        
+2025-04-16T15:16:12.7221608Z remote: Compressing objects:  62% (2575/4152)        
+2025-04-16T15:16:12.7223139Z remote: Compressing objects:  63% (2616/4152)        
+2025-04-16T15:16:12.7224459Z remote: Compressing objects:  64% (2658/4152)        
+2025-04-16T15:16:12.7225761Z remote: Compressing objects:  65% (2699/4152)        
+2025-04-16T15:16:12.7227101Z remote: Compressing objects:  66% (2741/4152)        
+2025-04-16T15:16:12.7428626Z remote: Compressing objects:  67% (2782/4152)        
+2025-04-16T15:16:12.7437478Z remote: Compressing objects:  68% (2824/4152)        
+2025-04-16T15:16:12.7438851Z remote: Compressing objects:  69% (2865/4152)        
+2025-04-16T15:16:12.7440159Z remote: Compressing objects:  70% (2907/4152)        
+2025-04-16T15:16:12.7441870Z remote: Compressing objects:  71% (2948/4152)        
+2025-04-16T15:16:12.7443375Z remote: Compressing objects:  72% (2990/4152)        
+2025-04-16T15:16:12.7444694Z remote: Compressing objects:  73% (3031/4152)        
+2025-04-16T15:16:12.7446011Z remote: Compressing objects:  74% (3073/4152)        
+2025-04-16T15:16:12.7447380Z remote: Compressing objects:  75% (3114/4152)        
+2025-04-16T15:16:12.7448672Z remote: Compressing objects:  76% (3156/4152)        
+2025-04-16T15:16:12.7449964Z remote: Compressing objects:  77% (3198/4152)        
+2025-04-16T15:16:12.7451278Z remote: Compressing objects:  78% (3239/4152)        
+2025-04-16T15:16:12.7452598Z remote: Compressing objects:  79% (3281/4152)        
+2025-04-16T15:16:12.7454018Z remote: Compressing objects:  80% (3322/4152)        
+2025-04-16T15:16:12.7455314Z remote: Compressing objects:  81% (3364/4152)        
+2025-04-16T15:16:12.7507148Z remote: Compressing objects:  82% (3405/4152)        
+2025-04-16T15:16:12.7509294Z remote: Compressing objects:  83% (3447/4152)        
+2025-04-16T15:16:12.7547181Z remote: Compressing objects:  84% (3488/4152)        
+2025-04-16T15:16:12.7549633Z remote: Compressing objects:  85% (3530/4152)        
+2025-04-16T15:16:12.7551830Z remote: Compressing objects:  86% (3571/4152)        
+2025-04-16T15:16:12.7553892Z remote: Compressing objects:  87% (3613/4152)        
+2025-04-16T15:16:12.7555725Z remote: Compressing objects:  88% (3654/4152)        
+2025-04-16T15:16:12.7557877Z remote: Compressing objects:  89% (3696/4152)        
+2025-04-16T15:16:12.7559500Z remote: Compressing objects:  90% (3737/4152)        
+2025-04-16T15:16:12.7560802Z remote: Compressing objects:  91% (3779/4152)        
+2025-04-16T15:16:12.7562207Z remote: Compressing objects:  92% (3820/4152)        
+2025-04-16T15:16:12.7563741Z remote: Compressing objects:  93% (3862/4152)        
+2025-04-16T15:16:12.7565030Z remote: Compressing objects:  94% (3903/4152)        
+2025-04-16T15:16:12.7566912Z remote: Compressing objects:  95% (3945/4152)        
+2025-04-16T15:16:12.7569182Z remote: Compressing objects:  96% (3986/4152)        
+2025-04-16T15:16:12.7570909Z remote: Compressing objects:  97% (4028/4152)        
+2025-04-16T15:16:12.7572244Z remote: Compressing objects:  98% (4069/4152)        
+2025-04-16T15:16:12.7574001Z remote: Compressing objects:  99% (4111/4152)        
+2025-04-16T15:16:12.7575456Z remote: Compressing objects: 100% (4152/4152)        
+2025-04-16T15:16:12.7576847Z remote: Compressing objects: 100% (4152/4152), done.        
+2025-04-16T15:16:13.2117852Z Receiving objects:   0% (1/5354)
+2025-04-16T15:16:13.2753081Z Receiving objects:   1% (54/5354)
+2025-04-16T15:16:13.2808711Z Receiving objects:   2% (108/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.2910538Z Receiving objects:   3% (161/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3070885Z Receiving objects:   4% (215/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3099358Z Receiving objects:   5% (268/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3117992Z Receiving objects:   6% (322/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3124256Z Receiving objects:   7% (375/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3128837Z Receiving objects:   8% (429/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3130213Z Receiving objects:   9% (482/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3153632Z Receiving objects:  10% (536/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3185230Z Receiving objects:  11% (589/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3222206Z Receiving objects:  12% (643/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3267276Z Receiving objects:  13% (697/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3356614Z Receiving objects:  14% (750/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3372498Z Receiving objects:  15% (804/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3472211Z Receiving objects:  16% (857/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3490568Z Receiving objects:  17% (911/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3511597Z Receiving objects:  18% (964/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3553482Z Receiving objects:  19% (1018/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3592679Z Receiving objects:  20% (1071/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3619338Z Receiving objects:  21% (1125/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3679688Z Receiving objects:  22% (1178/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3696414Z Receiving objects:  23% (1232/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.3711339Z Receiving objects:  24% (1285/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.4153959Z Receiving objects:  25% (1339/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.4613972Z Receiving objects:  26% (1393/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.4936523Z Receiving objects:  27% (1446/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.5961190Z Receiving objects:  28% (1500/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.6849777Z Receiving objects:  29% (1553/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.7070928Z Receiving objects:  30% (1607/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.7296652Z Receiving objects:  31% (1660/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.7545881Z Receiving objects:  32% (1714/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.7601321Z Receiving objects:  33% (1767/5354), 9.95 MiB | 19.88 MiB/s
+2025-04-16T15:16:13.8037911Z Receiving objects:  33% (1785/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.8308298Z Receiving objects:  34% (1821/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.8379163Z Receiving objects:  35% (1874/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.8403095Z Receiving objects:  36% (1928/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.8464888Z Receiving objects:  37% (1981/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.8485499Z Receiving objects:  38% (2035/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.8508022Z Receiving objects:  39% (2089/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.9728044Z Receiving objects:  40% (2142/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.9835249Z Receiving objects:  41% (2196/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:13.9884191Z Receiving objects:  42% (2249/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0082673Z Receiving objects:  43% (2303/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0251327Z Receiving objects:  44% (2356/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0284778Z Receiving objects:  45% (2410/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0339891Z Receiving objects:  46% (2463/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0396493Z Receiving objects:  47% (2517/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0446630Z Receiving objects:  48% (2570/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0507333Z Receiving objects:  49% (2624/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0525633Z Receiving objects:  50% (2677/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0555531Z Receiving objects:  51% (2731/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0569237Z Receiving objects:  52% (2785/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0579049Z Receiving objects:  53% (2838/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0585950Z Receiving objects:  54% (2892/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0600411Z Receiving objects:  55% (2945/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0605890Z Receiving objects:  56% (2999/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0616272Z Receiving objects:  57% (3052/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0640523Z Receiving objects:  58% (3106/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0661551Z Receiving objects:  59% (3159/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0696736Z Receiving objects:  60% (3213/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0713908Z Receiving objects:  61% (3266/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0735496Z Receiving objects:  62% (3320/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0783193Z Receiving objects:  63% (3374/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0832303Z Receiving objects:  64% (3427/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0842952Z Receiving objects:  65% (3481/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0862422Z Receiving objects:  66% (3534/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0892937Z Receiving objects:  67% (3588/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0923981Z Receiving objects:  68% (3641/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0953431Z Receiving objects:  69% (3695/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.0983939Z Receiving objects:  70% (3748/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1020465Z Receiving objects:  71% (3802/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1073423Z Receiving objects:  72% (3855/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1163396Z Receiving objects:  73% (3909/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1207977Z Receiving objects:  74% (3962/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1247517Z Receiving objects:  75% (4016/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1379929Z Receiving objects:  76% (4070/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1423922Z Receiving objects:  77% (4123/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1454220Z Receiving objects:  78% (4177/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1487090Z Receiving objects:  79% (4230/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1548317Z Receiving objects:  80% (4284/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1572575Z Receiving objects:  81% (4337/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1600868Z Receiving objects:  82% (4391/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1617819Z Receiving objects:  83% (4444/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1646571Z Receiving objects:  84% (4498/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.1713227Z Receiving objects:  85% (4551/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2161077Z Receiving objects:  86% (4605/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2223872Z Receiving objects:  87% (4658/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2237538Z Receiving objects:  88% (4712/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2269226Z Receiving objects:  89% (4766/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2322142Z Receiving objects:  90% (4819/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2379275Z Receiving objects:  91% (4873/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2402975Z Receiving objects:  92% (4926/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2418128Z Receiving objects:  93% (4980/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2468304Z Receiving objects:  94% (5033/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2529452Z Receiving objects:  95% (5087/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2572701Z Receiving objects:  96% (5140/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2745880Z Receiving objects:  97% (5194/5354), 22.96 MiB | 22.95 MiB/s
+2025-04-16T15:16:14.2775472Z Receiving objects:  98% (5247/5354), 39.62 MiB | 26.41 MiB/s
+2025-04-16T15:16:14.2783051Z Receiving objects:  99% (5301/5354), 39.62 MiB | 26.41 MiB/s
+2025-04-16T15:16:14.2783866Z remote: Total 5354 (delta 1075), reused 5268 (delta 1068), pack-reused 0 (from 0)        
+2025-04-16T15:16:14.2797973Z Receiving objects: 100% (5354/5354), 39.62 MiB | 26.41 MiB/s
+2025-04-16T15:16:14.2798935Z Receiving objects: 100% (5354/5354), 40.34 MiB | 26.55 MiB/s, done.
+2025-04-16T15:16:14.2802668Z Resolving deltas:   0% (0/1075)
+2025-04-16T15:16:14.2804110Z Resolving deltas:   1% (11/1075)
+2025-04-16T15:16:14.2901362Z Resolving deltas:   2% (22/1075)
+2025-04-16T15:16:14.2913957Z Resolving deltas:   3% (33/1075)
+2025-04-16T15:16:14.2916230Z Resolving deltas:   4% (43/1075)
+2025-04-16T15:16:14.2925731Z Resolving deltas:   5% (54/1075)
+2025-04-16T15:16:14.2930190Z Resolving deltas:   6% (65/1075)
+2025-04-16T15:16:14.2936338Z Resolving deltas:   7% (76/1075)
+2025-04-16T15:16:14.2940769Z Resolving deltas:   8% (86/1075)
+2025-04-16T15:16:14.2944980Z Resolving deltas:   9% (97/1075)
+2025-04-16T15:16:14.2948432Z Resolving deltas:  10% (108/1075)
+2025-04-16T15:16:14.2948970Z Resolving deltas:  11% (119/1075)
+2025-04-16T15:16:14.2951619Z Resolving deltas:  12% (129/1075)
+2025-04-16T15:16:14.2952017Z Resolving deltas:  13% (140/1075)
+2025-04-16T15:16:14.2952890Z Resolving deltas:  14% (151/1075)
+2025-04-16T15:16:14.2961035Z Resolving deltas:  15% (162/1075)
+2025-04-16T15:16:14.2961430Z Resolving deltas:  16% (172/1075)
+2025-04-16T15:16:14.2961797Z Resolving deltas:  17% (183/1075)
+2025-04-16T15:16:14.3038380Z Resolving deltas:  18% (194/1075)
+2025-04-16T15:16:14.3038775Z Resolving deltas:  19% (205/1075)
+2025-04-16T15:16:14.3039210Z Resolving deltas:  20% (215/1075)
+2025-04-16T15:16:14.3040813Z Resolving deltas:  21% (226/1075)
+2025-04-16T15:16:14.3041250Z Resolving deltas:  22% (237/1075)
+2025-04-16T15:16:14.3041622Z Resolving deltas:  23% (248/1075)
+2025-04-16T15:16:14.3041962Z Resolving deltas:  24% (258/1075)
+2025-04-16T15:16:14.3042308Z Resolving deltas:  25% (269/1075)
+2025-04-16T15:16:14.3042658Z Resolving deltas:  26% (280/1075)
+2025-04-16T15:16:14.3044013Z Resolving deltas:  27% (291/1075)
+2025-04-16T15:16:14.3044355Z Resolving deltas:  28% (301/1075)
+2025-04-16T15:16:14.3044758Z Resolving deltas:  29% (312/1075)
+2025-04-16T15:16:14.3045664Z Resolving deltas:  30% (323/1075)
+2025-04-16T15:16:14.3056951Z Resolving deltas:  31% (334/1075)
+2025-04-16T15:16:14.3063098Z Resolving deltas:  32% (344/1075)
+2025-04-16T15:16:14.3071828Z Resolving deltas:  33% (355/1075)
+2025-04-16T15:16:14.3080331Z Resolving deltas:  34% (366/1075)
+2025-04-16T15:16:14.3087341Z Resolving deltas:  35% (377/1075)
+2025-04-16T15:16:14.3095717Z Resolving deltas:  36% (387/1075)
+2025-04-16T15:16:14.3104046Z Resolving deltas:  37% (398/1075)
+2025-04-16T15:16:14.3112038Z Resolving deltas:  38% (409/1075)
+2025-04-16T15:16:14.3119518Z Resolving deltas:  39% (420/1075)
+2025-04-16T15:16:14.3127854Z Resolving deltas:  40% (430/1075)
+2025-04-16T15:16:14.3135669Z Resolving deltas:  41% (441/1075)
+2025-04-16T15:16:14.3141591Z Resolving deltas:  42% (452/1075)
+2025-04-16T15:16:14.3145363Z Resolving deltas:  43% (463/1075)
+2025-04-16T15:16:14.3147076Z Resolving deltas:  44% (473/1075)
+2025-04-16T15:16:14.3152355Z Resolving deltas:  45% (484/1075)
+2025-04-16T15:16:14.3156128Z Resolving deltas:  46% (495/1075)
+2025-04-16T15:16:14.3158985Z Resolving deltas:  47% (506/1075)
+2025-04-16T15:16:14.3172543Z Resolving deltas:  48% (516/1075)
+2025-04-16T15:16:14.3191905Z Resolving deltas:  49% (527/1075)
+2025-04-16T15:16:14.3193573Z Resolving deltas:  50% (538/1075)
+2025-04-16T15:16:14.3196050Z Resolving deltas:  51% (549/1075)
+2025-04-16T15:16:14.3198317Z Resolving deltas:  52% (560/1075)
+2025-04-16T15:16:14.3200413Z Resolving deltas:  53% (570/1075)
+2025-04-16T15:16:14.3203388Z Resolving deltas:  54% (581/1075)
+2025-04-16T15:16:14.3205444Z Resolving deltas:  55% (592/1075)
+2025-04-16T15:16:14.3209135Z Resolving deltas:  56% (602/1075)
+2025-04-16T15:16:14.3213566Z Resolving deltas:  57% (613/1075)
+2025-04-16T15:16:14.3221171Z Resolving deltas:  58% (624/1075)
+2025-04-16T15:16:14.3221571Z Resolving deltas:  59% (635/1075)
+2025-04-16T15:16:14.3234355Z Resolving deltas:  60% (645/1075)
+2025-04-16T15:16:14.3279314Z Resolving deltas:  61% (656/1075)
+2025-04-16T15:16:14.3396170Z Resolving deltas:  62% (667/1075)
+2025-04-16T15:16:14.3413640Z Resolving deltas:  63% (678/1075)
+2025-04-16T15:16:14.3444890Z Resolving deltas:  64% (688/1075)
+2025-04-16T15:16:14.3486562Z Resolving deltas:  65% (699/1075)
+2025-04-16T15:16:14.3508050Z Resolving deltas:  66% (710/1075)
+2025-04-16T15:16:14.3533322Z Resolving deltas:  67% (721/1075)
+2025-04-16T15:16:14.3560064Z Resolving deltas:  68% (731/1075)
+2025-04-16T15:16:14.3593379Z Resolving deltas:  69% (742/1075)
+2025-04-16T15:16:14.3646846Z Resolving deltas:  70% (753/1075)
+2025-04-16T15:16:14.3683417Z Resolving deltas:  71% (764/1075)
+2025-04-16T15:16:14.3724176Z Resolving deltas:  72% (774/1075)
+2025-04-16T15:16:14.3745801Z Resolving deltas:  73% (785/1075)
+2025-04-16T15:16:14.3780339Z Resolving deltas:  74% (796/1075)
+2025-04-16T15:16:14.3806161Z Resolving deltas:  75% (807/1075)
+2025-04-16T15:16:14.3813940Z Resolving deltas:  76% (817/1075)
+2025-04-16T15:16:14.3823367Z Resolving deltas:  77% (828/1075)
+2025-04-16T15:16:14.3830675Z Resolving deltas:  78% (839/1075)
+2025-04-16T15:16:14.3840822Z Resolving deltas:  79% (850/1075)
+2025-04-16T15:16:14.3847842Z Resolving deltas:  80% (860/1075)
+2025-04-16T15:16:14.3850396Z Resolving deltas:  81% (871/1075)
+2025-04-16T15:16:14.3852993Z Resolving deltas:  82% (882/1075)
+2025-04-16T15:16:14.3854384Z Resolving deltas:  83% (893/1075)
+2025-04-16T15:16:14.3858401Z Resolving deltas:  84% (903/1075)
+2025-04-16T15:16:14.3862651Z Resolving deltas:  85% (914/1075)
+2025-04-16T15:16:14.3907494Z Resolving deltas:  86% (925/1075)
+2025-04-16T15:16:14.3915023Z Resolving deltas:  87% (936/1075)
+2025-04-16T15:16:14.3938415Z Resolving deltas:  88% (946/1075)
+2025-04-16T15:16:14.3948763Z Resolving deltas:  89% (957/1075)
+2025-04-16T15:16:14.3956187Z Resolving deltas:  90% (968/1075)
+2025-04-16T15:16:14.3963535Z Resolving deltas:  91% (979/1075)
+2025-04-16T15:16:14.3967397Z Resolving deltas:  92% (989/1075)
+2025-04-16T15:16:14.3971485Z Resolving deltas:  93% (1000/1075)
+2025-04-16T15:16:14.3976544Z Resolving deltas:  94% (1011/1075)
+2025-04-16T15:16:14.3982914Z Resolving deltas:  95% (1022/1075)
+2025-04-16T15:16:14.4002611Z Resolving deltas:  96% (1032/1075)
+2025-04-16T15:16:14.4015077Z Resolving deltas:  97% (1043/1075)
+2025-04-16T15:16:14.4065460Z Resolving deltas:  98% (1054/1075)
+2025-04-16T15:16:14.4830163Z Resolving deltas:  99% (1065/1075)
+2025-04-16T15:16:14.4831508Z Resolving deltas: 100% (1075/1075)
+2025-04-16T15:16:14.4831903Z Resolving deltas: 100% (1075/1075), done.
+2025-04-16T15:16:14.5393397Z From https://github.com/eprouveze/ai-deck-translator
+2025-04-16T15:16:14.5394109Z  * [new ref]         88b23e9f9ab1d2146a3e157d3832bfe0dbc0094e -> origin/v2
+2025-04-16T15:16:14.5423454Z ##[endgroup]
+2025-04-16T15:16:14.5424104Z ##[group]Determining the checkout info
+2025-04-16T15:16:14.5426109Z ##[endgroup]
+2025-04-16T15:16:14.5426698Z ##[group]Checking out the ref
+2025-04-16T15:16:14.5430949Z [command]/usr/bin/git checkout --progress --force -B v2 refs/remotes/origin/v2
+2025-04-16T15:16:15.3950290Z Switched to a new branch 'v2'
+2025-04-16T15:16:15.3951306Z branch 'v2' set up to track 'origin/v2'.
+2025-04-16T15:16:15.3988587Z ##[endgroup]
+2025-04-16T15:16:15.4030217Z [command]/usr/bin/git log -1 --format='%H'
+2025-04-16T15:16:15.4055039Z '88b23e9f9ab1d2146a3e157d3832bfe0dbc0094e'
+2025-04-16T15:16:15.4271138Z ##[group]Run actions/setup-python@v4
+2025-04-16T15:16:15.4271405Z with:
+2025-04-16T15:16:15.4271574Z   python-version: 3.10
+2025-04-16T15:16:15.4271777Z   check-latest: false
+2025-04-16T15:16:15.4272069Z   token: ***
+2025-04-16T15:16:15.4272237Z   update-environment: true
+2025-04-16T15:16:15.4272446Z   allow-prereleases: false
+2025-04-16T15:16:15.4272661Z ##[endgroup]
+2025-04-16T15:16:15.5517100Z ##[group]Installed versions
+2025-04-16T15:16:15.5585803Z Successfully set up CPython (3.10.17)
+2025-04-16T15:16:15.5586576Z ##[endgroup]
+2025-04-16T15:16:15.5685008Z ##[group]Run python -m pip install --upgrade pip
+2025-04-16T15:16:15.5685420Z [36;1mpython -m pip install --upgrade pip[0m
+2025-04-16T15:16:15.5685700Z [36;1mpip install flake8 black isort[0m
+2025-04-16T15:16:15.5685974Z [36;1m# Install package dependencies first[0m
+2025-04-16T15:16:15.5686346Z [36;1mif [ -f requirements.txt ]; then pip install -r requirements.txt; fi[0m
+2025-04-16T15:16:15.5686737Z [36;1m# Install the package in development mode[0m
+2025-04-16T15:16:15.5687021Z [36;1mpip install -e .[0m
+2025-04-16T15:16:15.5740734Z shell: /usr/bin/bash -e {0}
+2025-04-16T15:16:15.5740967Z env:
+2025-04-16T15:16:15.5741245Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:15.5741673Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib/pkgconfig
+2025-04-16T15:16:15.5742261Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:15.5742612Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:15.5743119Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:15.5743454Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib
+2025-04-16T15:16:15.5743736Z ##[endgroup]
+2025-04-16T15:16:19.3413935Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (25.0.1)
+2025-04-16T15:16:20.5283281Z Collecting flake8
+2025-04-16T15:16:20.5833352Z   Downloading flake8-7.2.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2025-04-16T15:16:20.6536546Z Collecting black
+2025-04-16T15:16:20.6649348Z   Downloading black-25.1.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl.metadata (81 kB)
+2025-04-16T15:16:20.7239275Z Collecting isort
+2025-04-16T15:16:20.7339822Z   Downloading isort-6.0.1-py3-none-any.whl.metadata (11 kB)
+2025-04-16T15:16:20.7546892Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8)
+2025-04-16T15:16:20.7644510Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2025-04-16T15:16:20.7848198Z Collecting pycodestyle<2.14.0,>=2.13.0 (from flake8)
+2025-04-16T15:16:20.7946701Z   Downloading pycodestyle-2.13.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2025-04-16T15:16:20.8164629Z Collecting pyflakes<3.4.0,>=3.3.0 (from flake8)
+2025-04-16T15:16:20.8265588Z   Downloading pyflakes-3.3.2-py2.py3-none-any.whl.metadata (3.5 kB)
+2025-04-16T15:16:20.8528403Z Collecting click>=8.0.0 (from black)
+2025-04-16T15:16:20.8627897Z   Downloading click-8.1.8-py3-none-any.whl.metadata (2.3 kB)
+2025-04-16T15:16:20.8804943Z Collecting mypy-extensions>=0.4.3 (from black)
+2025-04-16T15:16:20.8903324Z   Downloading mypy_extensions-1.0.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:20.9133956Z Collecting packaging>=22.0 (from black)
+2025-04-16T15:16:20.9231935Z   Downloading packaging-24.2-py3-none-any.whl.metadata (3.2 kB)
+2025-04-16T15:16:20.9426091Z Collecting pathspec>=0.9.0 (from black)
+2025-04-16T15:16:20.9524677Z   Downloading pathspec-0.12.1-py3-none-any.whl.metadata (21 kB)
+2025-04-16T15:16:20.9792485Z Collecting platformdirs>=2 (from black)
+2025-04-16T15:16:20.9891578Z   Downloading platformdirs-4.3.7-py3-none-any.whl.metadata (11 kB)
+2025-04-16T15:16:21.0162144Z Collecting tomli>=1.1.0 (from black)
+2025-04-16T15:16:21.0261741Z   Downloading tomli-2.2.1-py3-none-any.whl.metadata (10 kB)
+2025-04-16T15:16:21.0509469Z Collecting typing-extensions>=4.0.1 (from black)
+2025-04-16T15:16:21.0609607Z   Downloading typing_extensions-4.13.2-py3-none-any.whl.metadata (3.0 kB)
+2025-04-16T15:16:21.0802060Z Downloading flake8-7.2.0-py2.py3-none-any.whl (57 kB)
+2025-04-16T15:16:21.1017087Z Downloading black-25.1.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl (1.8 MB)
+2025-04-16T15:16:21.2384139Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 14.0 MB/s eta 0:00:00
+2025-04-16T15:16:21.2486401Z Downloading isort-6.0.1-py3-none-any.whl (94 kB)
+2025-04-16T15:16:21.2631163Z Downloading click-8.1.8-py3-none-any.whl (98 kB)
+2025-04-16T15:16:21.2778909Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2025-04-16T15:16:21.2901220Z Downloading mypy_extensions-1.0.0-py3-none-any.whl (4.7 kB)
+2025-04-16T15:16:21.3020627Z Downloading packaging-24.2-py3-none-any.whl (65 kB)
+2025-04-16T15:16:21.3156113Z Downloading pathspec-0.12.1-py3-none-any.whl (31 kB)
+2025-04-16T15:16:21.3278555Z Downloading platformdirs-4.3.7-py3-none-any.whl (18 kB)
+2025-04-16T15:16:21.3409678Z Downloading pycodestyle-2.13.0-py2.py3-none-any.whl (31 kB)
+2025-04-16T15:16:21.3563246Z Downloading pyflakes-3.3.2-py2.py3-none-any.whl (63 kB)
+2025-04-16T15:16:21.3691134Z Downloading tomli-2.2.1-py3-none-any.whl (14 kB)
+2025-04-16T15:16:21.3816909Z Downloading typing_extensions-4.13.2-py3-none-any.whl (45 kB)
+2025-04-16T15:16:21.4349695Z Installing collected packages: typing-extensions, tomli, pyflakes, pycodestyle, platformdirs, pathspec, packaging, mypy-extensions, mccabe, isort, click, flake8, black
+2025-04-16T15:16:21.9551814Z Successfully installed black-25.1.0 click-8.1.8 flake8-7.2.0 isort-6.0.1 mccabe-0.7.0 mypy-extensions-1.0.0 packaging-24.2 pathspec-0.12.1 platformdirs-4.3.7 pycodestyle-2.13.0 pyflakes-3.3.2 tomli-2.2.1 typing-extensions-4.13.2
+2025-04-16T15:16:23.0041082Z Collecting Flask>=2.0.0 (from -r requirements.txt (line 1))
+2025-04-16T15:16:23.0561351Z   Downloading flask-3.1.0-py3-none-any.whl.metadata (2.7 kB)
+2025-04-16T15:16:23.0778753Z Collecting Flask-Session>=0.5.0 (from -r requirements.txt (line 2))
+2025-04-16T15:16:23.0889134Z   Downloading flask_session-0.8.0-py3-none-any.whl.metadata (5.2 kB)
+2025-04-16T15:16:23.1081000Z Collecting Flask-Markdown>=0.3.0 (from -r requirements.txt (line 3))
+2025-04-16T15:16:23.1190617Z   Downloading Flask-Markdown-0.3.tar.gz (165 kB)
+2025-04-16T15:16:23.1606713Z   Installing build dependencies: started
+2025-04-16T15:16:25.1945105Z   Installing build dependencies: finished with status 'done'
+2025-04-16T15:16:25.1952666Z   Getting requirements to build wheel: started
+2025-04-16T15:16:25.4410070Z   Getting requirements to build wheel: finished with status 'done'
+2025-04-16T15:16:25.4421040Z   Preparing metadata (pyproject.toml): started
+2025-04-16T15:16:25.6318721Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2025-04-16T15:16:25.6754208Z Collecting Werkzeug>=2.0.0 (from -r requirements.txt (line 4))
+2025-04-16T15:16:25.6855331Z   Downloading werkzeug-3.1.3-py3-none-any.whl.metadata (3.7 kB)
+2025-04-16T15:16:25.7589839Z Collecting google-api-python-client>=2.0.0 (from -r requirements.txt (line 5))
+2025-04-16T15:16:25.7694886Z   Downloading google_api_python_client-2.167.0-py2.py3-none-any.whl.metadata (6.7 kB)
+2025-04-16T15:16:25.7889100Z Collecting google-auth-httplib2>=0.1.0 (from -r requirements.txt (line 6))
+2025-04-16T15:16:25.7989975Z   Downloading google_auth_httplib2-0.2.0-py2.py3-none-any.whl.metadata (2.2 kB)
+2025-04-16T15:16:25.8209231Z Collecting google-auth-oauthlib>=0.5.0 (from -r requirements.txt (line 7))
+2025-04-16T15:16:25.8311198Z   Downloading google_auth_oauthlib-1.2.1-py2.py3-none-any.whl.metadata (2.7 kB)
+2025-04-16T15:16:25.8544794Z Collecting python-pptx>=0.6.21 (from -r requirements.txt (line 8))
+2025-04-16T15:16:25.8649866Z   Downloading python_pptx-1.0.2-py3-none-any.whl.metadata (2.5 kB)
+2025-04-16T15:16:25.9047649Z Collecting anthropic>=0.3.0 (from -r requirements.txt (line 9))
+2025-04-16T15:16:25.9150649Z   Downloading anthropic-0.49.0-py3-none-any.whl.metadata (24 kB)
+2025-04-16T15:16:25.9444128Z Collecting Markdown>=3.3.0 (from -r requirements.txt (line 10))
+2025-04-16T15:16:25.9546313Z   Downloading markdown-3.8-py3-none-any.whl.metadata (5.1 kB)
+2025-04-16T15:16:25.9920005Z Collecting requests>=2.25.0 (from -r requirements.txt (line 11))
+2025-04-16T15:16:26.0022516Z   Downloading requests-2.32.3-py3-none-any.whl.metadata (4.6 kB)
+2025-04-16T15:16:26.0460706Z Collecting tqdm>=4.65.0 (from -r requirements.txt (line 12))
+2025-04-16T15:16:26.0564881Z   Downloading tqdm-4.67.1-py3-none-any.whl.metadata (57 kB)
+2025-04-16T15:16:26.0935000Z Collecting python-dotenv>=1.0.0 (from -r requirements.txt (line 14))
+2025-04-16T15:16:26.1069964Z   Downloading python_dotenv-1.1.0-py3-none-any.whl.metadata (24 kB)
+2025-04-16T15:16:26.1543016Z Collecting pytest>=7.3.1 (from -r requirements.txt (line 15))
+2025-04-16T15:16:26.1667867Z   Downloading pytest-8.3.5-py3-none-any.whl.metadata (7.6 kB)
+2025-04-16T15:16:26.1942474Z Collecting pytest-cov>=4.1.0 (from -r requirements.txt (line 16))
+2025-04-16T15:16:26.2047648Z   Downloading pytest_cov-6.1.1-py3-none-any.whl.metadata (28 kB)
+2025-04-16T15:16:26.3110810Z Collecting mypy>=1.3.0 (from -r requirements.txt (line 17))
+2025-04-16T15:16:26.3224863Z   Downloading mypy-1.15.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl.metadata (2.1 kB)
+2025-04-16T15:16:26.3284292Z Requirement already satisfied: flake8>=6.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from -r requirements.txt (line 18)) (7.2.0)
+2025-04-16T15:16:26.3290190Z Requirement already satisfied: black>=23.3.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from -r requirements.txt (line 19)) (25.1.0)
+2025-04-16T15:16:26.3295880Z Requirement already satisfied: isort>=5.12.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from -r requirements.txt (line 20)) (6.0.1)
+2025-04-16T15:16:26.3301097Z Requirement already satisfied: typing-extensions>=4.6.3 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from -r requirements.txt (line 21)) (4.13.2)
+2025-04-16T15:16:26.3468167Z Collecting pathlib>=1.0.1 (from -r requirements.txt (line 22))
+2025-04-16T15:16:26.3571486Z   Downloading pathlib-1.0.1-py3-none-any.whl.metadata (5.1 kB)
+2025-04-16T15:16:26.3771749Z Collecting google-generativeai==0.1.0rc1 (from -r requirements.txt (line 23))
+2025-04-16T15:16:26.3881412Z   Downloading google_generativeai-0.1.0rc1-py3-none-any.whl.metadata (1.3 kB)
+2025-04-16T15:16:26.4127123Z Collecting google-ai-generativelanguage==0.1.0 (from google-generativeai==0.1.0rc1->-r requirements.txt (line 23))
+2025-04-16T15:16:26.4234187Z   Downloading google_ai_generativelanguage-0.1.0-py3-none-any.whl.metadata (5.0 kB)
+2025-04-16T15:16:26.5470046Z Collecting google-api-core!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0 (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->-r requirements.txt (line 23))
+2025-04-16T15:16:26.5575611Z   Downloading google_api_core-2.24.2-py3-none-any.whl.metadata (3.0 kB)
+2025-04-16T15:16:26.5946674Z Collecting proto-plus<2.0.0dev,>=1.22.0 (from google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->-r requirements.txt (line 23))
+2025-04-16T15:16:26.6051388Z   Downloading proto_plus-1.26.1-py3-none-any.whl.metadata (2.2 kB)
+2025-04-16T15:16:26.8425621Z Collecting protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0dev,>=3.19.5 (from google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->-r requirements.txt (line 23))
+2025-04-16T15:16:26.8531850Z   Downloading protobuf-4.25.6-cp37-abi3-manylinux2014_x86_64.whl.metadata (541 bytes)
+2025-04-16T15:16:26.9009486Z Collecting Jinja2>=3.1.2 (from Flask>=2.0.0->-r requirements.txt (line 1))
+2025-04-16T15:16:26.9111555Z   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+2025-04-16T15:16:26.9304291Z Collecting itsdangerous>=2.2 (from Flask>=2.0.0->-r requirements.txt (line 1))
+2025-04-16T15:16:26.9411983Z   Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+2025-04-16T15:16:26.9449529Z Requirement already satisfied: click>=8.1.3 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from Flask>=2.0.0->-r requirements.txt (line 1)) (8.1.8)
+2025-04-16T15:16:26.9600275Z Collecting blinker>=1.9 (from Flask>=2.0.0->-r requirements.txt (line 1))
+2025-04-16T15:16:26.9700983Z   Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+2025-04-16T15:16:27.0310652Z Collecting msgspec>=0.18.6 (from Flask-Session>=0.5.0->-r requirements.txt (line 2))
+2025-04-16T15:16:27.0421533Z   Downloading msgspec-0.19.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.9 kB)
+2025-04-16T15:16:27.0683205Z Collecting cachelib (from Flask-Session>=0.5.0->-r requirements.txt (line 2))
+2025-04-16T15:16:27.0784416Z   Downloading cachelib-0.13.0-py3-none-any.whl.metadata (2.0 kB)
+2025-04-16T15:16:27.1329501Z Collecting MarkupSafe>=2.1.1 (from Werkzeug>=2.0.0->-r requirements.txt (line 4))
+2025-04-16T15:16:27.1439574Z   Downloading MarkupSafe-3.0.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.0 kB)
+2025-04-16T15:16:27.1685817Z Collecting httplib2<1.0.0,>=0.19.0 (from google-api-python-client>=2.0.0->-r requirements.txt (line 5))
+2025-04-16T15:16:27.1790134Z   Downloading httplib2-0.22.0-py3-none-any.whl.metadata (2.6 kB)
+2025-04-16T15:16:27.2380954Z Collecting google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0 (from google-api-python-client>=2.0.0->-r requirements.txt (line 5))
+2025-04-16T15:16:27.2485997Z   Downloading google_auth-2.39.0-py2.py3-none-any.whl.metadata (6.2 kB)
+2025-04-16T15:16:27.4096514Z Collecting uritemplate<5,>=3.0.1 (from google-api-python-client>=2.0.0->-r requirements.txt (line 5))
+2025-04-16T15:16:27.4198870Z   Downloading uritemplate-4.1.1-py2.py3-none-any.whl.metadata (2.9 kB)
+2025-04-16T15:16:27.4603414Z Collecting requests-oauthlib>=0.7.0 (from google-auth-oauthlib>=0.5.0->-r requirements.txt (line 7))
+2025-04-16T15:16:27.4706418Z   Downloading requests_oauthlib-2.0.0-py2.py3-none-any.whl.metadata (11 kB)
+2025-04-16T15:16:27.6306685Z Collecting Pillow>=3.3.2 (from python-pptx>=0.6.21->-r requirements.txt (line 8))
+2025-04-16T15:16:27.6413440Z   Downloading pillow-11.2.1-cp310-cp310-manylinux_2_28_x86_64.whl.metadata (8.9 kB)
+2025-04-16T15:16:27.6867725Z Collecting XlsxWriter>=0.5.7 (from python-pptx>=0.6.21->-r requirements.txt (line 8))
+2025-04-16T15:16:27.6970746Z   Downloading XlsxWriter-3.2.2-py3-none-any.whl.metadata (2.8 kB)
+2025-04-16T15:16:27.8905507Z Collecting lxml>=3.1.0 (from python-pptx>=0.6.21->-r requirements.txt (line 8))
+2025-04-16T15:16:27.9011555Z   Downloading lxml-5.3.2-cp310-cp310-manylinux_2_28_x86_64.whl.metadata (3.6 kB)
+2025-04-16T15:16:27.9317845Z Collecting anyio<5,>=3.5.0 (from anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:27.9420243Z   Downloading anyio-4.9.0-py3-none-any.whl.metadata (4.7 kB)
+2025-04-16T15:16:27.9651956Z Collecting distro<2,>=1.7.0 (from anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:27.9754631Z   Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+2025-04-16T15:16:28.0039339Z Collecting httpx<1,>=0.23.0 (from anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:28.0143299Z   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+2025-04-16T15:16:28.0753008Z Collecting jiter<1,>=0.4.0 (from anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:28.0861580Z   Downloading jiter-0.9.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+2025-04-16T15:16:28.2016416Z Collecting pydantic<3,>=1.9.0 (from anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:28.2126339Z   Downloading pydantic-2.11.3-py3-none-any.whl.metadata (65 kB)
+2025-04-16T15:16:28.2363236Z Collecting sniffio (from anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:28.2465032Z   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+2025-04-16T15:16:28.3223769Z Collecting charset-normalizer<4,>=2 (from requests>=2.25.0->-r requirements.txt (line 11))
+2025-04-16T15:16:28.3330096Z   Downloading charset_normalizer-3.4.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (35 kB)
+2025-04-16T15:16:28.3576037Z Collecting idna<4,>=2.5 (from requests>=2.25.0->-r requirements.txt (line 11))
+2025-04-16T15:16:28.3686291Z   Downloading idna-3.10-py3-none-any.whl.metadata (10 kB)
+2025-04-16T15:16:28.4052418Z Collecting urllib3<3,>=1.21.1 (from requests>=2.25.0->-r requirements.txt (line 11))
+2025-04-16T15:16:28.4156589Z   Downloading urllib3-2.4.0-py3-none-any.whl.metadata (6.5 kB)
+2025-04-16T15:16:28.4437419Z Collecting certifi>=2017.4.17 (from requests>=2.25.0->-r requirements.txt (line 11))
+2025-04-16T15:16:28.4542397Z   Downloading certifi-2025.1.31-py3-none-any.whl.metadata (2.5 kB)
+2025-04-16T15:16:28.4780924Z Collecting exceptiongroup>=1.0.0rc8 (from pytest>=7.3.1->-r requirements.txt (line 15))
+2025-04-16T15:16:28.4881783Z   Downloading exceptiongroup-1.2.2-py3-none-any.whl.metadata (6.6 kB)
+2025-04-16T15:16:28.5053787Z Collecting iniconfig (from pytest>=7.3.1->-r requirements.txt (line 15))
+2025-04-16T15:16:28.5156236Z   Downloading iniconfig-2.1.0-py3-none-any.whl.metadata (2.7 kB)
+2025-04-16T15:16:28.5193282Z Requirement already satisfied: packaging in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pytest>=7.3.1->-r requirements.txt (line 15)) (24.2)
+2025-04-16T15:16:28.5360741Z Collecting pluggy<2,>=1.5 (from pytest>=7.3.1->-r requirements.txt (line 15))
+2025-04-16T15:16:28.5465045Z   Downloading pluggy-1.5.0-py3-none-any.whl.metadata (4.8 kB)
+2025-04-16T15:16:28.5513314Z Requirement already satisfied: tomli>=1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pytest>=7.3.1->-r requirements.txt (line 15)) (2.2.1)
+2025-04-16T15:16:28.8559426Z Collecting coverage>=7.5 (from coverage[toml]>=7.5->pytest-cov>=4.1.0->-r requirements.txt (line 16))
+2025-04-16T15:16:28.8668776Z   Downloading coverage-7.8.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.5 kB)
+2025-04-16T15:16:28.8733367Z Requirement already satisfied: mypy_extensions>=1.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from mypy>=1.3.0->-r requirements.txt (line 17)) (1.0.0)
+2025-04-16T15:16:28.8761894Z Requirement already satisfied: mccabe<0.8.0,>=0.7.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from flake8>=6.0.0->-r requirements.txt (line 18)) (0.7.0)
+2025-04-16T15:16:28.8767729Z Requirement already satisfied: pycodestyle<2.14.0,>=2.13.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from flake8>=6.0.0->-r requirements.txt (line 18)) (2.13.0)
+2025-04-16T15:16:28.8773332Z Requirement already satisfied: pyflakes<3.4.0,>=3.3.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from flake8>=6.0.0->-r requirements.txt (line 18)) (3.3.2)
+2025-04-16T15:16:28.8833540Z Requirement already satisfied: pathspec>=0.9.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from black>=23.3.0->-r requirements.txt (line 19)) (0.12.1)
+2025-04-16T15:16:28.8838990Z Requirement already satisfied: platformdirs>=2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from black>=23.3.0->-r requirements.txt (line 19)) (4.3.7)
+2025-04-16T15:16:28.9324213Z Collecting googleapis-common-protos<2.0.0,>=1.56.2 (from google-api-core!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->-r requirements.txt (line 23))
+2025-04-16T15:16:28.9431063Z   Downloading googleapis_common_protos-1.70.0-py3-none-any.whl.metadata (9.3 kB)
+2025-04-16T15:16:29.0975750Z Collecting cachetools<6.0,>=2.0.0 (from google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0->google-api-python-client>=2.0.0->-r requirements.txt (line 5))
+2025-04-16T15:16:29.1078554Z   Downloading cachetools-5.5.2-py3-none-any.whl.metadata (5.4 kB)
+2025-04-16T15:16:29.1346141Z Collecting pyasn1-modules>=0.2.1 (from google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0->google-api-python-client>=2.0.0->-r requirements.txt (line 5))
+2025-04-16T15:16:29.1451167Z   Downloading pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
+2025-04-16T15:16:29.1684245Z Collecting rsa<5,>=3.1.4 (from google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0->google-api-python-client>=2.0.0->-r requirements.txt (line 5))
+2025-04-16T15:16:29.1787585Z   Downloading rsa-4.9.1-py3-none-any.whl.metadata (5.6 kB)
+2025-04-16T15:16:29.2247593Z Collecting pyparsing!=3.0.0,!=3.0.1,!=3.0.2,!=3.0.3,<4,>=2.4.2 (from httplib2<1.0.0,>=0.19.0->google-api-python-client>=2.0.0->-r requirements.txt (line 5))
+2025-04-16T15:16:29.2354287Z   Downloading pyparsing-3.2.3-py3-none-any.whl.metadata (5.0 kB)
+2025-04-16T15:16:29.2670988Z Collecting httpcore==1.* (from httpx<1,>=0.23.0->anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:29.2773540Z   Downloading httpcore-1.0.8-py3-none-any.whl.metadata (21 kB)
+2025-04-16T15:16:29.3015334Z Collecting h11<0.15,>=0.13 (from httpcore==1.*->httpx<1,>=0.23.0->anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:29.3117369Z   Downloading h11-0.14.0-py3-none-any.whl.metadata (8.2 kB)
+2025-04-16T15:16:29.3588237Z Collecting annotated-types>=0.6.0 (from pydantic<3,>=1.9.0->anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:29.3691218Z   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2025-04-16T15:16:29.9213172Z Collecting pydantic-core==2.33.1 (from pydantic<3,>=1.9.0->anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:29.9326595Z   Downloading pydantic_core-2.33.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
+2025-04-16T15:16:29.9542499Z Collecting typing-inspection>=0.4.0 (from pydantic<3,>=1.9.0->anthropic>=0.3.0->-r requirements.txt (line 9))
+2025-04-16T15:16:29.9652390Z   Downloading typing_inspection-0.4.0-py3-none-any.whl.metadata (2.6 kB)
+2025-04-16T15:16:29.9924213Z Collecting oauthlib>=3.0.0 (from requests-oauthlib>=0.7.0->google-auth-oauthlib>=0.5.0->-r requirements.txt (line 7))
+2025-04-16T15:16:30.0026829Z   Downloading oauthlib-3.2.2-py3-none-any.whl.metadata (7.5 kB)
+2025-04-16T15:16:30.5563126Z Collecting grpcio<2.0dev,>=1.33.2 (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->-r requirements.txt (line 23))
+2025-04-16T15:16:30.5676501Z   Downloading grpcio-1.72.0rc1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (3.8 kB)
+2025-04-16T15:16:30.6161997Z Collecting grpcio-status<2.0.dev0,>=1.33.2 (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->-r requirements.txt (line 23))
+2025-04-16T15:16:30.6264664Z   Downloading grpcio_status-1.72.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:30.8356591Z Collecting pyasn1<0.7.0,>=0.6.1 (from pyasn1-modules>=0.2.1->google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0->google-api-python-client>=2.0.0->-r requirements.txt (line 5))
+2025-04-16T15:16:30.8460940Z   Downloading pyasn1-0.6.1-py3-none-any.whl.metadata (8.4 kB)
+2025-04-16T15:16:30.9238882Z INFO: pip is looking at multiple versions of grpcio-status to determine which version is compatible with other requirements. This could take a while.
+2025-04-16T15:16:30.9247363Z Collecting grpcio-status<2.0.dev0,>=1.33.2 (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->-r requirements.txt (line 23))
+2025-04-16T15:16:30.9353264Z   Downloading grpcio_status-1.71.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:30.9940499Z   Downloading grpcio_status-1.71.0rc2-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.0095132Z   Downloading grpcio_status-1.70.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.0245203Z   Downloading grpcio_status-1.70.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.0397906Z   Downloading grpcio_status-1.69.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.0548872Z   Downloading grpcio_status-1.69.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.0744236Z   Downloading grpcio_status-1.68.1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.0815805Z INFO: pip is still looking at multiple versions of grpcio-status to determine which version is compatible with other requirements. This could take a while.
+2025-04-16T15:16:31.0925713Z   Downloading grpcio_status-1.68.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.1077129Z   Downloading grpcio_status-1.68.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.1228600Z   Downloading grpcio_status-1.67.1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.1378215Z   Downloading grpcio_status-1.67.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.1530789Z   Downloading grpcio_status-1.67.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.1578567Z INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. See https://pip.pypa.io/warnings/backtracking for guidance. If you want to abort this run, press Ctrl + C.
+2025-04-16T15:16:31.1688753Z   Downloading grpcio_status-1.66.2-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.1842173Z   Downloading grpcio_status-1.66.1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.1995418Z   Downloading grpcio_status-1.66.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.2148625Z   Downloading grpcio_status-1.66.0rc5-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.2298558Z   Downloading grpcio_status-1.66.0rc3-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.2448885Z   Downloading grpcio_status-1.66.0rc2-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.2595942Z   Downloading grpcio_status-1.66.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.2745155Z   Downloading grpcio_status-1.65.5-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.2905784Z   Downloading grpcio_status-1.65.4-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.3052958Z   Downloading grpcio_status-1.65.2-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.3201020Z   Downloading grpcio_status-1.65.1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.3350155Z   Downloading grpcio_status-1.65.0rc2-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.3497174Z   Downloading grpcio_status-1.65.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.3658539Z   Downloading grpcio_status-1.64.3-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.3805628Z   Downloading grpcio_status-1.64.1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.3953504Z   Downloading grpcio_status-1.64.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.4100474Z   Downloading grpcio_status-1.64.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.4248957Z   Downloading grpcio_status-1.63.2-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.4400729Z   Downloading grpcio_status-1.63.0-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.4551543Z   Downloading grpcio_status-1.63.0rc2-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.4700052Z   Downloading grpcio_status-1.63.0rc1-py3-none-any.whl.metadata (1.1 kB)
+2025-04-16T15:16:31.6057582Z Downloading google_generativeai-0.1.0rc1-py3-none-any.whl (117 kB)
+2025-04-16T15:16:31.6306582Z Downloading google_ai_generativelanguage-0.1.0-py3-none-any.whl (109 kB)
+2025-04-16T15:16:31.6523687Z Downloading flask-3.1.0-py3-none-any.whl (102 kB)
+2025-04-16T15:16:31.6761767Z Downloading flask_session-0.8.0-py3-none-any.whl (24 kB)
+2025-04-16T15:16:31.6893990Z Downloading werkzeug-3.1.3-py3-none-any.whl (224 kB)
+2025-04-16T15:16:31.7200545Z Downloading google_api_python_client-2.167.0-py2.py3-none-any.whl (13.2 MB)
+2025-04-16T15:16:32.0986401Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.2/13.2 MB 36.3 MB/s eta 0:00:00
+2025-04-16T15:16:32.1096150Z Downloading google_auth_httplib2-0.2.0-py2.py3-none-any.whl (9.3 kB)
+2025-04-16T15:16:32.1225872Z Downloading google_auth_oauthlib-1.2.1-py2.py3-none-any.whl (24 kB)
+2025-04-16T15:16:32.1370368Z Downloading python_pptx-1.0.2-py3-none-any.whl (472 kB)
+2025-04-16T15:16:32.1556294Z Downloading anthropic-0.49.0-py3-none-any.whl (243 kB)
+2025-04-16T15:16:32.1715409Z Downloading markdown-3.8-py3-none-any.whl (106 kB)
+2025-04-16T15:16:32.1884481Z Downloading requests-2.32.3-py3-none-any.whl (64 kB)
+2025-04-16T15:16:32.2025744Z Downloading tqdm-4.67.1-py3-none-any.whl (78 kB)
+2025-04-16T15:16:32.2165822Z Downloading python_dotenv-1.1.0-py3-none-any.whl (20 kB)
+2025-04-16T15:16:32.2309905Z Downloading pytest-8.3.5-py3-none-any.whl (343 kB)
+2025-04-16T15:16:32.2507599Z Downloading pytest_cov-6.1.1-py3-none-any.whl (23 kB)
+2025-04-16T15:16:32.2664492Z Downloading mypy-1.15.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2025-04-16T15:16:32.4065989Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 88.8 MB/s eta 0:00:00
+2025-04-16T15:16:32.4170099Z Downloading pathlib-1.0.1-py3-none-any.whl (14 kB)
+2025-04-16T15:16:32.4295047Z Downloading anyio-4.9.0-py3-none-any.whl (100 kB)
+2025-04-16T15:16:32.4428830Z Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+2025-04-16T15:16:32.4556432Z Downloading certifi-2025.1.31-py3-none-any.whl (166 kB)
+2025-04-16T15:16:32.4691087Z Downloading charset_normalizer-3.4.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (146 kB)
+2025-04-16T15:16:32.4834902Z Downloading coverage-7.8.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (239 kB)
+2025-04-16T15:16:32.4971324Z Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+2025-04-16T15:16:32.5106234Z Downloading exceptiongroup-1.2.2-py3-none-any.whl (16 kB)
+2025-04-16T15:16:32.5234694Z Downloading google_api_core-2.24.2-py3-none-any.whl (160 kB)
+2025-04-16T15:16:32.5365818Z Downloading google_auth-2.39.0-py2.py3-none-any.whl (212 kB)
+2025-04-16T15:16:32.5503054Z Downloading httplib2-0.22.0-py3-none-any.whl (96 kB)
+2025-04-16T15:16:32.5638110Z Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+2025-04-16T15:16:32.5770776Z Downloading httpcore-1.0.8-py3-none-any.whl (78 kB)
+2025-04-16T15:16:32.5904328Z Downloading idna-3.10-py3-none-any.whl (70 kB)
+2025-04-16T15:16:32.6036207Z Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+2025-04-16T15:16:32.6161964Z Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+2025-04-16T15:16:32.6305863Z Downloading jiter-0.9.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (352 kB)
+2025-04-16T15:16:32.6483860Z Downloading lxml-5.3.2-cp310-cp310-manylinux_2_28_x86_64.whl (5.2 MB)
+2025-04-16T15:16:32.6939781Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.2/5.2 MB 114.7 MB/s eta 0:00:00
+2025-04-16T15:16:32.7044314Z Downloading MarkupSafe-3.0.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (20 kB)
+2025-04-16T15:16:32.7191106Z Downloading msgspec-0.19.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (211 kB)
+2025-04-16T15:16:32.7349322Z Downloading pillow-11.2.1-cp310-cp310-manylinux_2_28_x86_64.whl (4.6 MB)
+2025-04-16T15:16:32.7729327Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.6/4.6 MB 123.2 MB/s eta 0:00:00
+2025-04-16T15:16:32.7834159Z Downloading pluggy-1.5.0-py3-none-any.whl (20 kB)
+2025-04-16T15:16:32.7960485Z Downloading pydantic-2.11.3-py3-none-any.whl (443 kB)
+2025-04-16T15:16:32.8118622Z Downloading pydantic_core-2.33.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.0 MB)
+2025-04-16T15:16:32.8305464Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.0/2.0 MB 111.7 MB/s eta 0:00:00
+2025-04-16T15:16:32.8410547Z Downloading requests_oauthlib-2.0.0-py2.py3-none-any.whl (24 kB)
+2025-04-16T15:16:32.8564684Z Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+2025-04-16T15:16:32.8693405Z Downloading uritemplate-4.1.1-py2.py3-none-any.whl (10 kB)
+2025-04-16T15:16:32.8825246Z Downloading urllib3-2.4.0-py3-none-any.whl (128 kB)
+2025-04-16T15:16:32.8967360Z Downloading XlsxWriter-3.2.2-py3-none-any.whl (165 kB)
+2025-04-16T15:16:32.9098520Z Downloading cachelib-0.13.0-py3-none-any.whl (20 kB)
+2025-04-16T15:16:32.9231765Z Downloading iniconfig-2.1.0-py3-none-any.whl (6.0 kB)
+2025-04-16T15:16:32.9361570Z Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2025-04-16T15:16:32.9508076Z Downloading cachetools-5.5.2-py3-none-any.whl (10 kB)
+2025-04-16T15:16:32.9703065Z Downloading googleapis_common_protos-1.70.0-py3-none-any.whl (294 kB)
+2025-04-16T15:16:32.9847986Z Downloading oauthlib-3.2.2-py3-none-any.whl (151 kB)
+2025-04-16T15:16:33.0063165Z Downloading proto_plus-1.26.1-py3-none-any.whl (50 kB)
+2025-04-16T15:16:33.0199497Z Downloading protobuf-4.25.6-cp37-abi3-manylinux2014_x86_64.whl (294 kB)
+2025-04-16T15:16:33.0351601Z Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+2025-04-16T15:16:33.0597673Z Downloading pyparsing-3.2.3-py3-none-any.whl (111 kB)
+2025-04-16T15:16:33.0732526Z Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+2025-04-16T15:16:33.0866286Z Downloading typing_inspection-0.4.0-py3-none-any.whl (14 kB)
+2025-04-16T15:16:33.1020299Z Downloading grpcio-1.72.0rc1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (5.9 MB)
+2025-04-16T15:16:33.1437388Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.9/5.9 MB 147.1 MB/s eta 0:00:00
+2025-04-16T15:16:33.1540892Z Downloading grpcio_status-1.63.0rc1-py3-none-any.whl (14 kB)
+2025-04-16T15:16:33.1663545Z Downloading h11-0.14.0-py3-none-any.whl (58 kB)
+2025-04-16T15:16:33.1789784Z Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+2025-04-16T15:16:33.2777953Z Building wheels for collected packages: Flask-Markdown
+2025-04-16T15:16:33.2788236Z   Building wheel for Flask-Markdown (pyproject.toml): started
+2025-04-16T15:16:33.4682083Z   Building wheel for Flask-Markdown (pyproject.toml): finished with status 'done'
+2025-04-16T15:16:33.4688543Z   Created wheel for Flask-Markdown: filename=flask_markdown-0.3-py3-none-any.whl size=4621 sha256=54daa06777f10a6b6b8d93176ec832c2a10858fe85b04a3e5da09ec93672060e
+2025-04-16T15:16:33.4690505Z   Stored in directory: /home/runner/.cache/pip/wheels/1c/6c/92/c3940a49b9925e2d3553f359027a72deaee36a8e296c273054
+2025-04-16T15:16:33.4706580Z Successfully built Flask-Markdown
+2025-04-16T15:16:33.6091232Z Installing collected packages: pathlib, XlsxWriter, urllib3, uritemplate, typing-inspection, tqdm, sniffio, python-dotenv, pyparsing, pydantic-core, pyasn1, protobuf, pluggy, Pillow, oauthlib, mypy, msgspec, MarkupSafe, Markdown, lxml, jiter, itsdangerous, iniconfig, idna, h11, grpcio, exceptiongroup, distro, coverage, charset-normalizer, certifi, cachetools, cachelib, blinker, annotated-types, Werkzeug, rsa, requests, python-pptx, pytest, pydantic, pyasn1-modules, proto-plus, Jinja2, httplib2, httpcore, googleapis-common-protos, Flask-Markdown, anyio, requests-oauthlib, pytest-cov, httpx, grpcio-status, google-auth, Flask, google-auth-oauthlib, google-auth-httplib2, google-api-core, Flask-Session, anthropic, google-api-python-client, google-ai-generativelanguage, google-generativeai
+2025-04-16T15:16:38.4809750Z Successfully installed Flask-3.1.0 Flask-Markdown-0.3 Flask-Session-0.8.0 Jinja2-3.1.6 Markdown-3.8 MarkupSafe-3.0.2 Pillow-11.2.1 Werkzeug-3.1.3 XlsxWriter-3.2.2 annotated-types-0.7.0 anthropic-0.49.0 anyio-4.9.0 blinker-1.9.0 cachelib-0.13.0 cachetools-5.5.2 certifi-2025.1.31 charset-normalizer-3.4.1 coverage-7.8.0 distro-1.9.0 exceptiongroup-1.2.2 google-ai-generativelanguage-0.1.0 google-api-core-2.24.2 google-api-python-client-2.167.0 google-auth-2.39.0 google-auth-httplib2-0.2.0 google-auth-oauthlib-1.2.1 google-generativeai-0.1.0rc1 googleapis-common-protos-1.70.0 grpcio-1.72.0rc1 grpcio-status-1.63.0rc1 h11-0.14.0 httpcore-1.0.8 httplib2-0.22.0 httpx-0.28.1 idna-3.10 iniconfig-2.1.0 itsdangerous-2.2.0 jiter-0.9.0 lxml-5.3.2 msgspec-0.19.0 mypy-1.15.0 oauthlib-3.2.2 pathlib-1.0.1 pluggy-1.5.0 proto-plus-1.26.1 protobuf-4.25.6 pyasn1-0.6.1 pyasn1-modules-0.4.2 pydantic-2.11.3 pydantic-core-2.33.1 pyparsing-3.2.3 pytest-8.3.5 pytest-cov-6.1.1 python-dotenv-1.1.0 python-pptx-1.0.2 requests-2.32.3 requests-oauthlib-2.0.0 rsa-4.9.1 sniffio-1.3.1 tqdm-4.67.1 typing-inspection-0.4.0 uritemplate-4.1.1 urllib3-2.4.0
+2025-04-16T15:16:39.5992542Z Obtaining file:///home/runner/work/ai-deck-translator/ai-deck-translator
+2025-04-16T15:16:39.6016469Z   Installing build dependencies: started
+2025-04-16T15:16:41.5067876Z   Installing build dependencies: finished with status 'done'
+2025-04-16T15:16:41.5076567Z   Checking if build backend supports build_editable: started
+2025-04-16T15:16:41.6473005Z   Checking if build backend supports build_editable: finished with status 'done'
+2025-04-16T15:16:41.6481203Z   Getting requirements to build editable: started
+2025-04-16T15:16:41.8183569Z   Getting requirements to build editable: finished with status 'done'
+2025-04-16T15:16:41.8193035Z   Preparing editable metadata (pyproject.toml): started
+2025-04-16T15:16:41.9952415Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2025-04-16T15:16:42.0103883Z Requirement already satisfied: Flask>=2.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (3.1.0)
+2025-04-16T15:16:42.0108571Z Requirement already satisfied: Flask-Session>=0.5.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (0.8.0)
+2025-04-16T15:16:42.0113271Z Requirement already satisfied: Flask-Markdown>=0.3.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (0.3)
+2025-04-16T15:16:42.0117835Z Requirement already satisfied: Werkzeug>=2.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (3.1.3)
+2025-04-16T15:16:42.0122420Z Requirement already satisfied: google-api-python-client>=2.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (2.167.0)
+2025-04-16T15:16:42.0127143Z Requirement already satisfied: google-auth-httplib2>=0.1.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (0.2.0)
+2025-04-16T15:16:42.0131722Z Requirement already satisfied: google-auth-oauthlib>=0.5.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (1.2.1)
+2025-04-16T15:16:42.0136830Z Requirement already satisfied: python-pptx>=0.6.21 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (1.0.2)
+2025-04-16T15:16:42.0141298Z Requirement already satisfied: anthropic>=0.3.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (0.49.0)
+2025-04-16T15:16:42.0145977Z Requirement already satisfied: Markdown>=3.3.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (3.8)
+2025-04-16T15:16:42.0150543Z Requirement already satisfied: requests>=2.25.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (2.32.3)
+2025-04-16T15:16:42.0155180Z Requirement already satisfied: tqdm>=4.65.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (4.67.1)
+2025-04-16T15:16:42.0160818Z Requirement already satisfied: python-dotenv>=1.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (1.1.0)
+2025-04-16T15:16:42.0165585Z Requirement already satisfied: pytest>=7.3.1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (8.3.5)
+2025-04-16T15:16:42.0170124Z Requirement already satisfied: pytest-cov>=4.1.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (6.1.1)
+2025-04-16T15:16:42.0174772Z Requirement already satisfied: mypy>=1.3.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (1.15.0)
+2025-04-16T15:16:42.0179311Z Requirement already satisfied: flake8>=6.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (7.2.0)
+2025-04-16T15:16:42.0184190Z Requirement already satisfied: black>=23.3.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (25.1.0)
+2025-04-16T15:16:42.0188550Z Requirement already satisfied: isort>=5.12.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (6.0.1)
+2025-04-16T15:16:42.0193131Z Requirement already satisfied: typing-extensions>=4.6.3 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (4.13.2)
+2025-04-16T15:16:42.0197714Z Requirement already satisfied: pathlib>=1.0.1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (1.0.1)
+2025-04-16T15:16:42.0202488Z Requirement already satisfied: google-generativeai==0.1.0rc1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from ai_deck_translator==2.0.0) (0.1.0rc1)
+2025-04-16T15:16:42.0228569Z Requirement already satisfied: google-ai-generativelanguage==0.1.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-generativeai==0.1.0rc1->ai_deck_translator==2.0.0) (0.1.0)
+2025-04-16T15:16:42.0280804Z Requirement already satisfied: google-api-core!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->ai_deck_translator==2.0.0) (2.24.2)
+2025-04-16T15:16:42.0294267Z Requirement already satisfied: proto-plus<2.0.0dev,>=1.22.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->ai_deck_translator==2.0.0) (1.26.1)
+2025-04-16T15:16:42.0300978Z Requirement already satisfied: protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0dev,>=3.19.5 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->ai_deck_translator==2.0.0) (4.25.6)
+2025-04-16T15:16:42.0339752Z Requirement already satisfied: anyio<5,>=3.5.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from anthropic>=0.3.0->ai_deck_translator==2.0.0) (4.9.0)
+2025-04-16T15:16:42.0344507Z Requirement already satisfied: distro<2,>=1.7.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from anthropic>=0.3.0->ai_deck_translator==2.0.0) (1.9.0)
+2025-04-16T15:16:42.0349286Z Requirement already satisfied: httpx<1,>=0.23.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from anthropic>=0.3.0->ai_deck_translator==2.0.0) (0.28.1)
+2025-04-16T15:16:42.0355072Z Requirement already satisfied: jiter<1,>=0.4.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from anthropic>=0.3.0->ai_deck_translator==2.0.0) (0.9.0)
+2025-04-16T15:16:42.0360361Z Requirement already satisfied: pydantic<3,>=1.9.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from anthropic>=0.3.0->ai_deck_translator==2.0.0) (2.11.3)
+2025-04-16T15:16:42.0365016Z Requirement already satisfied: sniffio in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from anthropic>=0.3.0->ai_deck_translator==2.0.0) (1.3.1)
+2025-04-16T15:16:42.0425532Z Requirement already satisfied: click>=8.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from black>=23.3.0->ai_deck_translator==2.0.0) (8.1.8)
+2025-04-16T15:16:42.0431077Z Requirement already satisfied: mypy-extensions>=0.4.3 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from black>=23.3.0->ai_deck_translator==2.0.0) (1.0.0)
+2025-04-16T15:16:42.0436626Z Requirement already satisfied: packaging>=22.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from black>=23.3.0->ai_deck_translator==2.0.0) (24.2)
+2025-04-16T15:16:42.0442394Z Requirement already satisfied: pathspec>=0.9.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from black>=23.3.0->ai_deck_translator==2.0.0) (0.12.1)
+2025-04-16T15:16:42.0447791Z Requirement already satisfied: platformdirs>=2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from black>=23.3.0->ai_deck_translator==2.0.0) (4.3.7)
+2025-04-16T15:16:42.0454826Z Requirement already satisfied: tomli>=1.1.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from black>=23.3.0->ai_deck_translator==2.0.0) (2.2.1)
+2025-04-16T15:16:42.0478380Z Requirement already satisfied: mccabe<0.8.0,>=0.7.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from flake8>=6.0.0->ai_deck_translator==2.0.0) (0.7.0)
+2025-04-16T15:16:42.0484066Z Requirement already satisfied: pycodestyle<2.14.0,>=2.13.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from flake8>=6.0.0->ai_deck_translator==2.0.0) (2.13.0)
+2025-04-16T15:16:42.0489634Z Requirement already satisfied: pyflakes<3.4.0,>=3.3.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from flake8>=6.0.0->ai_deck_translator==2.0.0) (3.3.2)
+2025-04-16T15:16:42.0520315Z Requirement already satisfied: Jinja2>=3.1.2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from Flask>=2.0.0->ai_deck_translator==2.0.0) (3.1.6)
+2025-04-16T15:16:42.0525843Z Requirement already satisfied: itsdangerous>=2.2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from Flask>=2.0.0->ai_deck_translator==2.0.0) (2.2.0)
+2025-04-16T15:16:42.0532327Z Requirement already satisfied: blinker>=1.9 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from Flask>=2.0.0->ai_deck_translator==2.0.0) (1.9.0)
+2025-04-16T15:16:42.0577225Z Requirement already satisfied: msgspec>=0.18.6 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from Flask-Session>=0.5.0->ai_deck_translator==2.0.0) (0.19.0)
+2025-04-16T15:16:42.0581829Z Requirement already satisfied: cachelib in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from Flask-Session>=0.5.0->ai_deck_translator==2.0.0) (0.13.0)
+2025-04-16T15:16:42.0613846Z Requirement already satisfied: httplib2<1.0.0,>=0.19.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-api-python-client>=2.0.0->ai_deck_translator==2.0.0) (0.22.0)
+2025-04-16T15:16:42.0620252Z Requirement already satisfied: google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-api-python-client>=2.0.0->ai_deck_translator==2.0.0) (2.39.0)
+2025-04-16T15:16:42.0633037Z Requirement already satisfied: uritemplate<5,>=3.0.1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-api-python-client>=2.0.0->ai_deck_translator==2.0.0) (4.1.1)
+2025-04-16T15:16:42.0671521Z Requirement already satisfied: requests-oauthlib>=0.7.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-auth-oauthlib>=0.5.0->ai_deck_translator==2.0.0) (2.0.0)
+2025-04-16T15:16:42.0896212Z Requirement already satisfied: exceptiongroup>=1.0.0rc8 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pytest>=7.3.1->ai_deck_translator==2.0.0) (1.2.2)
+2025-04-16T15:16:42.0900557Z Requirement already satisfied: iniconfig in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pytest>=7.3.1->ai_deck_translator==2.0.0) (2.1.0)
+2025-04-16T15:16:42.0907259Z Requirement already satisfied: pluggy<2,>=1.5 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pytest>=7.3.1->ai_deck_translator==2.0.0) (1.5.0)
+2025-04-16T15:16:42.0941990Z Requirement already satisfied: coverage>=7.5 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from coverage[toml]>=7.5->pytest-cov>=4.1.0->ai_deck_translator==2.0.0) (7.8.0)
+2025-04-16T15:16:42.0985088Z Requirement already satisfied: Pillow>=3.3.2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from python-pptx>=0.6.21->ai_deck_translator==2.0.0) (11.2.1)
+2025-04-16T15:16:42.0990253Z Requirement already satisfied: XlsxWriter>=0.5.7 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from python-pptx>=0.6.21->ai_deck_translator==2.0.0) (3.2.2)
+2025-04-16T15:16:42.0995639Z Requirement already satisfied: lxml>=3.1.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from python-pptx>=0.6.21->ai_deck_translator==2.0.0) (5.3.2)
+2025-04-16T15:16:42.1029773Z Requirement already satisfied: charset-normalizer<4,>=2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from requests>=2.25.0->ai_deck_translator==2.0.0) (3.4.1)
+2025-04-16T15:16:42.1035368Z Requirement already satisfied: idna<4,>=2.5 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from requests>=2.25.0->ai_deck_translator==2.0.0) (3.10)
+2025-04-16T15:16:42.1040929Z Requirement already satisfied: urllib3<3,>=1.21.1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from requests>=2.25.0->ai_deck_translator==2.0.0) (2.4.0)
+2025-04-16T15:16:42.1046500Z Requirement already satisfied: certifi>=2017.4.17 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from requests>=2.25.0->ai_deck_translator==2.0.0) (2025.1.31)
+2025-04-16T15:16:42.1118375Z Requirement already satisfied: MarkupSafe>=2.1.1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from Werkzeug>=2.0.0->ai_deck_translator==2.0.0) (3.0.2)
+2025-04-16T15:16:42.1346351Z Requirement already satisfied: googleapis-common-protos<2.0.0,>=1.56.2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-api-core!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->ai_deck_translator==2.0.0) (1.70.0)
+2025-04-16T15:16:42.1479884Z Requirement already satisfied: cachetools<6.0,>=2.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0->google-api-python-client>=2.0.0->ai_deck_translator==2.0.0) (5.5.2)
+2025-04-16T15:16:42.1485240Z Requirement already satisfied: pyasn1-modules>=0.2.1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0->google-api-python-client>=2.0.0->ai_deck_translator==2.0.0) (0.4.2)
+2025-04-16T15:16:42.1490947Z Requirement already satisfied: rsa<5,>=3.1.4 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0->google-api-python-client>=2.0.0->ai_deck_translator==2.0.0) (4.9.1)
+2025-04-16T15:16:42.1527387Z Requirement already satisfied: pyparsing!=3.0.0,!=3.0.1,!=3.0.2,!=3.0.3,<4,>=2.4.2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from httplib2<1.0.0,>=0.19.0->google-api-python-client>=2.0.0->ai_deck_translator==2.0.0) (3.2.3)
+2025-04-16T15:16:42.1569637Z Requirement already satisfied: httpcore==1.* in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from httpx<1,>=0.23.0->anthropic>=0.3.0->ai_deck_translator==2.0.0) (1.0.8)
+2025-04-16T15:16:42.1606376Z Requirement already satisfied: h11<0.15,>=0.13 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from httpcore==1.*->httpx<1,>=0.23.0->anthropic>=0.3.0->ai_deck_translator==2.0.0) (0.14.0)
+2025-04-16T15:16:42.1990773Z Requirement already satisfied: annotated-types>=0.6.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pydantic<3,>=1.9.0->anthropic>=0.3.0->ai_deck_translator==2.0.0) (0.7.0)
+2025-04-16T15:16:42.1996928Z Requirement already satisfied: pydantic-core==2.33.1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pydantic<3,>=1.9.0->anthropic>=0.3.0->ai_deck_translator==2.0.0) (2.33.1)
+2025-04-16T15:16:42.2005916Z Requirement already satisfied: typing-inspection>=0.4.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pydantic<3,>=1.9.0->anthropic>=0.3.0->ai_deck_translator==2.0.0) (0.4.0)
+2025-04-16T15:16:42.2065231Z Requirement already satisfied: oauthlib>=3.0.0 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib>=0.5.0->ai_deck_translator==2.0.0) (3.2.2)
+2025-04-16T15:16:42.2249851Z Requirement already satisfied: grpcio<2.0dev,>=1.33.2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->ai_deck_translator==2.0.0) (1.72.0rc1)
+2025-04-16T15:16:42.2258481Z Requirement already satisfied: grpcio-status<2.0.dev0,>=1.33.2 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0->google-ai-generativelanguage==0.1.0->google-generativeai==0.1.0rc1->ai_deck_translator==2.0.0) (1.63.0rc1)
+2025-04-16T15:16:42.2400480Z Requirement already satisfied: pyasn1<0.7.0,>=0.6.1 in /opt/hostedtoolcache/Python/3.10.17/x64/lib/python3.10/site-packages (from pyasn1-modules>=0.2.1->google-auth!=2.24.0,!=2.25.0,<3.0.0,>=1.32.0->google-api-python-client>=2.0.0->ai_deck_translator==2.0.0) (0.6.1)
+2025-04-16T15:16:42.2567164Z Building wheels for collected packages: ai_deck_translator
+2025-04-16T15:16:42.2576550Z   Building editable for ai_deck_translator (pyproject.toml): started
+2025-04-16T15:16:42.4634580Z   Building editable for ai_deck_translator (pyproject.toml): finished with status 'done'
+2025-04-16T15:16:42.4642997Z   Created wheel for ai_deck_translator: filename=ai_deck_translator-2.0.0-0.editable-py3-none-any.whl size=3803 sha256=c6f2d456fd0f748f9253360696dde4cabdadb34dae152ae53299a2bcb668ed13
+2025-04-16T15:16:42.4645013Z   Stored in directory: /tmp/pip-ephem-wheel-cache-fopzgqp1/wheels/62/b2/1a/d28aa9b22da8eab6a195fb49748d84780f6cbcba404217b066
+2025-04-16T15:16:42.4666161Z Successfully built ai_deck_translator
+2025-04-16T15:16:42.4806373Z Installing collected packages: ai_deck_translator
+2025-04-16T15:16:42.4993088Z Successfully installed ai_deck_translator-2.0.0
+2025-04-16T15:16:42.6033979Z ##[group]Run echo "CLAUDE_API_KEY=dummy_key_for_testing" > .env
+2025-04-16T15:16:42.6034403Z [36;1mecho "CLAUDE_API_KEY=dummy_key_for_testing" > .env[0m
+2025-04-16T15:16:42.6084281Z shell: /usr/bin/bash -e {0}
+2025-04-16T15:16:42.6084508Z env:
+2025-04-16T15:16:42.6084758Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6085196Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib/pkgconfig
+2025-04-16T15:16:42.6085607Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6085971Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6086323Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6086665Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib
+2025-04-16T15:16:42.6086946Z ##[endgroup]
+2025-04-16T15:16:42.6182345Z ##[group]Run # stop the build if there are Python syntax errors or undefined names
+2025-04-16T15:16:42.6183139Z [36;1m# stop the build if there are Python syntax errors or undefined names[0m
+2025-04-16T15:16:42.6183660Z [36;1mflake8 ai_deck_translator/ --count --select=E9,F63,F7,F82 --show-source --statistics[0m
+2025-04-16T15:16:42.6184098Z [36;1m# exit-zero treats all errors as warnings[0m
+2025-04-16T15:16:42.6184559Z [36;1mflake8 ai_deck_translator/ --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics[0m
+2025-04-16T15:16:42.6231070Z shell: /usr/bin/bash -e {0}
+2025-04-16T15:16:42.6231295Z env:
+2025-04-16T15:16:42.6231531Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6231931Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib/pkgconfig
+2025-04-16T15:16:42.6232342Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6232707Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6233282Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6233630Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib
+2025-04-16T15:16:42.6233907Z ##[endgroup]
+2025-04-16T15:16:43.8788285Z 0
+2025-04-16T15:16:44.5273610Z ai_deck_translator/auth/google_auth.py:17:1: F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5274598Z ai_deck_translator/auth/google_auth.py:33:1: C901 'authenticate_google' is too complex (15)
+2025-04-16T15:16:44.5275974Z ai_deck_translator/auth/google_auth.py:140:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5276761Z ai_deck_translator/cli/main.py:142:1: C901 'main' is too complex (17)
+2025-04-16T15:16:44.5277497Z ai_deck_translator/cli/main.py:190:101: E501 line too long (108 > 100 characters)
+2025-04-16T15:16:44.5278263Z ai_deck_translator/cli/main.py:204:101: E501 line too long (104 > 100 characters)
+2025-04-16T15:16:44.5279020Z ai_deck_translator/cli/main.py:250:21: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5279761Z ai_deck_translator/config.py:9:1: F401 'logging' imported but unused
+2025-04-16T15:16:44.5280468Z ai_deck_translator/config.py:11:1: F401 'typing.List' imported but unused
+2025-04-16T15:16:44.5281194Z ai_deck_translator/config.py:220:1: C901 'get_config' is too complex (11)
+2025-04-16T15:16:44.5282084Z ai_deck_translator/core/base_translation_service.py:22:1: F401 '.shared_utils.find_terms_in_text' imported but unused
+2025-04-16T15:16:44.5283104Z ai_deck_translator/core/base_translation_service.py:248:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5284026Z ai_deck_translator/core/extractor.py:19:1: C901 'extract_text' is too complex (24)
+2025-04-16T15:16:44.5284878Z ai_deck_translator/core/extractor.py:51:101: E501 line too long (116 > 100 characters)
+2025-04-16T15:16:44.5285775Z ai_deck_translator/core/shared_utils.py:110:1: C901 'perform_quality_check' is too complex (14)
+2025-04-16T15:16:44.5286683Z ai_deck_translator/core/shared_utils.py:190:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5287227Z ai_deck_translator/core/shared_utils.py:230:101: E501 line too long (130 > 100 characters)
+2025-04-16T15:16:44.5287791Z ai_deck_translator/core/translation_interface.py:20:1: F401 'typing.Union' imported but unused
+2025-04-16T15:16:44.5288571Z ai_deck_translator/core/translator.py:21:1: F401 'datetime.datetime' imported but unused
+2025-04-16T15:16:44.5289550Z ai_deck_translator/core/translator.py:27:1: F401 '..utils.batch.split_dict_into_smart_batches' imported but unused
+2025-04-16T15:16:44.5290269Z ai_deck_translator/core/translator.py:27:1: F401 '..utils.batch.deduplicate_content' imported but unused
+2025-04-16T15:16:44.5291342Z ai_deck_translator/core/translator.py:28:1: F401 '..utils.recovery.setup_recovery_system' imported but unused
+2025-04-16T15:16:44.5292442Z ai_deck_translator/core/translator.py:29:1: F401 '..utils.progress.create_progress_bar' imported but unused
+2025-04-16T15:16:44.5293996Z ai_deck_translator/core/translator.py:36:1: F401 '..utils.glossary.find_terms_in_text' imported but unused
+2025-04-16T15:16:44.5294642Z ai_deck_translator/core/translator.py:131:1: C901 'translate_batch' is too complex (19)
+2025-04-16T15:16:44.5295532Z ai_deck_translator/core/translator.py:208:101: E501 line too long (125 > 100 characters)
+2025-04-16T15:16:44.5296141Z ai_deck_translator/core/translator.py:208:126: W291 trailing whitespace
+2025-04-16T15:16:44.5296584Z ai_deck_translator/core/translator.py:209:1: W293 blank line contains whitespace
+2025-04-16T15:16:44.5297020Z ai_deck_translator/core/translator.py:210:95: W291 trailing whitespace
+2025-04-16T15:16:44.5297462Z ai_deck_translator/core/translator.py:211:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5297909Z ai_deck_translator/core/translator.py:211:115: W291 trailing whitespace
+2025-04-16T15:16:44.5298353Z ai_deck_translator/core/translator.py:225:101: E501 line too long (106 > 100 characters)
+2025-04-16T15:16:44.5298835Z ai_deck_translator/core/translator.py:229:101: E501 line too long (201 > 100 characters)
+2025-04-16T15:16:44.5299306Z ai_deck_translator/core/translator.py:262:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5299781Z ai_deck_translator/core/translator.py:269:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5300258Z ai_deck_translator/core/translator.py:290:1: C901 'translate_text' is too complex (35)
+2025-04-16T15:16:44.5300740Z ai_deck_translator/core/translator.py:324:101: E501 line too long (105 > 100 characters)
+2025-04-16T15:16:44.5301796Z ai_deck_translator/core/translator.py:325:101: E501 line too long (111 > 100 characters)
+2025-04-16T15:16:44.5302409Z ai_deck_translator/core/translator.py:326:101: E501 line too long (112 > 100 characters)
+2025-04-16T15:16:44.5303268Z ai_deck_translator/core/translator.py:458:101: E501 line too long (118 > 100 characters)
+2025-04-16T15:16:44.5303758Z ai_deck_translator/core/translator.py:537:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5304249Z ai_deck_translator/core/translator.py:631:11: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5304728Z ai_deck_translator/core/updater.py:20:1: C901 'update_slides' is too complex (17)
+2025-04-16T15:16:44.5305156Z ai_deck_translator/core/updater.py:151:31: E203 whitespace before ':'
+2025-04-16T15:16:44.5305590Z ai_deck_translator/core/updater.py:153:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5306013Z ai_deck_translator/core/updater.py:169:41: E203 whitespace before ':'
+2025-04-16T15:16:44.5306476Z ai_deck_translator/pptx/enhanced/__init__.py:2:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5306975Z ai_deck_translator/pptx/enhanced/cache.py:9:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5307502Z ai_deck_translator/pptx/enhanced/cache.py:88:5: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5308077Z ai_deck_translator/pptx/enhanced/cache.py:126:5: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5308648Z ai_deck_translator/pptx/enhanced/cache.py:147:5: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5309209Z ai_deck_translator/pptx/enhanced/cache.py:177:5: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5309781Z ai_deck_translator/pptx/enhanced/models/anthropic.py:53:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5310334Z ai_deck_translator/pptx/enhanced/models/anthropic.py:53:104: W291 trailing whitespace
+2025-04-16T15:16:44.5310892Z ai_deck_translator/pptx/enhanced/models/anthropic.py:54:101: E501 line too long (133 > 100 characters)
+2025-04-16T15:16:44.5311474Z ai_deck_translator/pptx/enhanced/models/anthropic.py:80:101: E501 line too long (132 > 100 characters)
+2025-04-16T15:16:44.5312066Z ai_deck_translator/pptx/enhanced/models/anthropic.py:102:101: E501 line too long (122 > 100 characters)
+2025-04-16T15:16:44.5313032Z ai_deck_translator/pptx/enhanced/models/anthropic.py:172:21: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5313732Z ai_deck_translator/pptx/enhanced/models/anthropic.py:177:13: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5314347Z ai_deck_translator/pptx/enhanced/models/base.py:7:1: F401 'typing.Union' imported but unused
+2025-04-16T15:16:44.5314859Z ai_deck_translator/pptx/enhanced/models/gemini.py:53:86: W291 trailing whitespace
+2025-04-16T15:16:44.5315381Z ai_deck_translator/pptx/enhanced/models/gemini.py:65:101: E501 line too long (192 > 100 characters)
+2025-04-16T15:16:44.5315991Z ai_deck_translator/pptx/enhanced/models/gemini.py:138:21: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5316631Z ai_deck_translator/pptx/enhanced/models/gemini.py:143:13: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5317269Z ai_deck_translator/pptx/enhanced/models/openai.py:15:1: F401 '..utils.extract_json_blocks' imported but unused
+2025-04-16T15:16:44.5317869Z ai_deck_translator/pptx/enhanced/models/openai.py:62:101: E501 line too long (124 > 100 characters)
+2025-04-16T15:16:44.5318394Z ai_deck_translator/pptx/enhanced/models/openai.py:62:125: W291 trailing whitespace
+2025-04-16T15:16:44.5318908Z ai_deck_translator/pptx/enhanced/models/openai.py:73:101: E501 line too long (179 > 100 characters)
+2025-04-16T15:16:44.5319467Z ai_deck_translator/pptx/enhanced/models/openai.py:88:101: E501 line too long (106 > 100 characters)
+2025-04-16T15:16:44.5320063Z ai_deck_translator/pptx/enhanced/models/openai.py:158:21: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5320817Z ai_deck_translator/pptx/enhanced/models/openai.py:163:13: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5321406Z ai_deck_translator/pptx/enhanced/translator.py:14:1: F401 'typing.Union' imported but unused
+2025-04-16T15:16:44.5321963Z ai_deck_translator/pptx/enhanced/translator.py:14:1: F401 'typing.Callable' imported but unused
+2025-04-16T15:16:44.5322527Z ai_deck_translator/pptx/enhanced/translator.py:33:1: F401 '.utils.repair_json' imported but unused
+2025-04-16T15:16:44.5323372Z ai_deck_translator/pptx/enhanced/translator.py:33:1: F401 '.utils.extract_json_blocks' imported but unused
+2025-04-16T15:16:44.5323965Z ai_deck_translator/pptx/enhanced/translator.py:33:1: F401 '.utils.estimate_cost' imported but unused
+2025-04-16T15:16:44.5324545Z ai_deck_translator/pptx/enhanced/translator.py:33:1: F401 '.utils.clean_text' imported but unused
+2025-04-16T15:16:44.5325123Z ai_deck_translator/pptx/enhanced/translator.py:155:1: C901 'perform_quality_check' is too complex (14)
+2025-04-16T15:16:44.5325690Z ai_deck_translator/pptx/enhanced/translator.py:235:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5326240Z ai_deck_translator/pptx/enhanced/translator.py:277:101: E501 line too long (130 > 100 characters)
+2025-04-16T15:16:44.5326776Z ai_deck_translator/pptx/enhanced/translator.py:330:101: E501 line too long (209 > 100 characters)
+2025-04-16T15:16:44.5327322Z ai_deck_translator/pptx/enhanced/translator.py:332:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5327859Z ai_deck_translator/pptx/enhanced/translator.py:335:101: E501 line too long (124 > 100 characters)
+2025-04-16T15:16:44.5328404Z ai_deck_translator/pptx/enhanced/translator.py:337:101: E501 line too long (137 > 100 characters)
+2025-04-16T15:16:44.5328952Z ai_deck_translator/pptx/enhanced/translator.py:346:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5329557Z ai_deck_translator/pptx/enhanced/translator.py:350:5: F841 local variable 'translator' is assigned to but never used
+2025-04-16T15:16:44.5330188Z ai_deck_translator/pptx/enhanced/translator.py:399:1: C901 'translate_batch' is too complex (32)
+2025-04-16T15:16:44.5330781Z ai_deck_translator/pptx/enhanced/translator.py:432:5: F811 redefinition of unused 'clean_text' from line 33
+2025-04-16T15:16:44.5331441Z ai_deck_translator/pptx/enhanced/translator.py:518:13: F841 local variable 'slide_info' is assigned to but never used
+2025-04-16T15:16:44.5332196Z ai_deck_translator/pptx/enhanced/translator.py:531:101: E501 line too long (109 > 100 characters)
+2025-04-16T15:16:44.5333140Z ai_deck_translator/pptx/enhanced/translator.py:560:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5333730Z ai_deck_translator/pptx/enhanced/translator.py:637:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5334281Z ai_deck_translator/pptx/enhanced/translator.py:756:101: E501 line too long (117 > 100 characters)
+2025-04-16T15:16:44.5334841Z ai_deck_translator/pptx/enhanced/translator.py:767:1: C901 'translate_pptx' is too complex (22)
+2025-04-16T15:16:44.5335397Z ai_deck_translator/pptx/enhanced/translator.py:950:101: E501 line too long (117 > 100 characters)
+2025-04-16T15:16:44.5335945Z ai_deck_translator/pptx/enhanced/translator.py:1000:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5336499Z ai_deck_translator/pptx/enhanced/translator.py:1023:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5337013Z ai_deck_translator/pptx/enhanced/utils.py:7:1: F401 'hashlib' imported but unused
+2025-04-16T15:16:44.5337478Z ai_deck_translator/pptx/enhanced/utils.py:8:1: F401 'os' imported but unused
+2025-04-16T15:16:44.5337942Z ai_deck_translator/pptx/enhanced/utils.py:9:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5338438Z ai_deck_translator/pptx/enhanced/utils.py:9:1: F401 'typing.Union' imported but unused
+2025-04-16T15:16:44.5338918Z ai_deck_translator/pptx/enhanced/utils.py:98:17: E722 do not use bare 'except'
+2025-04-16T15:16:44.5339507Z ai_deck_translator/pptx/enhanced/utils.py:106:5: E722 do not use bare 'except'
+2025-04-16T15:16:44.5339997Z ai_deck_translator/pptx/enhanced_translation_service.py:9:1: F401 'os' imported but unused
+2025-04-16T15:16:44.5340540Z ai_deck_translator/pptx/enhanced_translation_service.py:10:1: F401 'time' imported but unused
+2025-04-16T15:16:44.5341259Z ai_deck_translator/pptx/enhanced_translation_service.py:83:5: C901 'EnhancedPPTXTranslationService._translate_text_elements' is too complex (18)
+2025-04-16T15:16:44.5342004Z ai_deck_translator/pptx/enhanced_translation_service.py:114:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5342667Z ai_deck_translator/pptx/enhanced_translation_service.py:170:9: F841 local variable 'translator' is assigned to but never used
+2025-04-16T15:16:44.5343683Z ai_deck_translator/pptx/enhanced_translation_service.py:248:5: C901 'EnhancedPPTXTranslationService._translate_batch' is too complex (14)
+2025-04-16T15:16:44.5344408Z ai_deck_translator/pptx/enhanced_translation_service.py:409:101: E501 line too long (213 > 100 characters)
+2025-04-16T15:16:44.5344999Z ai_deck_translator/pptx/enhanced_translation_service.py:411:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5345594Z ai_deck_translator/pptx/enhanced_translation_service.py:414:101: E501 line too long (124 > 100 characters)
+2025-04-16T15:16:44.5346180Z ai_deck_translator/pptx/enhanced_translation_service.py:416:101: E501 line too long (140 > 100 characters)
+2025-04-16T15:16:44.5346778Z ai_deck_translator/pptx/enhanced_translation_service.py:419:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5347375Z ai_deck_translator/pptx/enhanced_translation_service.py:425:101: E501 line too long (110 > 100 characters)
+2025-04-16T15:16:44.5347887Z ai_deck_translator/pptx/extractor.py:17:1: F401 're' imported but unused
+2025-04-16T15:16:44.5348336Z ai_deck_translator/pptx/extractor.py:96:1: C901 'extract_text' is too complex (36)
+2025-04-16T15:16:44.5348812Z ai_deck_translator/pptx/extractor.py:234:101: E501 line too long (136 > 100 characters)
+2025-04-16T15:16:44.5349293Z ai_deck_translator/pptx/extractor.py:241:101: E501 line too long (108 > 100 characters)
+2025-04-16T15:16:44.5349763Z ai_deck_translator/pptx/extractor.py:261:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5350230Z ai_deck_translator/pptx/extractor.py:282:101: E501 line too long (105 > 100 characters)
+2025-04-16T15:16:44.5350850Z ai_deck_translator/pptx/pptx_adapter.py:9:1: F401 'time' imported but unused
+2025-04-16T15:16:44.5351313Z ai_deck_translator/pptx/pptx_adapter.py:11:1: F401 'typing.Dict' imported but unused
+2025-04-16T15:16:44.5351785Z ai_deck_translator/pptx/pptx_adapter.py:11:1: F401 'typing.List' imported but unused
+2025-04-16T15:16:44.5352258Z ai_deck_translator/pptx/pptx_adapter.py:11:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5352902Z ai_deck_translator/pptx/pptx_adapter.py:11:1: F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5353491Z ai_deck_translator/pptx/pptx_adapter.py:25:5: C901 'PPTXAdapter.extract_text' is too complex (13)
+2025-04-16T15:16:44.5354049Z ai_deck_translator/pptx/pptx_adapter.py:110:5: C901 'PPTXAdapter.update_document' is too complex (11)
+2025-04-16T15:16:44.5354603Z ai_deck_translator/pptx/translator.py:11:1: F401 'tqdm.tqdm' imported but unused
+2025-04-16T15:16:44.5355049Z ai_deck_translator/pptx/translator.py:12:1: F401 'sys' imported but unused
+2025-04-16T15:16:44.5355478Z ai_deck_translator/pptx/translator.py:101:17: E722 do not use bare 'except'
+2025-04-16T15:16:44.5355912Z ai_deck_translator/pptx/translator.py:109:5: E722 do not use bare 'except'
+2025-04-16T15:16:44.5356372Z ai_deck_translator/pptx/translator.py:135:101: E501 line too long (137 > 100 characters)
+2025-04-16T15:16:44.5356851Z ai_deck_translator/pptx/translator.py:136:101: E501 line too long (136 > 100 characters)
+2025-04-16T15:16:44.5357366Z ai_deck_translator/pptx/translator.py:167:1: C901 'validate_translation_ids' is too complex (33)
+2025-04-16T15:16:44.5358131Z ai_deck_translator/pptx/translator.py:197:9: F841 local variable 'orig_text_to_id' is assigned to but never used
+2025-04-16T15:16:44.5358717Z ai_deck_translator/pptx/translator.py:348:1: C901 'verify_translation_keys' is too complex (11)
+2025-04-16T15:16:44.5359311Z ai_deck_translator/pptx/translator.py:384:5: F841 local variable 'advanced_norm_orig' is assigned to but never used
+2025-04-16T15:16:44.5359886Z ai_deck_translator/pptx/translator.py:419:1: C901 'translate_batch' is too complex (22)
+2025-04-16T15:16:44.5360375Z ai_deck_translator/pptx/translator.py:484:101: E501 line too long (113 > 100 characters)
+2025-04-16T15:16:44.5360827Z ai_deck_translator/pptx/translator.py:489:100: W291 trailing whitespace
+2025-04-16T15:16:44.5361278Z ai_deck_translator/pptx/translator.py:490:101: E501 line too long (133 > 100 characters)
+2025-04-16T15:16:44.5361759Z ai_deck_translator/pptx/translator.py:500:101: E501 line too long (151 > 100 characters)
+2025-04-16T15:16:44.5362239Z ai_deck_translator/pptx/translator.py:507:101: E501 line too long (132 > 100 characters)
+2025-04-16T15:16:44.5362878Z ai_deck_translator/pptx/translator.py:511:101: E501 line too long (118 > 100 characters)
+2025-04-16T15:16:44.5363356Z ai_deck_translator/pptx/translator.py:564:101: E501 line too long (141 > 100 characters)
+2025-04-16T15:16:44.5363838Z ai_deck_translator/pptx/translator.py:583:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5364314Z ai_deck_translator/pptx/translator.py:592:101: E501 line too long (113 > 100 characters)
+2025-04-16T15:16:44.5364798Z ai_deck_translator/pptx/translator.py:625:1: C901 'translate_text' is too complex (11)
+2025-04-16T15:16:44.5365282Z ai_deck_translator/pptx/translator.py:759:101: E501 line too long (144 > 100 characters)
+2025-04-16T15:16:44.5365755Z ai_deck_translator/pptx/translator.py:865:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5366208Z ai_deck_translator/pptx/translator.py:868:9: E722 do not use bare 'except'
+2025-04-16T15:16:44.5366656Z ai_deck_translator/pptx/updater.py:34:1: C901 'update_slides' is too complex (30)
+2025-04-16T15:16:44.5367126Z ai_deck_translator/pptx/updater.py:194:1: C901 'update_xml_elements' is too complex (32)
+2025-04-16T15:16:44.5367564Z ai_deck_translator/run.py:3:1: E302 expected 2 blank lines, found 1
+2025-04-16T15:16:44.5367941Z ai_deck_translator/run.py:24:1: E302 expected 2 blank lines, found 1
+2025-04-16T15:16:44.5368549Z ai_deck_translator/run.py:29:1: E305 expected 2 blank lines after class or function definition, found 1
+2025-04-16T15:16:44.5368994Z ai_deck_translator/run.py:30:11: W291 trailing whitespace
+2025-04-16T15:16:44.5369332Z ai_deck_translator/run.py:30:12: W292 no newline at end of file
+2025-04-16T15:16:44.5369733Z ai_deck_translator/services/anthropic.py:13:1: F401 'json' imported but unused
+2025-04-16T15:16:44.5370217Z ai_deck_translator/services/anthropic.py:16:1: F401 'typing.Dict' imported but unused
+2025-04-16T15:16:44.5370712Z ai_deck_translator/services/anthropic.py:16:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5371216Z ai_deck_translator/services/anthropic.py:16:1: F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5371729Z ai_deck_translator/services/anthropic.py:25:1: C901 'translate_batch' is too complex (11)
+2025-04-16T15:16:44.5372231Z ai_deck_translator/services/anthropic.py:45:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5372902Z ai_deck_translator/services/anthropic.py:57:9: F841 local variable 'client' is assigned to but never used
+2025-04-16T15:16:44.5373472Z ai_deck_translator/services/google_translate.py:12:1: F401 'os' imported but unused
+2025-04-16T15:16:44.5373993Z ai_deck_translator/services/google_translate.py:14:1: F401 'typing.Dict' imported but unused
+2025-04-16T15:16:44.5374524Z ai_deck_translator/services/google_translate.py:14:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5375086Z ai_deck_translator/services/google_translate.py:14:1: F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5375775Z ai_deck_translator/services/google_translate.py:17:1: F401 '..config' imported but unused
+2025-04-16T15:16:44.5376266Z ai_deck_translator/utils/batch.py:15:1: F401 'typing.Iterable' imported but unused
+2025-04-16T15:16:44.5376722Z ai_deck_translator/utils/batch.py:15:1: F401 'typing.Iterator' imported but unused
+2025-04-16T15:16:44.5377181Z ai_deck_translator/utils/batch.py:15:1: F401 'typing.Generic' imported but unused
+2025-04-16T15:16:44.5377605Z ai_deck_translator/utils/batch.py:52:31: E203 whitespace before ':'
+2025-04-16T15:16:44.5377989Z ai_deck_translator/utils/batch.py:97:26: E203 whitespace before ':'
+2025-04-16T15:16:44.5378356Z ai_deck_translator/utils/batch.py:98:30: E203 whitespace before ':'
+2025-04-16T15:16:44.5378773Z ai_deck_translator/utils/batch.py:150:101: E501 line too long (115 > 100 characters)
+2025-04-16T15:16:44.5379242Z ai_deck_translator/utils/glossary.py:21:1: F401 'typing.List' imported but unused
+2025-04-16T15:16:44.5379705Z ai_deck_translator/utils/glossary.py:21:1: F401 'typing.Tuple' imported but unused
+2025-04-16T15:16:44.5380170Z ai_deck_translator/utils/glossary.py:21:1: F401 'typing.Set' imported but unused
+2025-04-16T15:16:44.5380674Z ai_deck_translator/utils/glossary.py:167:5: C901 'Glossary.find_terms_in_text' is too complex (11)
+2025-04-16T15:16:44.5381162Z ai_deck_translator/utils/glossary.py:209:56: E203 whitespace before ':'
+2025-04-16T15:16:44.5381609Z ai_deck_translator/utils/glossary.py:263:26: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5382087Z ai_deck_translator/utils/logging.py:80:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5382567Z ai_deck_translator/utils/progress.py:81:101: E501 line too long (127 > 100 characters)
+2025-04-16T15:16:44.5383182Z ai_deck_translator/utils/progress.py:167:101: E501 line too long (115 > 100 characters)
+2025-04-16T15:16:44.5383672Z ai_deck_translator/utils/recovery.py:19:1: F401 'typing.Callable' imported but unused
+2025-04-16T15:16:44.5384145Z ai_deck_translator/utils/recovery.py:107:37: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5384615Z ai_deck_translator/utils/recovery.py:115:101: E501 line too long (106 > 100 characters)
+2025-04-16T15:16:44.5385088Z ai_deck_translator/utils/recovery.py:116:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5385550Z ai_deck_translator/utils/recovery.py:247:101: E501 line too long (108 > 100 characters)
+2025-04-16T15:16:44.5386023Z ai_deck_translator/utils/recovery.py:281:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5386632Z ai_deck_translator/utils/recovery.py:314:33: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5387103Z ai_deck_translator/utils/recovery.py:318:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5387605Z ai_deck_translator/utils/translation_memory.py:20:1: F401 'typing.List' imported but unused
+2025-04-16T15:16:44.5388134Z ai_deck_translator/utils/translation_memory.py:20:1: F401 'typing.Tuple' imported but unused
+2025-04-16T15:16:44.5388632Z ai_deck_translator/web/app.py:16:1: F401 'flask.make_response' imported but unused
+2025-04-16T15:16:44.5389095Z ai_deck_translator/web/app.py:36:1: F401 '..utils.logging.setup_logging' imported but unused
+2025-04-16T15:16:44.5389588Z ai_deck_translator/web/app.py:69:1: C901 'translate_presentation' is too complex (37)
+2025-04-16T15:16:44.5390028Z ai_deck_translator/web/app.py:148:101: E501 line too long (108 > 100 characters)
+2025-04-16T15:16:44.5390452Z ai_deck_translator/web/app.py:178:101: E501 line too long (104 > 100 characters)
+2025-04-16T15:16:44.5390874Z ai_deck_translator/web/app.py:191:101: E501 line too long (109 > 100 characters)
+2025-04-16T15:16:44.5391269Z ai_deck_translator/web/app.py:238:17: E722 do not use bare 'except'
+2025-04-16T15:16:44.5391665Z ai_deck_translator/web/app.py:300:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5392083Z ai_deck_translator/web/app.py:327:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5392495Z ai_deck_translator/web/app.py:379:1: C901 'create_app' is too complex (56)
+2025-04-16T15:16:44.5393199Z ai_deck_translator/web/app.py:535:101: E501 line too long (186 > 100 characters)
+2025-04-16T15:16:44.5393609Z ai_deck_translator/web/app.py:646:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5394071Z ai_deck_translator/web/app.py:666:9: F811 redefinition of unused 'make_response' from line 16
+2025-04-16T15:16:44.5394529Z ai_deck_translator/web/app.py:790:101: E501 line too long (113 > 100 characters)
+2025-04-16T15:16:44.5394952Z ai_deck_translator/web/app.py:802:101: E501 line too long (113 > 100 characters)
+2025-04-16T15:16:44.5395376Z ai_deck_translator/web/app.py:862:101: E501 line too long (130 > 100 characters)
+2025-04-16T15:16:44.5395788Z ai_deck_translator/web/app.py:881:101: E501 line too long (106 > 100 characters)
+2025-04-16T15:16:44.5396152Z 26    C901 'authenticate_google' is too complex (15)
+2025-04-16T15:16:44.5396415Z 6     E203 whitespace before ':'
+2025-04-16T15:16:44.5396645Z 2     E302 expected 2 blank lines, found 1
+2025-04-16T15:16:44.5396972Z 1     E305 expected 2 blank lines after class or function definition, found 1
+2025-04-16T15:16:44.5397311Z 86    E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5397554Z 6     E722 do not use bare 'except'
+2025-04-16T15:16:44.5397791Z 54    F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5398048Z 5     F541 f-string is missing placeholders
+2025-04-16T15:16:44.5398336Z 2     F811 redefinition of unused 'clean_text' from line 33
+2025-04-16T15:16:44.5398657Z 16    F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5398923Z 8     W291 trailing whitespace
+2025-04-16T15:16:44.5399132Z 1     W292 no newline at end of file
+2025-04-16T15:16:44.5399364Z 1     W293 blank line contains whitespace
+2025-04-16T15:16:44.5399577Z 214
+2025-04-16T15:16:44.5497679Z ##[group]Run black --check --diff ai_deck_translator/
+2025-04-16T15:16:44.5498063Z [36;1mblack --check --diff ai_deck_translator/[0m
+2025-04-16T15:16:44.5545417Z shell: /usr/bin/bash -e {0}
+2025-04-16T15:16:44.5545640Z env:
+2025-04-16T15:16:44.5545870Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:44.5546280Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib/pkgconfig
+2025-04-16T15:16:44.5546653Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:44.5546989Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:44.5547330Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:44.5547666Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib
+2025-04-16T15:16:44.5547953Z ##[endgroup]
+2025-04-16T15:16:45.2700868Z would reformat /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/run.py
+2025-04-16T15:16:45.2705247Z --- /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/run.py	2025-04-16 15:16:15.379934+00:00
+2025-04-16T15:16:45.2723909Z +++ /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/run.py	2025-04-16 15:16:45.266826+00:00
+2025-04-16T15:16:45.2724839Z @@ -1,30 +1,43 @@
+2025-04-16T15:16:45.2725726Z  import argparse
+2025-04-16T15:16:45.2726061Z +
+2025-04-16T15:16:45.2726316Z  
+2025-04-16T15:16:45.2726568Z  def parse_args():
+2025-04-16T15:16:45.2727212Z      parser = argparse.ArgumentParser(description="AI Deck Translator command-line tool")
+2025-04-16T15:16:45.2728123Z      subparsers = parser.add_subparsers(dest="command", required=True)
+2025-04-16T15:16:45.2728693Z  
+2025-04-16T15:16:45.2728980Z      # Subcommand: translate
+2025-04-16T15:16:45.2729639Z -    translate_parser = subparsers.add_parser("translate", help="Translate a presentation")
+2025-04-16T15:16:45.2730703Z -    translate_parser.add_argument("--presentation-id", required=True, help="Presentation ID")
+2025-04-16T15:16:45.2731785Z -    translate_parser.add_argument("--source-language", required=True, help="Source language code")
+2025-04-16T15:16:45.2733117Z -    translate_parser.add_argument("--target-language", required=True, help="Target language code")
+2025-04-16T15:16:45.2734313Z +    translate_parser = subparsers.add_parser(
+2025-04-16T15:16:45.2734848Z +        "translate", help="Translate a presentation"
+2025-04-16T15:16:45.2735308Z +    )
+2025-04-16T15:16:45.2735611Z +    translate_parser.add_argument(
+2025-04-16T15:16:45.2736305Z +        "--presentation-id", required=True, help="Presentation ID"
+2025-04-16T15:16:45.2736825Z +    )
+2025-04-16T15:16:45.2737130Z +    translate_parser.add_argument(
+2025-04-16T15:16:45.2737685Z +        "--source-language", required=True, help="Source language code"
+2025-04-16T15:16:45.2738231Z +    )
+2025-04-16T15:16:45.2738522Z +    translate_parser.add_argument(
+2025-04-16T15:16:45.2739078Z +        "--target-language", required=True, help="Target language code"
+2025-04-16T15:16:45.2739947Z +    )
+2025-04-16T15:16:45.2740496Z      translate_parser.add_argument("--api-key", help="API key for translation service")
+2025-04-16T15:16:45.2741470Z -    translate_parser.add_argument("--resume-file", help="Resume a translation from a file")
+2025-04-16T15:16:45.2742341Z +    translate_parser.add_argument(
+2025-04-16T15:16:45.2760475Z +        "--resume-file", help="Resume a translation from a file"
+2025-04-16T15:16:45.2761023Z +    )
+2025-04-16T15:16:45.2761296Z  
+2025-04-16T15:16:45.2761567Z      # Subcommand: web
+2025-04-16T15:16:45.2762116Z      web_parser = subparsers.add_parser("web", help="Run the web interface")
+2025-04-16T15:16:45.2763156Z      web_parser.add_argument("--port", type=int, default=8080, help="Port number")
+2025-04-16T15:16:45.2763787Z  
+2025-04-16T15:16:45.2764089Z      # Subcommand: list-recovery
+2025-04-16T15:16:45.2764667Z      subparsers.add_parser("list-recovery", help="List recovery files")
+2025-04-16T15:16:45.2765233Z  
+2025-04-16T15:16:45.2765925Z      return parser.parse_args()
+2025-04-16T15:16:45.2766329Z  
+2025-04-16T15:16:45.2766566Z +
+2025-04-16T15:16:45.2766821Z  def main():
+2025-04-16T15:16:45.2767129Z      args = parse_args()
+2025-04-16T15:16:45.2767536Z      print(f"Command: {args.command}")
+2025-04-16T15:16:45.2767999Z      # Additional logic based on the command
+2025-04-16T15:16:45.2768406Z  
+2025-04-16T15:16:45.2768652Z +
+2025-04-16T15:16:45.2768918Z  if __name__ == "__main__":
+2025-04-16T15:16:45.2769259Z -    main() 
+2025-04-16T15:16:45.2769554Z \ No newline at end of file
+2025-04-16T15:16:45.2769895Z +    main()
+2025-04-16T15:16:45.7913629Z --- /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/web/app.py	2025-04-16 15:16:15.380934+00:00
+2025-04-16T15:16:45.7914739Z +++ /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/web/app.py	2025-04-16 15:16:45.787306+00:00
+2025-04-16T15:16:45.7915430Z @@ -898,17 +898,26 @@
+2025-04-16T15:16:45.7915828Z          presentation_id = request.args.get("presentation_id")
+2025-04-16T15:16:45.7916438Z          source_language = request.args.get("source_language")
+2025-04-16T15:16:45.7917019Z          target_language = request.args.get("target_language")
+2025-04-16T15:16:45.7917519Z          api_key = request.args.get("api_key")
+2025-04-16T15:16:45.7917907Z  
+2025-04-16T15:16:45.7918394Z -        if not presentation_id or not source_language or not target_language or not api_key:
+2025-04-16T15:16:45.7919041Z +        if (
+2025-04-16T15:16:45.7919363Z +            not presentation_id
+2025-04-16T15:16:45.7919776Z +            or not source_language
+2025-04-16T15:16:45.7920171Z +            or not target_language
+2025-04-16T15:16:45.7920550Z +            or not api_key
+2025-04-16T15:16:45.7920898Z +        ):
+2025-04-16T15:16:45.7921294Z              return jsonify({"error": "Missing parameters"}), 400
+2025-04-16T15:16:45.7921628Z  
+2025-04-16T15:16:45.7921783Z          try:
+2025-04-16T15:16:45.7922251Z would reformat /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/web/app.py
+2025-04-16T15:16:45.7922952Z              # Simulate translation progress
+2025-04-16T15:16:45.7923445Z -            translate_with_progress(presentation_id, source_language, target_language, api_key)
+2025-04-16T15:16:45.7924284Z -            return jsonify({"status": "success", "result_url": translation_state["result_url"]})
+2025-04-16T15:16:45.7924653Z +            translate_with_progress(
+2025-04-16T15:16:45.7924948Z +                presentation_id, source_language, target_language, api_key
+2025-04-16T15:16:45.7925483Z +            )
+2025-04-16T15:16:45.7925790Z +            return jsonify(
+2025-04-16T15:16:45.7926298Z +                {"status": "success", "result_url": translation_state["result_url"]}
+2025-04-16T15:16:45.7926686Z +            )
+2025-04-16T15:16:45.7926858Z          except Exception as e:
+2025-04-16T15:16:45.7927088Z              return jsonify({"error": str(e)}), 500
+2025-04-16T15:16:45.7927316Z  
+2025-04-16T15:16:45.7927460Z      return app
+2025-04-16T15:16:45.7927609Z  
+2025-04-16T15:16:45.8009787Z 
+2025-04-16T15:16:45.8010418Z Oh no! 💥 💔 💥
+2025-04-16T15:16:45.8010880Z 2 files would be reformatted, 39 files would be left unchanged.
+2025-04-16T15:16:45.8240474Z ##[error]Process completed with exit code 1.
+2025-04-16T15:16:45.8333277Z Post job cleanup.
+2025-04-16T15:16:45.9060484Z [command]/usr/bin/git version
+2025-04-16T15:16:45.9095671Z git version 2.49.0
+2025-04-16T15:16:45.9138180Z Temporarily overriding HOME='/home/runner/work/_temp/58e4d722-eda4-4cf7-9e66-6d927744859a' before making global git config changes
+2025-04-16T15:16:45.9139078Z Adding repository directory to the temporary git global config as a safe directory
+2025-04-16T15:16:45.9142262Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ai-deck-translator/ai-deck-translator
+2025-04-16T15:16:45.9174239Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-04-16T15:16:45.9203745Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-04-16T15:16:45.9450209Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-04-16T15:16:45.9471424Z http.https://github.com/.extraheader
+2025-04-16T15:16:45.9484195Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-04-16T15:16:45.9514197Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-04-16T15:16:45.9853913Z Cleaning up orphan processes

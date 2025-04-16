@@ -900,13 +900,22 @@ def create_app(debug=False):
         target_language = request.args.get("target_language")
         api_key = request.args.get("api_key")
 
-        if not presentation_id or not source_language or not target_language or not api_key:
+        if (
+            not presentation_id
+            or not source_language
+            or not target_language
+            or not api_key
+        ):
             return jsonify({"error": "Missing parameters"}), 400
 
         try:
             # Simulate translation progress
-            translate_with_progress(presentation_id, source_language, target_language, api_key)
-            return jsonify({"status": "success", "result_url": translation_state["result_url"]})
+            translate_with_progress(
+                presentation_id, source_language, target_language, api_key
+            )
+            return jsonify(
+                {"status": "success", "result_url": translation_state["result_url"]}
+            )
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -939,6 +948,7 @@ def main():
 if __name__ == "__main__":
     main()
 
+
 def translate_with_progress(presentation_id, source_language, target_language, api_key):
     """
     Simulates a translation process and updates the global `translation_state`.
@@ -950,7 +960,6 @@ def translate_with_progress(presentation_id, source_language, target_language, a
     Returns:
         None
     """
-    global translation_state
     translation_state["running"] = True
     translation_state["progress"] = 0
     translation_state["console_output"] = []

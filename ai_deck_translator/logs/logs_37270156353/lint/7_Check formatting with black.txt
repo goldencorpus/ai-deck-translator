@@ -1,0 +1,102 @@
+﻿2025-04-16T15:16:44.5497661Z ##[group]Run black --check --diff ai_deck_translator/
+2025-04-16T15:16:44.5498060Z [36;1mblack --check --diff ai_deck_translator/[0m
+2025-04-16T15:16:44.5545411Z shell: /usr/bin/bash -e {0}
+2025-04-16T15:16:44.5545638Z env:
+2025-04-16T15:16:44.5545867Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:44.5546277Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib/pkgconfig
+2025-04-16T15:16:44.5546650Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:44.5546987Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:44.5547328Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:44.5547663Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib
+2025-04-16T15:16:44.5547950Z ##[endgroup]
+2025-04-16T15:16:45.2700826Z would reformat /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/run.py
+2025-04-16T15:16:45.2705138Z --- /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/run.py	2025-04-16 15:16:15.379934+00:00
+2025-04-16T15:16:45.2723886Z +++ /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/run.py	2025-04-16 15:16:45.266826+00:00
+2025-04-16T15:16:45.2724831Z @@ -1,30 +1,43 @@
+2025-04-16T15:16:45.2725717Z  import argparse
+2025-04-16T15:16:45.2726056Z +
+2025-04-16T15:16:45.2726312Z  
+2025-04-16T15:16:45.2726564Z  def parse_args():
+2025-04-16T15:16:45.2727204Z      parser = argparse.ArgumentParser(description="AI Deck Translator command-line tool")
+2025-04-16T15:16:45.2728116Z      subparsers = parser.add_subparsers(dest="command", required=True)
+2025-04-16T15:16:45.2728689Z  
+2025-04-16T15:16:45.2728966Z      # Subcommand: translate
+2025-04-16T15:16:45.2729631Z -    translate_parser = subparsers.add_parser("translate", help="Translate a presentation")
+2025-04-16T15:16:45.2730696Z -    translate_parser.add_argument("--presentation-id", required=True, help="Presentation ID")
+2025-04-16T15:16:45.2731767Z -    translate_parser.add_argument("--source-language", required=True, help="Source language code")
+2025-04-16T15:16:45.2733106Z -    translate_parser.add_argument("--target-language", required=True, help="Target language code")
+2025-04-16T15:16:45.2734305Z +    translate_parser = subparsers.add_parser(
+2025-04-16T15:16:45.2734842Z +        "translate", help="Translate a presentation"
+2025-04-16T15:16:45.2735302Z +    )
+2025-04-16T15:16:45.2735606Z +    translate_parser.add_argument(
+2025-04-16T15:16:45.2736297Z +        "--presentation-id", required=True, help="Presentation ID"
+2025-04-16T15:16:45.2736820Z +    )
+2025-04-16T15:16:45.2737125Z +    translate_parser.add_argument(
+2025-04-16T15:16:45.2737679Z +        "--source-language", required=True, help="Source language code"
+2025-04-16T15:16:45.2738225Z +    )
+2025-04-16T15:16:45.2738517Z +    translate_parser.add_argument(
+2025-04-16T15:16:45.2739073Z +        "--target-language", required=True, help="Target language code"
+2025-04-16T15:16:45.2739932Z +    )
+2025-04-16T15:16:45.2740490Z      translate_parser.add_argument("--api-key", help="API key for translation service")
+2025-04-16T15:16:45.2741462Z -    translate_parser.add_argument("--resume-file", help="Resume a translation from a file")
+2025-04-16T15:16:45.2742332Z +    translate_parser.add_argument(
+2025-04-16T15:16:45.2760461Z +        "--resume-file", help="Resume a translation from a file"
+2025-04-16T15:16:45.2761017Z +    )
+2025-04-16T15:16:45.2761291Z  
+2025-04-16T15:16:45.2761562Z      # Subcommand: web
+2025-04-16T15:16:45.2762110Z      web_parser = subparsers.add_parser("web", help="Run the web interface")
+2025-04-16T15:16:45.2763146Z      web_parser.add_argument("--port", type=int, default=8080, help="Port number")
+2025-04-16T15:16:45.2763780Z  
+2025-04-16T15:16:45.2764084Z      # Subcommand: list-recovery
+2025-04-16T15:16:45.2764660Z      subparsers.add_parser("list-recovery", help="List recovery files")
+2025-04-16T15:16:45.2765227Z  
+2025-04-16T15:16:45.2765521Z      return parser.parse_args()
+2025-04-16T15:16:45.2766325Z  
+2025-04-16T15:16:45.2766563Z +
+2025-04-16T15:16:45.2766817Z  def main():
+2025-04-16T15:16:45.2767124Z      args = parse_args()
+2025-04-16T15:16:45.2767531Z      print(f"Command: {args.command}")
+2025-04-16T15:16:45.2767994Z      # Additional logic based on the command
+2025-04-16T15:16:45.2768402Z  
+2025-04-16T15:16:45.2768647Z +
+2025-04-16T15:16:45.2768914Z  if __name__ == "__main__":
+2025-04-16T15:16:45.2769255Z -    main() 
+2025-04-16T15:16:45.2769550Z \ No newline at end of file
+2025-04-16T15:16:45.2769891Z +    main()
+2025-04-16T15:16:45.7913587Z --- /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/web/app.py	2025-04-16 15:16:15.380934+00:00
+2025-04-16T15:16:45.7914734Z +++ /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/web/app.py	2025-04-16 15:16:45.787306+00:00
+2025-04-16T15:16:45.7915427Z @@ -898,17 +898,26 @@
+2025-04-16T15:16:45.7915824Z          presentation_id = request.args.get("presentation_id")
+2025-04-16T15:16:45.7916409Z          source_language = request.args.get("source_language")
+2025-04-16T15:16:45.7917015Z          target_language = request.args.get("target_language")
+2025-04-16T15:16:45.7917513Z          api_key = request.args.get("api_key")
+2025-04-16T15:16:45.7917901Z  
+2025-04-16T15:16:45.7918389Z -        if not presentation_id or not source_language or not target_language or not api_key:
+2025-04-16T15:16:45.7919030Z +        if (
+2025-04-16T15:16:45.7919358Z +            not presentation_id
+2025-04-16T15:16:45.7919769Z +            or not source_language
+2025-04-16T15:16:45.7920166Z +            or not target_language
+2025-04-16T15:16:45.7920543Z +            or not api_key
+2025-04-16T15:16:45.7920891Z +        ):
+2025-04-16T15:16:45.7921289Z              return jsonify({"error": "Missing parameters"}), 400
+2025-04-16T15:16:45.7921625Z  
+2025-04-16T15:16:45.7921781Z          try:
+2025-04-16T15:16:45.7922237Z would reformat /home/runner/work/ai-deck-translator/ai-deck-translator/ai_deck_translator/web/app.py
+2025-04-16T15:16:45.7922948Z              # Simulate translation progress
+2025-04-16T15:16:45.7923442Z -            translate_with_progress(presentation_id, source_language, target_language, api_key)
+2025-04-16T15:16:45.7924281Z -            return jsonify({"status": "success", "result_url": translation_state["result_url"]})
+2025-04-16T15:16:45.7924650Z +            translate_with_progress(
+2025-04-16T15:16:45.7924945Z +                presentation_id, source_language, target_language, api_key
+2025-04-16T15:16:45.7925477Z +            )
+2025-04-16T15:16:45.7925776Z +            return jsonify(
+2025-04-16T15:16:45.7926291Z +                {"status": "success", "result_url": translation_state["result_url"]}
+2025-04-16T15:16:45.7926683Z +            )
+2025-04-16T15:16:45.7926855Z          except Exception as e:
+2025-04-16T15:16:45.7927085Z              return jsonify({"error": str(e)}), 500
+2025-04-16T15:16:45.7927313Z  
+2025-04-16T15:16:45.7927458Z      return app
+2025-04-16T15:16:45.7927607Z  
+2025-04-16T15:16:45.8009743Z 
+2025-04-16T15:16:45.8010407Z Oh no! 💥 💔 💥
+2025-04-16T15:16:45.8010876Z 2 files would be reformatted, 39 files would be left unchanged.
+2025-04-16T15:16:45.8240454Z ##[error]Process completed with exit code 1.
