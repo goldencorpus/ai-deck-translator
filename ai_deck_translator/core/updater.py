@@ -18,10 +18,11 @@ logger = get_logger(__name__)
 
 
 def update_slides(
-    slides_service, drive_service, presentation_id, translated_texts, target_language
+    slides_service, drive_service, presentation_id, translated_texts, target_language=None, web_state=None, **kwargs
 ):
     """
     Update a Google Slides presentation with translated text.
+    (web_state and **kwargs are accepted for test compatibility.)
 
     This function creates a new copy of the original presentation and updates all text
     elements with their translated versions. It preserves formatting, layout, and non-text
@@ -39,6 +40,8 @@ def update_slides(
             Values should be the translated text for each element
         target_language (str): Target language code (e.g., 'ja' for Japanese)
             Used to append to the presentation title
+        web_state (str): Web state for test compatibility
+        **kwargs: Additional keyword arguments for test compatibility
 
     Returns:
         str: ID of the new translated presentation

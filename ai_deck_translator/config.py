@@ -66,6 +66,7 @@ DEFAULT_CONFIG = {
             "max_tokens": 150000,
             "temperature": 0.0,
         },
+        "anthropic_api_base": "https://api.anthropic.com/v1",
         "google": {
             "scopes": [
                 "https://www.googleapis.com/auth/presentations",
@@ -157,20 +158,34 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
 
     # If config_path is provided, load from file
     if config_path:
-        try:
-            with open(config_path, "r") as f:
-                file_config = json.load(f)
-                # Deep merge with defaults
-                for section, values in file_config.items():
-                    if section in config and isinstance(config[section], dict):
-                        config[section].update(values)
-                    else:
-                        config[section] = values
-        except (IOError, json.JSONDecodeError) as e:
-            logger.error(f"Failed to load configuration file: {e}")
-            raise ConfigurationError(
-                f"Could not load config from {config_path}: {str(e)}"
-            )
+        if not os.path.exists(config_path):
+            logger.warning(f"Configuration file {config_path} not found. Using default values.")
+        else:
+            try:
+                with open(config_path, "r") as f:
+                    file_config = json.load(f)
+                    # Deep merge with defaults
+                    for section, values in file_config.items():
+                        if section in config and isinstance(config[section], dict):
+                            config[section].update(values)
+                        else:
+                            config[section] = values
+            except (IOError, json.JSONDecodeError) as e:
+                logger.error(f"Failed to load configuration file: {e}")
+                raise ConfigurationError(
+                    f"Could not load config from {config_path}: {str(e)}"
+                )
+
+    # Ensure all required keys are present, fill with defaults if missing
+    for section, default_values in DEFAULT_CONFIG.items():
+        if section not in config:
+            logger.warning(f"Missing section '{section}' in config, using default.")
+            config[section] = default_values
+        elif isinstance(default_values, dict):
+            for key, value in default_values.items():
+                if key not in config[section]:
+                    logger.warning(f"Missing key '{key}' in section '{section}', using default.")
+                    config[section][key] = value
 
     # Validate loaded config
     validate_config(config)

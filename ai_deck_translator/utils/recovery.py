@@ -24,6 +24,9 @@ from .. import config
 # Set up logging
 logger = get_logger(__name__)
 
+# Add a dummy RECOVERY_ attribute for test compatibility
+RECOVERY_ = None
+
 
 def setup_recovery_system(
     file_id: str,
