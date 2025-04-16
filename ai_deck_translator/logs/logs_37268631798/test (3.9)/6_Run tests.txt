@@ -1,0 +1,126 @@
+﻿2025-04-16T14:51:06.4416418Z ##[group]Run pytest tests/ -v 
+2025-04-16T14:51:06.4416716Z [36;1mpytest tests/ -v [0m
+2025-04-16T14:51:06.4466110Z shell: /usr/bin/bash -e {0}
+2025-04-16T14:51:06.4466352Z env:
+2025-04-16T14:51:06.4466599Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.21/x64
+2025-04-16T14:51:06.4467005Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.21/x64/lib/pkgconfig
+2025-04-16T14:51:06.4467390Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.21/x64
+2025-04-16T14:51:06.4467748Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.21/x64
+2025-04-16T14:51:06.4468091Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.21/x64
+2025-04-16T14:51:06.4468670Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.21/x64/lib
+2025-04-16T14:51:06.4468974Z ##[endgroup]
+2025-04-16T14:51:06.9289965Z ============================= test session starts ==============================
+2025-04-16T14:51:06.9290759Z platform linux -- Python 3.9.21, pytest-8.3.5, pluggy-1.5.0 -- /opt/hostedtoolcache/Python/3.9.21/x64/bin/python
+2025-04-16T14:51:06.9291490Z cachedir: .pytest_cache
+2025-04-16T14:51:06.9291883Z rootdir: /home/runner/work/ai-deck-translator/ai-deck-translator
+2025-04-16T14:51:06.9292310Z configfile: setup.cfg
+2025-04-16T14:51:06.9292591Z plugins: cov-6.1.1, anyio-4.9.0
+2025-04-16T14:51:08.0358947Z collecting ... collected 61 items / 5 errors
+2025-04-16T14:51:08.0359394Z 
+2025-04-16T14:51:08.0359559Z ==================================== ERRORS ====================================
+2025-04-16T14:51:08.0360483Z _____________________ ERROR collecting tests/test_batch.py _____________________
+2025-04-16T14:51:08.0361434Z ImportError while importing test module '/home/runner/work/ai-deck-translator/ai-deck-translator/tests/test_batch.py'.
+2025-04-16T14:51:08.0362375Z Hint: make sure your test modules/packages have valid Python names.
+2025-04-16T14:51:08.0362863Z Traceback:
+2025-04-16T14:51:08.0363461Z /opt/hostedtoolcache/Python/3.9.21/x64/lib/python3.9/importlib/__init__.py:127: in import_module
+2025-04-16T14:51:08.0364259Z     return _bootstrap._gcd_import(name[level:], package, level)
+2025-04-16T14:51:08.0364765Z tests/test_batch.py:5: in <module>
+2025-04-16T14:51:08.0365392Z     from ai_deck_translator.utils.batch import split_dict_into_smart_batches, deduplicate_content
+2025-04-16T14:51:08.0366074Z ai_deck_translator/__init__.py:17: in <module>
+2025-04-16T14:51:08.0366483Z     from .pptx.enhanced import (
+2025-04-16T14:51:08.0366912Z ai_deck_translator/pptx/enhanced/__init__.py:5: in <module>
+2025-04-16T14:51:08.0367388Z     from .translator import (
+2025-04-16T14:51:08.0367831Z ai_deck_translator/pptx/enhanced/translator.py:17: in <module>
+2025-04-16T14:51:08.0368823Z     from .models import get_translator_for_model
+2025-04-16T14:51:08.0369385Z ai_deck_translator/pptx/enhanced/models/__init__.py:7: in <module>
+2025-04-16T14:51:08.0369902Z     from .openai import OpenAITranslator
+2025-04-16T14:51:08.0370400Z ai_deck_translator/pptx/enhanced/models/openai.py:6: in <module>
+2025-04-16T14:51:08.0370882Z     import openai
+2025-04-16T14:51:08.0371214Z E   ModuleNotFoundError: No module named 'openai'
+2025-04-16T14:51:08.0371738Z ------------------------------- Captured stdout --------------------------------
+2025-04-16T14:51:08.0372694Z 2025-04-16 14:51:07 - ai_deck_translator - INFO - No configuration file found at /home/runner/.gslides_translator/config.json, using defaults
+2025-04-16T14:51:08.0373610Z _____________________ ERROR collecting tests/test_init.py ______________________
+2025-04-16T14:51:08.0374536Z ImportError while importing test module '/home/runner/work/ai-deck-translator/ai-deck-translator/tests/test_init.py'.
+2025-04-16T14:51:08.0375403Z Hint: make sure your test modules/packages have valid Python names.
+2025-04-16T14:51:08.0375856Z Traceback:
+2025-04-16T14:51:08.0376385Z /opt/hostedtoolcache/Python/3.9.21/x64/lib/python3.9/importlib/__init__.py:127: in import_module
+2025-04-16T14:51:08.0377159Z     return _bootstrap._gcd_import(name[level:], package, level)
+2025-04-16T14:51:08.0377629Z tests/test_init.py:5: in <module>
+2025-04-16T14:51:08.0378469Z     import ai_deck_translator
+2025-04-16T14:51:08.0378839Z ai_deck_translator/__init__.py:17: in <module>
+2025-04-16T14:51:08.0379229Z     from .pptx.enhanced import (
+2025-04-16T14:51:08.0379671Z ai_deck_translator/pptx/enhanced/__init__.py:5: in <module>
+2025-04-16T14:51:08.0380115Z     from .translator import (
+2025-04-16T14:51:08.0380569Z ai_deck_translator/pptx/enhanced/translator.py:17: in <module>
+2025-04-16T14:51:08.0381094Z     from .models import get_translator_for_model
+2025-04-16T14:51:08.0381613Z ai_deck_translator/pptx/enhanced/models/__init__.py:7: in <module>
+2025-04-16T14:51:08.0382115Z     from .openai import OpenAITranslator
+2025-04-16T14:51:08.0382612Z ai_deck_translator/pptx/enhanced/models/openai.py:6: in <module>
+2025-04-16T14:51:08.0383077Z     import openai
+2025-04-16T14:51:08.0383389Z E   ModuleNotFoundError: No module named 'openai'
+2025-04-16T14:51:08.0383941Z ____________________ ERROR collecting tests/test_package.py ____________________
+2025-04-16T14:51:08.0384888Z ImportError while importing test module '/home/runner/work/ai-deck-translator/ai-deck-translator/tests/test_package.py'.
+2025-04-16T14:51:08.0385789Z Hint: make sure your test modules/packages have valid Python names.
+2025-04-16T14:51:08.0386247Z Traceback:
+2025-04-16T14:51:08.0386798Z /opt/hostedtoolcache/Python/3.9.21/x64/lib/python3.9/importlib/__init__.py:127: in import_module
+2025-04-16T14:51:08.0387564Z     return _bootstrap._gcd_import(name[level:], package, level)
+2025-04-16T14:51:08.0388409Z tests/test_package.py:7: in <module>
+2025-04-16T14:51:08.0388795Z     import ai_deck_translator
+2025-04-16T14:51:08.0389149Z ai_deck_translator/__init__.py:17: in <module>
+2025-04-16T14:51:08.0389549Z     from .pptx.enhanced import (
+2025-04-16T14:51:08.0389965Z ai_deck_translator/pptx/enhanced/__init__.py:5: in <module>
+2025-04-16T14:51:08.0390407Z     from .translator import (
+2025-04-16T14:51:08.0390837Z ai_deck_translator/pptx/enhanced/translator.py:17: in <module>
+2025-04-16T14:51:08.0391331Z     from .models import get_translator_for_model
+2025-04-16T14:51:08.0391864Z ai_deck_translator/pptx/enhanced/models/__init__.py:7: in <module>
+2025-04-16T14:51:08.0392373Z     from .openai import OpenAITranslator
+2025-04-16T14:51:08.0392856Z ai_deck_translator/pptx/enhanced/models/openai.py:6: in <module>
+2025-04-16T14:51:08.0393311Z     import openai
+2025-04-16T14:51:08.0393636Z E   ModuleNotFoundError: No module named 'openai'
+2025-04-16T14:51:08.0394216Z ______________________ ERROR collecting tests/test_run.py ______________________
+2025-04-16T14:51:08.0395111Z ImportError while importing test module '/home/runner/work/ai-deck-translator/ai-deck-translator/tests/test_run.py'.
+2025-04-16T14:51:08.0395993Z Hint: make sure your test modules/packages have valid Python names.
+2025-04-16T14:51:08.0396454Z Traceback:
+2025-04-16T14:51:08.0397010Z /opt/hostedtoolcache/Python/3.9.21/x64/lib/python3.9/importlib/__init__.py:127: in import_module
+2025-04-16T14:51:08.0397780Z     return _bootstrap._gcd_import(name[level:], package, level)
+2025-04-16T14:51:08.0398417Z tests/test_run.py:8: in <module>
+2025-04-16T14:51:08.0398821Z     from ai_deck_translator.run import parse_args, main
+2025-04-16T14:51:08.0399273Z ai_deck_translator/__init__.py:17: in <module>
+2025-04-16T14:51:08.0399682Z     from .pptx.enhanced import (
+2025-04-16T14:51:08.0400106Z ai_deck_translator/pptx/enhanced/__init__.py:5: in <module>
+2025-04-16T14:51:08.0400554Z     from .translator import (
+2025-04-16T14:51:08.0401016Z ai_deck_translator/pptx/enhanced/translator.py:17: in <module>
+2025-04-16T14:51:08.0401532Z     from .models import get_translator_for_model
+2025-04-16T14:51:08.0402058Z ai_deck_translator/pptx/enhanced/models/__init__.py:7: in <module>
+2025-04-16T14:51:08.0402581Z     from .openai import OpenAITranslator
+2025-04-16T14:51:08.0403070Z ai_deck_translator/pptx/enhanced/models/openai.py:6: in <module>
+2025-04-16T14:51:08.0403545Z     import openai
+2025-04-16T14:51:08.0403871Z E   ModuleNotFoundError: No module named 'openai'
+2025-04-16T14:51:08.0404622Z ______________________ ERROR collecting tests/test_web.py ______________________
+2025-04-16T14:51:08.0405518Z ImportError while importing test module '/home/runner/work/ai-deck-translator/ai-deck-translator/tests/test_web.py'.
+2025-04-16T14:51:08.0406404Z Hint: make sure your test modules/packages have valid Python names.
+2025-04-16T14:51:08.0429630Z Traceback:
+2025-04-16T14:51:08.0430244Z /opt/hostedtoolcache/Python/3.9.21/x64/lib/python3.9/importlib/__init__.py:127: in import_module
+2025-04-16T14:51:08.0430993Z     return _bootstrap._gcd_import(name[level:], package, level)
+2025-04-16T14:51:08.0431589Z tests/test_web.py:11: in <module>
+2025-04-16T14:51:08.0432140Z     from ai_deck_translator.web.app import create_app, translate_with_progress, CaptureStdout
+2025-04-16T14:51:08.0432808Z ai_deck_translator/__init__.py:17: in <module>
+2025-04-16T14:51:08.0433206Z     from .pptx.enhanced import (
+2025-04-16T14:51:08.0433642Z ai_deck_translator/pptx/enhanced/__init__.py:5: in <module>
+2025-04-16T14:51:08.0434114Z     from .translator import (
+2025-04-16T14:51:08.0434548Z ai_deck_translator/pptx/enhanced/translator.py:17: in <module>
+2025-04-16T14:51:08.0435069Z     from .models import get_translator_for_model
+2025-04-16T14:51:08.0435584Z ai_deck_translator/pptx/enhanced/models/__init__.py:7: in <module>
+2025-04-16T14:51:08.0436087Z     from .openai import OpenAITranslator
+2025-04-16T14:51:08.0436575Z ai_deck_translator/pptx/enhanced/models/openai.py:6: in <module>
+2025-04-16T14:51:08.0437261Z     import openai
+2025-04-16T14:51:08.0437584Z E   ModuleNotFoundError: No module named 'openai'
+2025-04-16T14:51:08.0438049Z =========================== short test summary info ============================
+2025-04-16T14:51:08.0438654Z ERROR tests/test_batch.py
+2025-04-16T14:51:08.0438983Z ERROR tests/test_init.py
+2025-04-16T14:51:08.0439307Z ERROR tests/test_package.py
+2025-04-16T14:51:08.0439620Z ERROR tests/test_run.py
+2025-04-16T14:51:08.0439916Z ERROR tests/test_web.py
+2025-04-16T14:51:08.0440312Z !!!!!!!!!!!!!!!!!!! Interrupted: 5 errors during collection !!!!!!!!!!!!!!!!!!!!
+2025-04-16T14:51:08.0440835Z ============================== 5 errors in 1.11s ===============================
+2025-04-16T14:51:08.1766178Z ##[error]Process completed with exit code 2.

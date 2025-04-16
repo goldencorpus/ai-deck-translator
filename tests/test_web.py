@@ -9,6 +9,13 @@ import json
 import threading
 import time
 from ai_deck_translator.web.app import create_app, translate_with_progress, CaptureStdout
+import pytest
+try:
+    import openai
+except ImportError:
+    openai = None
+
+pytestmark = pytest.mark.skipif(openai is None, reason="openai package not installed")
 
 class TestWebInterface(unittest.TestCase):
     """Test cases for the web interface module."""

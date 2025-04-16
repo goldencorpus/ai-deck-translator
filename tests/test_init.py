@@ -3,6 +3,13 @@ Tests for the __init__.py module.
 """
 import unittest
 import ai_deck_translator
+import pytest
+try:
+    import openai
+except ImportError:
+    openai = None
+
+pytestmark = pytest.mark.skipif(openai is None, reason="openai package not installed")
 
 class TestInit(unittest.TestCase):
     """Test cases for the __init__.py module."""

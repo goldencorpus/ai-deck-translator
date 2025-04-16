@@ -3,6 +3,13 @@ Tests for the batch utilities module.
 """
 import unittest
 from ai_deck_translator.utils.batch import split_dict_into_smart_batches, deduplicate_content
+import pytest
+try:
+    import openai
+except ImportError:
+    openai = None
+
+pytestmark = pytest.mark.skipif(openai is None, reason="openai package not installed")
 
 class TestBatch(unittest.TestCase):
     """Test cases for the batch utilities module."""

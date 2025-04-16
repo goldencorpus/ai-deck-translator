@@ -5,6 +5,13 @@ import unittest
 import importlib
 import pkgutil
 import ai_deck_translator
+import pytest
+try:
+    import openai
+except ImportError:
+    openai = None
+
+pytestmark = pytest.mark.skipif(openai is None, reason="openai package not installed")
 
 class TestPackage(unittest.TestCase):
     """Test cases for the package structure."""

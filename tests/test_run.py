@@ -6,6 +6,13 @@ from unittest.mock import patch, MagicMock
 import sys
 import argparse
 from ai_deck_translator.run import parse_args, main
+import pytest
+try:
+    import openai
+except ImportError:
+    openai = None
+
+pytestmark = pytest.mark.skipif(openai is None, reason="openai package not installed")
 
 class TestRun(unittest.TestCase):
     """Test cases for the run module."""

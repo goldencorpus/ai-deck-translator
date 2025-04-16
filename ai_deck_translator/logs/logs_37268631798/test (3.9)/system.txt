@@ -1,0 +1,5 @@
+2025-04-16T14:50:42.6212935Z Requested labels: ubuntu-latest
+2025-04-16T14:50:42.6212935Z Job defined at: eprouveze/ai-deck-translator/.github/workflows/python-tests.yml@refs/heads/v2
+2025-04-16T14:50:42.6212935Z Waiting for a runner to pick up this job...
+2025-04-16T14:50:42.6956516Z Job is waiting for a hosted runner to come online.
+2025-04-16T14:50:42.6956565Z Job is about to start running on the hosted runner: GitHub Actions

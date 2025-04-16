@@ -3,7 +3,10 @@ OpenAI GPT model implementation for translation.
 """
 import json
 import time
-import openai
+try:
+    import openai
+except ImportError:
+    openai = None
 from typing import Dict, Any, Optional
 
 from .base import TranslationModel, ModelResponse
@@ -21,6 +24,11 @@ class OpenAITranslator(TranslationModel):
             api_key: OpenAI API key (optional)
             max_retries: Maximum number of retries for API calls
         """
+        if openai is None:
+            raise ImportError(
+                "The 'openai' package is required to use OpenAITranslator. "
+                "Install it with 'pip install openai'."
+            )
         super().__init__(api_key, max_retries)
         self.model = model
         self.client = openai.OpenAI(api_key=self.api_key)

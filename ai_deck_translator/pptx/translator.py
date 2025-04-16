@@ -96,6 +96,276 @@ def extract_json_blocks(text):
     except:
         return None
 
+def standardize_ids(text_dict, slide_metadata):
+    """
+    Standardize ID formats to ensure consistency between extraction and updating.
+    
+    Args:
+        text_dict: Dictionary of text elements
+        slide_metadata: Metadata about slides
+        
+    Returns:
+        dict: Dictionary with standardized IDs
+    """
+    logger.info("Standardizing ID formats...")
+    
+    standardized_dict = {}
+    id_mapping = {}
+    
+    # Pattern detection for various ID formats
+    patterns = {
+        r'^slide(\d+)_shape(\d+)$': lambda m: f"slide{m.group(1)}_shape{m.group(2)}",
+        r'^slide_(\d+)_element_(\d+)$': lambda m: f"slide{m.group(1)}_shape{m.group(2)}",
+        r'^slide(\d+)_notes$': lambda m: f"slide{m.group(1)}_notes",
+        r'^slide_(\d+)_notes$': lambda m: f"slide{m.group(1)}_notes",
+        r'^slide(\d+)_shape(\d+)_table_r(\d+)c(\d+)$': lambda m: f"slide{m.group(1)}_shape{m.group(2)}_table_r{m.group(3)}c{m.group(4)}",
+        r'^slide_(\d+)_element_(\d+)_r(\d+)_c(\d+)$': lambda m: f"slide{m.group(1)}_shape{m.group(2)}_table_r{m.group(3)}c{m.group(4)}",
+        r'^slide(\d+)_smartart_(.+)$': lambda m: f"slide{m.group(1)}_smartart_{m.group(2)}",
+        r'^slide_(\d+)_smartart_(.+)$': lambda m: f"slide{m.group(1)}_smartart_{m.group(2)}",
+        r'^slide(\d+)_xml_(.+)$': lambda m: f"slide{m.group(1)}_xml_{m.group(2)}",
+        r'^slide_(\d+)_xml_(.+)$': lambda m: f"slide{m.group(1)}_xml_{m.group(2)}"
+    }
+    
+    # Process each key in the text dictionary
+    for old_id, text in text_dict.items():
+        standardized_id = old_id
+        
+        # Try to match and standardize the ID
+        for pattern, formatter in patterns.items():
+            match = re.match(pattern, old_id)
+            if match:
+                standardized_id = formatter(match)
+                break
+        
+        # Add to the standardized dictionary and track the mapping
+        standardized_dict[standardized_id] = text
+        if standardized_id != old_id:
+            id_mapping[old_id] = standardized_id
+            logger.debug(f"Standardized ID: {old_id} -> {standardized_id}")
+    
+    # Log results
+    if id_mapping:
+        logger.info(f"Standardized {len(id_mapping)} IDs to ensure consistency")
+    
+    return standardized_dict
+
+def validate_translation_ids(text_dict, translated_dict, slide_metadata):
+    """
+    Validate that all IDs in the original text dict have corresponding IDs in the translated dict.
+    
+    Args:
+        text_dict: Dictionary of original text elements
+        translated_dict: Dictionary of translated text elements
+        slide_metadata: Metadata about slides
+        
+    Returns:
+        tuple: (bool for success, dict of missing IDs, dict of fixed translations)
+    """
+    logger.info("Validating translation IDs...")
+    
+    missing_ids = {}
+    fixed_translations = translated_dict.copy()
+    
+    # Check for missing IDs
+    for original_id in text_dict:
+        if original_id not in translated_dict:
+            missing_ids[original_id] = text_dict[original_id]
+            logger.warning(f"Missing translation for ID: {original_id}")
+    
+    # If there are missing IDs, try to fix them by looking for alternative formats
+    if missing_ids:
+        logger.warning(f"Found {len(missing_ids)} missing translations. Attempting to fix...")
+        
+        # Create a mapping of original text to (original_id, text) for content matching
+        orig_text_to_id = {text: (id, text) for id, text in text_dict.items()}
+        
+        # First, try to match based on key format pattern matches
+        patterns = {
+            (r'^slide(\d+)_shape(\d+)$', r'^slide_(\d+)_element_(\d+)$'): 
+                lambda old, new: re.sub(r'^slide(\d+)_shape(\d+)$', r'slide_\1_element_\2', old),
+            
+            (r'^slide_(\d+)_element_(\d+)$', r'^slide(\d+)_shape(\d+)$'): 
+                lambda old, new: re.sub(r'^slide_(\d+)_element_(\d+)$', r'slide\1_shape\2', old),
+                
+            (r'^slide(\d+)_notes$', r'^slide_(\d+)_notes$'): 
+                lambda old, new: re.sub(r'^slide(\d+)_notes$', r'slide_\1_notes', old),
+                
+            (r'^slide_(\d+)_notes$', r'^slide(\d+)_notes$'): 
+                lambda old, new: re.sub(r'^slide_(\d+)_notes$', r'slide\1_notes', old),
+                
+            (r'^slide(\d+)_shape(\d+)_table_r(\d+)c(\d+)$', r'^slide_(\d+)_element_(\d+)_r(\d+)_c(\d+)$'): 
+                lambda old, new: re.sub(r'^slide(\d+)_shape(\d+)_table_r(\d+)c(\d+)$', 
+                                        r'slide_\1_element_\2_r\3_c\4', old),
+                
+            (r'^slide_(\d+)_element_(\d+)_r(\d+)_c(\d+)$', r'^slide(\d+)_shape(\d+)_table_r(\d+)c(\d+)$'): 
+                lambda old, new: re.sub(r'^slide_(\d+)_element_(\d+)_r(\d+)_c(\d+)$', 
+                                        r'slide\1_shape\2_table_r\3c\4', old)
+        }
+        
+        # Apply the pattern-based transformations
+        pattern_transformations = {}
+        for missing_id in list(missing_ids.keys()):
+            for (old_pattern, new_pattern), transformer in patterns.items():
+                if re.match(old_pattern, missing_id):
+                    transformed_id = transformer(missing_id, new_pattern)
+                    if transformed_id in translated_dict:
+                        pattern_transformations[missing_id] = transformed_id
+                        break
+        
+        # Apply transformations and update missing IDs
+        for missing_id, transformed_id in pattern_transformations.items():
+            if transformed_id in translated_dict:
+                fixed_translations[missing_id] = translated_dict[transformed_id]
+                logger.debug(f"Fixed missing ID with pattern transform: {missing_id} -> {transformed_id}")
+                if missing_id in missing_ids:
+                    del missing_ids[missing_id]
+        
+        # For any remaining missing IDs, try normalized matching
+        if missing_ids:
+            # Create normalized keys to help with matching
+            def normalize_key(key):
+                return re.sub(r'[_\s]', '', key.lower())
+                
+            normalized_trans_keys = {normalize_key(k): k for k in translated_dict.keys()}
+            
+            for missing_id in list(missing_ids.keys()):
+                if missing_id in fixed_translations:
+                    continue
+                
+                norm_missing = normalize_key(missing_id)
+                if norm_missing in normalized_trans_keys:
+                    trans_key = normalized_trans_keys[norm_missing]
+                    fixed_translations[missing_id] = translated_dict[trans_key]
+                    logger.debug(f"Fixed missing ID with normalized key: {missing_id} -> {trans_key}")
+                    if missing_id in missing_ids:
+                        del missing_ids[missing_id]
+        
+        # For any still missing IDs, try positional matching based on slide/element numbers
+        if missing_ids:
+            # Extract slide/shape numbers from IDs for better matching
+            def extract_numbers(key):
+                slide_match = re.search(r'slide[_]?(\d+)', key)
+                element_match = re.search(r'(shape|element)[_]?(\d+)', key)
+                
+                slide_num = int(slide_match.group(1)) if slide_match else 0
+                element_num = int(element_match.group(2)) if element_match else -1
+                
+                return (slide_num, element_num)
+            
+            # Group keys by slide/element numbers
+            trans_by_position = {}
+            for k in translated_dict.keys():
+                try:
+                    pos = extract_numbers(k)
+                    if pos not in trans_by_position:
+                        trans_by_position[pos] = []
+                    trans_by_position[pos].append(k)
+                except (AttributeError, ValueError, IndexError):
+                    continue
+            
+            # Match missing IDs by position
+            for missing_id in list(missing_ids.keys()):
+                if missing_id in fixed_translations:
+                    continue
+                
+                try:
+                    pos = extract_numbers(missing_id)
+                    if pos in trans_by_position and trans_by_position[pos]:
+                        trans_key = trans_by_position[pos][0]
+                        fixed_translations[missing_id] = translated_dict[trans_key]
+                        logger.debug(f"Fixed missing ID with positional match: {missing_id} -> {trans_key}")
+                        if missing_id in missing_ids:
+                            del missing_ids[missing_id]
+                except (AttributeError, ValueError, IndexError):
+                    continue
+        
+        # Check how many IDs we fixed
+        fixed_count = len(missing_ids) - len([id for id in missing_ids if id not in fixed_translations])
+        if fixed_count > 0:
+            logger.info(f"Fixed {fixed_count} of {len(missing_ids)} missing translations")
+        
+        # Final check for still missing IDs
+        still_missing = [id for id in missing_ids if id not in fixed_translations]
+        if still_missing:
+            logger.warning(f"Still missing {len(still_missing)} translations after fixes")
+            for id in still_missing[:5]:  # Show only first few to avoid log spam
+                logger.warning(f"  Missing: {id}")
+            if len(still_missing) > 5:
+                logger.warning(f"  ... and {len(still_missing) - 5} more")
+    
+    success = len(missing_ids) == 0 or all(id in fixed_translations for id in missing_ids)
+    return success, missing_ids, fixed_translations
+
+def verify_translation_keys(original_keys, translated_keys):
+    """
+    Verify that translation keys in API response match the input keys exactly.
+    
+    Args:
+        original_keys: Set of keys in the original request
+        translated_keys: Set of keys in the API response
+        
+    Returns:
+        tuple: (bool for exact match, set of missing keys, set of changed keys)
+    """
+    # Check for exact matches
+    missing_keys = set(original_keys) - set(translated_keys)
+    
+    # Check for format changes
+    format_changes = {}
+    
+    # Create normalized versions of the keys for comparison
+    normalized_orig = {k.lower().replace('_', ''): k for k in original_keys}
+    normalized_trans = {k.lower().replace('_', ''): k for k in translated_keys}
+    
+    # Helper function to normalize key formats for comparison
+    def normalize_for_comparison(key):
+        # Remove all underscores and convert to lowercase
+        basic = key.lower().replace('_', '')
+        # Replace common format variations
+        for pattern, replacement in [
+            ('slide', 's'),
+            ('element', 'shape'),
+            ('shape', 'sh'),
+            ('notes', 'n')
+        ]:
+            basic = basic.replace(pattern, replacement)
+        return basic
+    
+    # Build lookup dictionaries with normalized keys
+    advanced_norm_orig = {normalize_for_comparison(k): k for k in original_keys}
+    advanced_norm_trans = {normalize_for_comparison(k): k for k in translated_keys}
+    
+    # Find format changes - first using simple normalization
+    for orig_norm, orig_key in normalized_orig.items():
+        # Skip if key is already present in translated keys
+        if orig_key in translated_keys:
+            continue
+        
+        # Skip if key is in missing keys and not found in any normalized form
+        if orig_key in missing_keys and orig_norm not in normalized_trans:
+            continue
+        
+        # Check if normalized key exists in translated keys
+        if orig_norm in normalized_trans:
+            format_changes[orig_key] = normalized_trans[orig_norm]
+            if orig_key in missing_keys:
+                missing_keys.remove(orig_key)
+    
+    # If we still have missing keys, try advanced normalization
+    if missing_keys:
+        remaining_missing = set()
+        for orig_key in missing_keys:
+            norm_key = normalize_for_comparison(orig_key)
+            if norm_key in advanced_norm_trans:
+                format_changes[orig_key] = advanced_norm_trans[norm_key]
+            else:
+                remaining_missing.add(orig_key)
+        missing_keys = remaining_missing
+    
+    # Return the verification result
+    exact_match = (len(missing_keys) == 0 and len(format_changes) == 0)
+    return exact_match, missing_keys, format_changes
+
 def translate_batch(batch, batch_index, slide_metadata, source_language, target_language, api_key=None, max_retries=3, cost_tracker=None):
     """
     Translate a batch of text using the Anthropic API.
@@ -167,6 +437,7 @@ IMPORTANT GUIDELINES:
 5. Respect the context of each text element (slide title, body text, etc.).
 6. Do not add or remove content; translate only what is provided.
 7. Return your response as a JSON object with the same structure as the input.
+8. CRITICAL: You must preserve the exact key format for each item. Do not modify key formats such as "slide1_shape0" or "slide_1_element_0" in any way.
 
 PRIVACY NOTICE:
 - Do not store or remember any content from this presentation.
@@ -188,6 +459,11 @@ Context information (to help you understand the content better):
 ```json
 {json.dumps(context_info, ensure_ascii=False, indent=2)}
 ```
+
+IMPORTANT INSTRUCTION:
+- Your response must be a JSON object with EXACTLY the same keys as the input.
+- Do not modify key formats (like "slide1_shape0" or "slide_1_element_0") in any way.
+- Only translate the text values, leaving keys unchanged.
 
 Please return ONLY a JSON object with the same keys and the translated content as values.
 Do not include any explanations or notes outside the JSON object.
@@ -232,6 +508,27 @@ Do not include any explanations or notes outside the JSON object.
             if json_content:
                 try:
                     translated_batch = json.loads(json_content)
+                    
+                    # Verify that keys match exactly
+                    exact_match, missing_keys, format_changes = verify_translation_keys(
+                        batch.keys(), translated_batch.keys()
+                    )
+                    
+                    # Log any issues with key matching
+                    if not exact_match:
+                        if missing_keys:
+                            logger.warning(f"API response missing {len(missing_keys)} keys in batch {batch_index}")
+                            for k in list(missing_keys)[:5]:  # Show only first few to avoid log spam
+                                logger.warning(f"  Missing key: {k}")
+                        
+                        if format_changes:
+                            logger.warning(f"API response modified {len(format_changes)} key formats in batch {batch_index}")
+                            for orig, changed in list(format_changes.items())[:5]:
+                                logger.warning(f"  Key format changed: {orig} -> {changed}")
+                                # Fix the format changes by copying values to the correct keys
+                                if changed in translated_batch:
+                                    translated_batch[orig] = translated_batch[changed]
+                    
                     break  # Success, exit the retry loop
                 except json.JSONDecodeError as e:
                     logger.error(f"Error parsing JSON in batch {batch_index}: {e}")
@@ -267,6 +564,9 @@ def translate_text(text_dict, slide_metadata, source_language, target_language, 
     Returns:
         dict: Dictionary of translated text elements
     """
+    # Standardize IDs in the text dictionary
+    text_dict = standardize_ids(text_dict, slide_metadata)
+    
     # Set up recovery system
     file_id = f"pptx_{datetime.now().strftime('%Y%m%d%H%M%S')}"
     recovery_system = setup_recovery_system(file_id, text_dict, slide_metadata, source_language, target_language, resume_file)
@@ -354,6 +654,12 @@ def translate_text(text_dict, slide_metadata, source_language, target_language, 
         
         translated_texts = expanded_translations
     
+    # Validate and fix translation IDs
+    success, missing_ids, fixed_translations = validate_translation_ids(text_dict, translated_texts, slide_metadata)
+    if not success:
+        logger.warning(f"Some translations ({len(missing_ids)}) could not be mapped correctly")
+        translated_texts = fixed_translations
+    
     # Log cost information
     if cost_tracker["total_cost"] > 0:
         logger.info(f"Translation complete. Total tokens: {cost_tracker['total_prompt_tokens']} input, {cost_tracker['total_completion_tokens']} output")
@@ -395,6 +701,14 @@ def translate_pptx(input_file, output_file, source_language="en", target_languag
         resume_file=resume_file,
         api_key=api_key
     )
+    
+    # Validate the translations before updating
+    logger.info("Validating translations before updating presentation...")
+    success, missing, fixed = validate_translation_ids(text_dict, translated_texts, slide_metadata)
+    
+    if not success:
+        logger.warning(f"Some translations ({len(missing)}) may not be applied correctly")
+        translated_texts = fixed
     
     # Update the presentation with translated text
     logger.info("Updating presentation with translated text...")

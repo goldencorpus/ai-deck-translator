@@ -494,57 +494,6 @@ def translate_text(
     logger.info(f"Translation completed: {len(translated_elements)} elements translated to {target_language}")
     return translated_elements
 
-def translate_batch(
-    texts: List[str],
-    target_language: str,
-    translate_func: Callable[[str, str], str],
-    source_language: str = "en",
-    use_glossary: bool = True
-) -> List[str]:
-    """
-    Translate a batch of text elements.
-    
-    This is a helper function that applies a translation function to each text element
-    in a batch. It's used by the translate_text function to process batches of text.
-    
-    Args:
-        texts (List[str]): List of text elements to translate
-        target_language (str): Target language code (e.g., 'ja' for Japanese)
-        translate_func (Callable): Function to translate a single text element
-            The function should accept a string and a target language code,
-            and return the translated string
-        source_language (str, optional): Source language code. Defaults to "en".
-        use_glossary (bool, optional): Whether to use the glossary. Defaults to True.
-    
-    Returns:
-        List[str]: List of translated text elements in the same order
-        
-    Raises:
-        TranslationError: If there's an error during translation
-    """
-    translated = []
-    
-    for text in texts:
-        try:
-            # Translate the text
-            translated_text = translate_func(text, target_language)
-            
-            # Apply glossary if enabled
-            if use_glossary:
-                translated_text = apply_glossary_to_text(
-                    text, 
-                    source_language, 
-                    target_language, 
-                    translated_text
-                )
-            
-            translated.append(translated_text)
-        except Exception as e:
-            logger.error(f"Error translating text: {e}")
-            raise TranslationError(f"Error translating text: {str(e)}")
-    
-    return translated
-
 def translate_slides(presentation_id, source_language=None, target_language=None, resume_file=None, api_key=None, web_state=None):
     """
     Translate a Google Slides presentation from one language to another.

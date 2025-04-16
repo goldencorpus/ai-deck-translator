@@ -1,0 +1,11 @@
+﻿2025-04-16T14:51:06.7779488Z ##[group]Run echo "CLAUDE_API_KEY=dummy_key_for_testing" > .env
+2025-04-16T14:51:06.7779927Z [36;1mecho "CLAUDE_API_KEY=dummy_key_for_testing" > .env[0m
+2025-04-16T14:51:06.7830492Z shell: /usr/bin/bash -e {0}
+2025-04-16T14:51:06.7830724Z env:
+2025-04-16T14:51:06.7830962Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.16/x64
+2025-04-16T14:51:06.7831373Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.16/x64/lib/pkgconfig
+2025-04-16T14:51:06.7831762Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.16/x64
+2025-04-16T14:51:06.7832102Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.16/x64
+2025-04-16T14:51:06.7832441Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.16/x64
+2025-04-16T14:51:06.7832773Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.16/x64/lib
+2025-04-16T14:51:06.7833053Z ##[endgroup]
