@@ -18,7 +18,13 @@ logger = get_logger(__name__)
 
 
 def update_slides(
-    slides_service, drive_service, presentation_id, translated_texts, target_language=None, web_state=None, **kwargs
+    slides_service,
+    drive_service,
+    presentation_id,
+    translated_texts,
+    target_language=None,
+    web_state=None,
+    **kwargs,
 ):
     """
     Update a Google Slides presentation with translated text.

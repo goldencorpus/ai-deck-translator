@@ -159,7 +159,9 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     # If config_path is provided, load from file
     if config_path:
         if not os.path.exists(config_path):
-            logger.warning(f"Configuration file {config_path} not found. Using default values.")
+            logger.warning(
+                f"Configuration file {config_path} not found. Using default values."
+            )
         else:
             try:
                 with open(config_path, "r") as f:
@@ -184,7 +186,9 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         elif isinstance(default_values, dict):
             for key, value in default_values.items():
                 if key not in config[section]:
-                    logger.warning(f"Missing key '{key}' in section '{section}', using default.")
+                    logger.warning(
+                        f"Missing key '{key}' in section '{section}', using default."
+                    )
                     config[section][key] = value
 
     # Validate loaded config
