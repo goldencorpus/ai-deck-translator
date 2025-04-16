@@ -68,6 +68,23 @@ class APIError(AIDeckTranslatorError):
         super().__init__(message)
 
 
+class RateLimitError(APIError):
+    """
+    Exception raised when API rate limits are exceeded.
+    
+    This exception is raised when an API request is rejected due to
+    rate limiting or quota restrictions.
+    
+    Examples:
+        - Too many requests in a time period
+        - API quota exceeded
+        - API usage limits reached
+    """
+    def __init__(self, message="API rate limit exceeded", retry_after=None):
+        self.retry_after = retry_after
+        super().__init__(message)
+
+
 class TranslationError(AIDeckTranslatorError):
     """
     Exception raised for translation failures.

@@ -18,6 +18,7 @@ import re
 import anthropic
 import time
 from datetime import datetime
+from typing import Dict, List, Any, Optional, Callable
 from .. import config
 from ..auth.google_auth import authenticate_google
 from ..core.extractor import extract_text

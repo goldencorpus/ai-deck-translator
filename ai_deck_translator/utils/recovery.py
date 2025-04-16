@@ -9,6 +9,8 @@ job including completed and pending work.
 Public Functions:
     setup_recovery_system: Set up or load a recovery system for translation
     list_recovery_files: List available recovery files for resuming translations
+    save_recovery_file: Save a recovery file with translation progress
+    load_recovery_file: Load translation progress from a recovery file
 """
 import os
 import json
@@ -217,4 +219,65 @@ def list_recovery_files() -> List[Dict[str, Any]]:
     recovery_files.sort(key=lambda x: x["timestamp"], reverse=True)
     
     logger.info(f"Found {len(recovery_files)} recovery files")
-    return recovery_files 
+    return recovery_files
+
+def save_recovery_file(file_path: str, 
+                      recovery_state: Dict[str, Any]) -> None:
+    """
+    Save the recovery state to a file.
+    
+    Args:
+        file_path (str): Path to save the recovery file
+        recovery_state (dict): Recovery state to save
+        
+    Raises:
+        RecoveryError: If there's an error saving the recovery file
+    """
+    try:
+        # Update dynamic fields
+        recovery_state["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Save to file
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(recovery_state, f, ensure_ascii=False, indent=2)
+            
+        logger.debug(f"Saved recovery state to {file_path}: "
+                    f"{recovery_state.get('translated_items', 0)}/{recovery_state.get('total_items', 0)} items")
+    except Exception as e:
+        logger.error(f"Error saving recovery state: {str(e)}")
+        raise RecoveryError(f"Failed to save recovery file: {str(e)}")
+
+def load_recovery_file(file_path: str) -> Dict[str, Any]:
+    """
+    Load recovery state from a file.
+    
+    Args:
+        file_path (str): Path to the recovery file
+        
+    Returns:
+        dict: The loaded recovery state
+        
+    Raises:
+        RecoveryError: If there's an error loading the recovery file
+    """
+    try:
+        logger.info(f"Loading recovery state from {file_path}")
+        with open(file_path, 'r', encoding='utf-8') as f:
+            recovery_state = json.load(f)
+        
+        # Validate the recovery state
+        required_keys = ["text_dict", "translated_texts", "source_language", "target_language"]
+        if not all(key in recovery_state for key in required_keys):
+            raise RecoveryError(f"Invalid recovery file: missing required keys")
+        
+        logger.info(f"Successfully loaded recovery state: "
+                  f"{recovery_state.get('translated_items', 0)} of {recovery_state.get('total_items', 0)} "
+                  f"items already translated")
+        
+        return recovery_state
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing recovery file {file_path}: {str(e)}")
+        raise RecoveryError(f"Invalid recovery file format: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error loading recovery file {file_path}: {str(e)}")
+        raise RecoveryError(f"Failed to load recovery file: {str(e)}") 

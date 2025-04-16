@@ -15,6 +15,13 @@ from ..core.translator import translate_text
 from ..core.updater import update_slides as update_slides_gslides
 from ..pptx.extractor import extract_text as extract_text_pptx
 from ..pptx.updater import update_slides as update_slides_pptx
+from ..pptx.enhanced import (
+    translate_presentation,
+    QUALITY_PROFESSIONAL,
+    QUALITY_STANDARD,
+    QUALITY_DRAFT,
+    QUALITY_ECONOMY
+)
 from ..services.google_translate import translate_batch as google_translate_batch
 from ..services.anthropic import translate_batch as anthropic_translate_batch
 from ..utils.logging import get_logger, setup_logging
@@ -38,10 +45,10 @@ def parse_args():
     
     # Translation options
     parser.add_argument("--target-language", "-t", required=True, help="Target language code (e.g., 'ja' for Japanese)")
-    parser.add_argument("--source-language", "-s", help="Source language code (auto-detected if not specified)")
+    parser.add_argument("--source-language", "-s", default="en", help="Source language code (default: en)")
     
     # Service options
-    parser.add_argument("--service", choices=["google", "anthropic"], default="google", 
+    parser.add_argument("--service", choices=["google", "anthropic", "enhanced"], default="google", 
                         help="Translation service to use (default: google)")
     parser.add_argument("--api-key", help="API key for the translation service")
     
@@ -56,6 +63,13 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=50, help="Maximum number of elements per batch")
     parser.add_argument("--delay", type=float, default=0.5, help="Delay between batches in seconds")
     parser.add_argument("--translate-notes", action="store_true", help="Translate slide notes in addition to slide content")
+    
+    # Enhanced translator options
+    parser.add_argument("--quality", choices=[QUALITY_PROFESSIONAL, QUALITY_STANDARD, QUALITY_DRAFT, QUALITY_ECONOMY],
+                        default=QUALITY_STANDARD, help="Translation quality level (for enhanced service)")
+    parser.add_argument("--no-cache", action="store_true", help="Disable translation cache (for enhanced service)")
+    parser.add_argument("--no-qa", action="store_true", help="Disable quality assurance (for enhanced service)")
+    parser.add_argument("--workers", type=int, help="Number of parallel workers (for enhanced service)")
     
     return parser.parse_args()
 
@@ -79,6 +93,37 @@ def main():
     try:
         # Determine if input is a Google Slides ID or a PPTX file
         is_google_slides = not os.path.exists(args.input) and len(args.input) == 44
+        
+        # If using enhanced translator, ensure we're working with PPTX files
+        if args.service == "enhanced" and is_google_slides:
+            logger.error("Enhanced translation service only works with PPTX files, not Google Slides")
+            return 1
+        
+        # Use enhanced translator directly if selected
+        if args.service == "enhanced" and not is_google_slides:
+            logger.info("Using enhanced translator service for PPTX file")
+            
+            result = translate_presentation(
+                args.input,
+                args.output,
+                source_language=args.source_language,
+                target_language=args.target_language,
+                quality_level=args.quality,
+                resume_file=args.recovery_file,
+                api_key=args.api_key,
+                use_cache=not args.no_cache,
+                qa_enabled=not args.no_qa,
+                max_workers=args.workers
+            )
+            
+            if result["success"]:
+                logger.info(f"Successfully translated presentation: {args.output}")
+                logger.info(f"Translated {result['translated_elements']} of {result['text_elements']} text elements")
+                logger.info(f"Translation completed in {result['duration_seconds']:.2f} seconds")
+                return 0
+            else:
+                logger.error(f"Failed to translate presentation: {result.get('error', 'Unknown error')}")
+                return 1
         
         # Extract text from the presentation
         logger.info(f"Extracting text from {'Google Slides' if is_google_slides else 'PowerPoint'} presentation")

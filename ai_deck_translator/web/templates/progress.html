@@ -61,6 +61,11 @@
                                 <div class="status-icon status-running">⚙️</div>
                                 <h3>Translation in Progress</h3>
                                 <p>Please wait while your presentation is being translated...</p>
+                                {% if state.note %}
+                                <div class="alert alert-info">
+                                    <p><strong>Note:</strong> {{ state.note }}</p>
+                                </div>
+                                {% endif %}
                             {% elif state.status == "completed" %}
                                 <div class="status-icon status-completed">✅</div>
                                 <h3>Translation Completed</h3>
@@ -69,10 +74,27 @@
                                 <div class="status-icon status-failed">❌</div>
                                 <h3>Translation Failed</h3>
                                 <p>{{ state.error }}</p>
+                                {% if "403" in state.error or "Access denied" in state.error %}
+                                <div class="alert alert-warning mt-3">
+                                    <h5>Permission Error</h5>
+                                    <p>It looks like there's a permission issue with your Google Slides presentation. Please check that:</p>
+                                    <ul>
+                                        <li>The presentation ID is correct</li>
+                                        <li>The presentation is shared with the email address used for the Google API access</li>
+                                        <li>The sharing permissions include view access for extraction, and edit access for updating</li>
+                                    </ul>
+                                    <p>After adjusting permissions, you can <a href="/">try again</a>.</p>
+                                </div>
+                                {% endif %}
                             {% else %}
                                 <div class="status-icon">⏳</div>
                                 <h3>Preparing Translation</h3>
                                 <p>Setting up the translation process...</p>
+                                {% if state.note %}
+                                <div class="alert alert-info">
+                                    <p><strong>Note:</strong> {{ state.note }}</p>
+                                </div>
+                                {% endif %}
                             {% endif %}
                         </div>
 
@@ -95,11 +117,114 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // For debug purposes, show initial state from server
+        console.log("Initial state from server:", {
+            status: "{{ state.status }}",
+            progress: {{ state.progress }},
+            total: {{ state.total }},
+            percent: {{ state.percent }}
+        });
+
+        // Track if we've already handled completion
+        let completionHandled = false;
+        let errorHandled = false;
+
+        // Function to handle completion
+        function handleCompletion() {
+            if (completionHandled) {
+                console.log("Completion already handled, skipping");
+                return;
+            }
+            
+            console.log("Handling completion, preparing redirect");
+            completionHandled = true;
+            
+            // Update UI to show completion
+            document.getElementById('status-container').innerHTML = `
+                <div class="status-icon status-completed">✅</div>
+                <h3>Translation Completed</h3>
+                <p>Your presentation has been successfully translated!</p>
+                <p class="text-success">Redirecting to download page in <span id="countdown">3</span> seconds...</p>
+            `;
+            
+            // Show download button
+            document.getElementById('action-buttons').innerHTML = `
+                <a href="/download" class="btn btn-primary">Download Translated Presentation</a>
+                <a href="/" class="btn btn-outline-secondary">Back to Home</a>
+            `;
+            
+            // Stop polling
+            clearInterval(progressInterval);
+            
+            // Auto-redirect to download page after 3 seconds
+            let countdown = 3;
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('countdown').innerText = countdown;
+                console.log(`Redirecting in ${countdown} seconds...`);
+                if (countdown <= 0) {
+                    console.log("Countdown finished, redirecting to download page now");
+                    clearInterval(countdownInterval);
+                    window.location.href = '/download';
+                }
+            }, 1000);
+        }
+        
+        // Function to handle errors
+        function handleError(data) {
+            if (errorHandled) {
+                console.log("Error already handled, skipping");
+                return;
+            }
+            
+            errorHandled = true;
+            console.log("Handling error:", data.error);
+            
+            let errorHtml = `
+                <div class="status-icon status-failed">❌</div>
+                <h3>Translation Failed</h3>
+                <p>${data.error || 'An error occurred during translation.'}</p>
+            `;
+            
+            // Add specialized help for 403/permission errors
+            if (data.error && (data.error.includes('403') || data.error.includes('Access denied'))) {
+                errorHtml += `
+                <div class="alert alert-warning mt-3">
+                    <h5>Permission Error</h5>
+                    <p>It looks like there's a permission issue with your Google Slides presentation. Please check that:</p>
+                    <ul>
+                        <li>The presentation ID is correct</li>
+                        <li>The presentation is shared with the email address used for the Google API access</li>
+                        <li>The sharing permissions include view access for extraction, and edit access for updating</li>
+                    </ul>
+                    <p>After adjusting permissions, you can try again.</p>
+                </div>
+                `;
+            }
+            
+            // Update status container
+            document.getElementById('status-container').innerHTML = errorHtml;
+            
+            // Update action buttons
+            document.getElementById('action-buttons').innerHTML = `
+                <a href="/" class="btn btn-outline-secondary">Back to Home</a>
+            `;
+            
+            // Stop polling
+            clearInterval(progressInterval);
+        }
+
         // Function to update progress
         function updateProgress() {
+            console.log("Fetching translation status...");
             fetch('/status')
-                .then(response => response.json())
+                .then(response => {
+                    console.log("Status response received:", response.status, response.statusText);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log("Status update received:", data);
+                    
                     // Update progress bar
                     const progressBar = document.getElementById('progress-bar');
                     progressBar.style.width = data.percent + '%';
@@ -112,42 +237,37 @@
                     
                     // Update status container
                     const statusContainer = document.getElementById('status-container');
+                    console.log("Current status:", data.status);
                     
                     if (data.status === 'running') {
-                        statusContainer.innerHTML = `
+                        let statusHtml = `
                             <div class="status-icon status-running">⚙️</div>
                             <h3>Translation in Progress</h3>
                             <p>Please wait while your presentation is being translated...</p>
                         `;
+                        
+                        // Add note if present
+                        if (data.note) {
+                            statusHtml += `
+                            <div class="alert alert-info">
+                                <p><strong>Note:</strong> ${data.note}</p>
+                            </div>
+                            `;
+                        }
+                        
+                        statusContainer.innerHTML = statusHtml;
+                        
+                        // Check if progress is at 100% despite status still being 'running'
+                        if (data.progress > 0 && data.total > 0 && data.progress === data.total) {
+                            console.log("Progress is at 100% but status is still 'running', treating as completed");
+                            handleCompletion();
+                        }
                     } else if (data.status === 'completed') {
-                        statusContainer.innerHTML = `
-                            <div class="status-icon status-completed">✅</div>
-                            <h3>Translation Completed</h3>
-                            <p>Your presentation has been successfully translated!</p>
-                        `;
-                        
-                        // Show download button
-                        document.getElementById('action-buttons').innerHTML = `
-                            <a href="/download" class="btn btn-primary">Download Translated Presentation</a>
-                            <a href="/" class="btn btn-outline-secondary">Back to Home</a>
-                        `;
-                        
-                        // Stop polling
-                        clearInterval(progressInterval);
+                        console.log("Status is completed, handling completion");
+                        handleCompletion();
                     } else if (data.status === 'failed') {
-                        statusContainer.innerHTML = `
-                            <div class="status-icon status-failed">❌</div>
-                            <h3>Translation Failed</h3>
-                            <p>${data.error || 'An error occurred during translation.'}</p>
-                        `;
-                        
-                        // Update action buttons
-                        document.getElementById('action-buttons').innerHTML = `
-                            <a href="/" class="btn btn-outline-secondary">Back to Home</a>
-                        `;
-                        
-                        // Stop polling
-                        clearInterval(progressInterval);
+                        console.log("Translation failed:", data.error);
+                        handleError(data);
                     }
                 })
                 .catch(error => {
@@ -155,9 +275,25 @@
                 });
         }
         
-        // Update progress immediately and then every 2 seconds
-        updateProgress();
-        const progressInterval = setInterval(updateProgress, 2000);
+        // Check initial state
+        if ("{{ state.status }}" === "completed") {
+            console.log("Initial state is already completed, handling completion immediately");
+            handleCompletion();
+        } else if ("{{ state.status }}" === "failed") {
+            console.log("Initial state shows failure, handling error immediately");
+            handleError({error: "{{ state.error|e }}"});
+        } else {
+            // Update progress immediately and then every 2 seconds
+            console.log("Starting progress updates");
+            updateProgress();
+            const progressInterval = setInterval(updateProgress, 2000);
+            
+            // Set a safety timeout - if not completed after 5 minutes, stop checking
+            setTimeout(() => {
+                console.log("Safety timeout reached, clearing interval");
+                clearInterval(progressInterval);
+            }, 5 * 60 * 1000);
+        }
     </script>
 </body>
 </html> 
