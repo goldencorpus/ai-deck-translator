@@ -883,6 +883,33 @@ def create_app(debug=False):
             )
             return redirect(url_for("index"))
 
+    @app.route("/translate_with_progress")
+    def translate_with_progress():
+        """
+        Simulates a translation process and updates the global `translation_state`.
+        Args:
+            presentation_id (str): ID of the presentation to translate.
+            source_language (str): Source language code.
+            target_language (str): Target language code.
+            api_key (str): API key for translation.
+        Returns:
+            None
+        """
+        presentation_id = request.args.get("presentation_id")
+        source_language = request.args.get("source_language")
+        target_language = request.args.get("target_language")
+        api_key = request.args.get("api_key")
+
+        if not presentation_id or not source_language or not target_language or not api_key:
+            return jsonify({"error": "Missing parameters"}), 400
+
+        try:
+            # Simulate translation progress
+            translate_with_progress(presentation_id, source_language, target_language, api_key)
+            return jsonify({"status": "success", "result_url": translation_state["result_url"]})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     return app
 
 
