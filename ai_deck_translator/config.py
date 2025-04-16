@@ -13,6 +13,7 @@ from typing import Dict, Any, List, Optional
 # Load dotenv before any imports that might use environment variables
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass  # dotenv is optional
@@ -44,7 +45,7 @@ OPTIONAL_ENV_VARS = {
     "WEB_SECRET_KEY": ["web", "secret_key"],
     "WEB_HOST": ["web", "host"],
     "WEB_PORT": ["web", "port"],
-    "WEB_DEBUG": ["web", "debug"]
+    "WEB_DEBUG": ["web", "debug"],
 }
 
 # Default configuration
@@ -56,102 +57,108 @@ DEFAULT_CONFIG = {
     },
     "translation": {
         "batch_size": 100000,  # Maximum tokens per batch
-        "max_retries": 3,      # Maximum number of retries for API calls
-        "timeout": 120         # Timeout for API calls in seconds
+        "max_retries": 3,  # Maximum number of retries for API calls
+        "timeout": 120,  # Timeout for API calls in seconds
     },
     "api": {
         "anthropic": {
             "model": "claude-3-7-sonnet",
             "max_tokens": 150000,
-            "temperature": 0.0
+            "temperature": 0.0,
         },
         "google": {
             "scopes": [
                 "https://www.googleapis.com/auth/presentations",
-                "https://www.googleapis.com/auth/drive"
+                "https://www.googleapis.com/auth/drive",
             ],
             "credentials_file": "credentials.json",
-            "token_file": "token.json"
-        }
+            "token_file": "token.json",
+        },
     },
     "logging": {
         "level": "INFO",
         "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        "date_format": "%Y-%m-%d %H:%M:%S"
+        "date_format": "%Y-%m-%d %H:%M:%S",
     },
-    "recovery": {
-        "enabled": True,
-        "directory": "translation_recovery"
-    },
+    "recovery": {"enabled": True, "directory": "translation_recovery"},
     "web": {
         "secret_key": os.urandom(24).hex(),
         "host": "127.0.0.1",
         "port": 5000,
-        "debug": False
-    }
+        "debug": False,
+    },
 }
 
 
 def validate_config(config: Dict[str, Any]) -> bool:
     """
     Validate that the configuration contains all required fields.
-    
+
     Args:
         config (Dict[str, Any]): Configuration dictionary to validate
-        
+
     Returns:
         bool: True if valid, raises ConfigurationError otherwise
-        
+
     Raises:
         ConfigurationError: If configuration is invalid
     """
     # Check for required top-level keys
-    required_sections = ["presentation", "translation", "api", "logging", "recovery", "web"]
+    required_sections = [
+        "presentation",
+        "translation",
+        "api",
+        "logging",
+        "recovery",
+        "web",
+    ]
     for section in required_sections:
         if section not in config:
-            raise ConfigurationError(f"Missing required configuration section: {section}")
-    
+            raise ConfigurationError(
+                f"Missing required configuration section: {section}"
+            )
+
     # Check for required nested keys
     if "create_copy" not in config["presentation"]:
         raise ConfigurationError("Missing 'create_copy' in presentation config")
-    
+
     if "model" not in config["api"]["anthropic"]:
         raise ConfigurationError("Missing 'model' in anthropic config")
-    
+
     if "max_tokens" not in config["api"]["anthropic"]:
         raise ConfigurationError("Missing 'max_tokens' in anthropic config")
-    
+
     if "temperature" not in config["api"]["anthropic"]:
         raise ConfigurationError("Missing 'temperature' in anthropic config")
-    
+
     if "anthropic_api_base" not in config["api"]:
         raise ConfigurationError("Missing 'anthropic_api_base' in API config")
-    
+
     if "host" not in config["web"] or "port" not in config["web"]:
         raise ConfigurationError("Missing 'host' or 'port' in web config")
-    
+
     return True
 
 
 def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     """
     Load configuration from file or use defaults.
-    
+
     Args:
         config_path (str, optional): Path to configuration file
-        
+
     Returns:
         Dict[str, Any]: Configuration dictionary
-        
+
     Raises:
         ConfigurationError: If configuration file cannot be loaded or is invalid
     """
     config = DEFAULT_CONFIG.copy()
-    
+
     # If config_path is provided, load from file
     if config_path:
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 file_config = json.load(f)
                 # Deep merge with defaults
                 for section, values in file_config.items():
@@ -161,30 +168,32 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
                         config[section] = values
         except (IOError, json.JSONDecodeError) as e:
             logger.error(f"Failed to load configuration file: {e}")
-            raise ConfigurationError(f"Could not load config from {config_path}: {str(e)}")
-    
+            raise ConfigurationError(
+                f"Could not load config from {config_path}: {str(e)}"
+            )
+
     # Validate loaded config
     validate_config(config)
-    
+
     return config
 
 
 def save_config(config: Dict[str, Any], config_path: str) -> None:
     """
     Save configuration to file.
-    
+
     Args:
         config (Dict[str, Any]): Configuration to save
         config_path (str): Path to save configuration to
-        
+
     Raises:
         ConfigurationError: If configuration cannot be saved
     """
     # Ensure directory exists
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
-    
+
     try:
-        with open(config_path, 'w') as f:
+        with open(config_path, "w") as f:
             json.dump(config, f, indent=2)
     except IOError as e:
         logger.error(f"Failed to save configuration: {e}")
@@ -194,7 +203,7 @@ def save_config(config: Dict[str, Any], config_path: str) -> None:
 def check_environment() -> None:
     """
     Check that all required environment variables are set.
-    
+
     Raises:
         ConfigurationError: If any required variables are missing
     """
@@ -211,27 +220,27 @@ def check_environment() -> None:
 def get_config() -> Dict[str, Any]:
     """
     Get the application configuration.
-    
+
     This is the main function to use when getting configuration.
-    
+
     Returns:
         Dict[str, Any]: Complete configuration with defaults and environment overrides
-        
+
     Raises:
         ConfigurationError: If configuration is invalid
     """
     # Check environment variables
     check_environment()
-    
+
     # Set up config directory
     os.makedirs(CONFIG_DIR, exist_ok=True)
-    
+
     # Default config path
     default_config_path = os.path.join(CONFIG_DIR, "config.json")
-    
+
     # Use environment variable for config path if available
     config_path = os.environ.get("GSLIDES_CONFIG_PATH", default_config_path)
-    
+
     # Try to load from path, falling back to defaults if file doesn't exist
     try:
         if os.path.exists(config_path):
@@ -242,26 +251,30 @@ def get_config() -> Dict[str, Any]:
     except ConfigurationError:
         logger.warning("Error loading configuration, falling back to defaults")
         config = DEFAULT_CONFIG.copy()
-    
+
     # Apply environment variable overrides
     if os.environ.get("GSLIDES_CREATE_COPY"):
-        config["presentation"]["create_copy"] = os.environ.get("GSLIDES_CREATE_COPY").lower() == "true"
-    
+        config["presentation"]["create_copy"] = (
+            os.environ.get("GSLIDES_CREATE_COPY").lower() == "true"
+        )
+
     if os.environ.get("GSLIDES_OPEN_BROWSER"):
-        config["presentation"]["open_browser"] = os.environ.get("GSLIDES_OPEN_BROWSER").lower() == "true"
-    
+        config["presentation"]["open_browser"] = (
+            os.environ.get("GSLIDES_OPEN_BROWSER").lower() == "true"
+        )
+
     if os.environ.get("GSLIDES_MODEL"):
         config["api"]["anthropic"]["model"] = os.environ.get("GSLIDES_MODEL")
-    
+
     if os.environ.get("GSLIDES_WEB_HOST"):
         config["web"]["host"] = os.environ.get("GSLIDES_WEB_HOST")
-    
+
     if os.environ.get("GSLIDES_WEB_PORT"):
         try:
             config["web"]["port"] = int(os.environ.get("GSLIDES_WEB_PORT"))
         except ValueError:
             raise ConfigurationError("GSLIDES_WEB_PORT must be an integer")
-    
+
     return config
 
 
@@ -299,4 +312,4 @@ RECOVERY_DIRECTORY = RECOVERY_CONFIG["directory"]
 SECRET_KEY = WEB_CONFIG["secret_key"]
 WEB_HOST = WEB_CONFIG["host"]
 WEB_PORT = WEB_CONFIG["port"]
-WEB_DEBUG = WEB_CONFIG["debug"] 
+WEB_DEBUG = WEB_CONFIG["debug"]

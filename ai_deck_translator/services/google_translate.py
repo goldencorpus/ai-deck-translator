@@ -8,6 +8,7 @@ Public Functions:
     translate_batch: Translate a batch of text elements using Google Translate
     translate_text: Translate a single text element using Google Translate
 """
+
 import os
 import time
 from typing import List, Dict, Any, Optional
@@ -18,18 +19,21 @@ from .. import config
 # Set up logging
 logger = get_logger(__name__)
 
-def translate_batch(texts: List[str], target_language: str, source_language: str = "en") -> List[str]:
+
+def translate_batch(
+    texts: List[str], target_language: str, source_language: str = "en"
+) -> List[str]:
     """
     Translate a batch of text elements using Google Translate.
-    
+
     Args:
         texts (List[str]): List of text elements to translate
         target_language (str): Target language code (e.g., 'ja' for Japanese)
         source_language (str, optional): Source language code. Defaults to "en".
-    
+
     Returns:
         List[str]: List of translated text elements in the same order
-        
+
     Raises:
         TranslationError: If there's an error during translation
         NetworkError: If there's a network error during translation
@@ -37,8 +41,10 @@ def translate_batch(texts: List[str], target_language: str, source_language: str
     """
     # This is a placeholder implementation
     # In a real implementation, you would use the Google Cloud Translation API
-    logger.info(f"Translating {len(texts)} elements from {source_language} to {target_language}")
-    
+    logger.info(
+        f"Translating {len(texts)} elements from {source_language} to {target_language}"
+    )
+
     try:
         # Simulate translation (replace with actual API call)
         translated = []
@@ -50,10 +56,10 @@ def translate_batch(texts: List[str], target_language: str, source_language: str
                 translated.append(f"[FR] {text}")
             else:
                 translated.append(f"[{target_language.upper()}] {text}")
-            
+
             # Simulate API delay
             time.sleep(0.1)
-        
+
         return translated
     except Exception as e:
         logger.error(f"Error translating batch: {e}")
@@ -64,22 +70,23 @@ def translate_batch(texts: List[str], target_language: str, source_language: str
         else:
             raise TranslationError(f"Error during translation: {str(e)}")
 
+
 def translate_text(text: str, target_language: str, source_language: str = "en") -> str:
     """
     Translate a single text element using Google Translate.
-    
+
     Args:
         text (str): Text to translate
         target_language (str): Target language code (e.g., 'ja' for Japanese)
         source_language (str, optional): Source language code. Defaults to "en".
-    
+
     Returns:
         str: Translated text
-        
+
     Raises:
         TranslationError: If there's an error during translation
         NetworkError: If there's a network error during translation
         RateLimitError: If the translation service rate limit is exceeded
     """
     result = translate_batch([text], target_language, source_language)
-    return result[0] 
+    return result[0]

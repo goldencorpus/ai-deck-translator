@@ -10,9 +10,9 @@ from .extractor import extract_text
 from .updater import update_slides
 
 __all__ = [
-    'translate_pptx',
-    'translate_text',
-    'extract_text',
-    'update_slides',
-    'list_recovery_files'
+    "translate_pptx",
+    "translate_text",
+    "extract_text",
+    "update_slides",
+    "list_recovery_files",
 ]

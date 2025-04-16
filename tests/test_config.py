@@ -25,7 +25,7 @@ def test_validate_config_missing_section():
     """Test that validation fails with missing sections."""
     invalid_config = DEFAULT_CONFIG.copy()
     invalid_config.pop("presentation")
-    
+
     with pytest.raises(ConfigurationError):
         validate_config(invalid_config)
 
@@ -41,7 +41,7 @@ def test_load_config_invalid_json():
     with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
         temp_file.write("This is not valid JSON")
         temp_file_path = temp_file.name
-    
+
     try:
         with pytest.raises(ConfigurationError):
             load_config(temp_file_path)
@@ -57,11 +57,11 @@ def test_load_config_valid():
             "copy_title_suffix": " (Custom)",
         }
     }
-    
+
     with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
         json.dump(custom_config, temp_file)
         temp_file_path = temp_file.name
-    
+
     try:
         config = load_config(temp_file_path)
         assert config["presentation"]["create_copy"] is False
@@ -78,12 +78,12 @@ def test_save_config():
     with tempfile.TemporaryDirectory() as temp_dir:
         config_path = os.path.join(temp_dir, "config.json")
         save_config(DEFAULT_CONFIG, config_path)
-        
+
         assert os.path.exists(config_path)
-        
+
         with open(config_path, "r") as f:
             saved_config = json.load(f)
-        
+
         assert saved_config == DEFAULT_CONFIG
 
 
@@ -91,8 +91,8 @@ def test_save_config():
 def test_env_var_override():
     """Test that environment variables override config settings."""
     from ai_deck_translator.config import get_config
-    
+
     # Patch the home directory to avoid interference with user's actual config
     with mock.patch("ai_deck_translator.config.CONFIG_DIR", "/tmp/nonexistent_dir"):
         config = get_config()
-        assert config["translation"]["model"] == "claude-3-haiku-20240307" 
+        assert config["translation"]["model"] == "claude-3-haiku-20240307"

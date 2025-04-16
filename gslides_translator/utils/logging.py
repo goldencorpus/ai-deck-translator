@@ -32,7 +32,7 @@ def setup_logging(log_level=logging.INFO, log_file=None, console=True):
     # Create formatter
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     # Add console handler if requested
@@ -47,7 +47,7 @@ def setup_logging(log_level=logging.INFO, log_file=None, console=True):
         log_dir = os.path.dirname(log_file)
         if log_dir:
             os.makedirs(log_dir, exist_ok=True)
-            
+
         file_handler = logging.handlers.RotatingFileHandler(
             log_file, maxBytes=10485760, backupCount=5
         )
@@ -65,5 +65,5 @@ default_log_file = os.path.join(default_log_dir, "gslides_translator.log")
 logger = setup_logging(
     log_level=os.environ.get("GSLIDES_LOG_LEVEL", logging.INFO),
     log_file=os.environ.get("GSLIDES_LOG_FILE", default_log_file),
-    console=os.environ.get("GSLIDES_LOG_CONSOLE", "1") == "1"
-) 
+    console=os.environ.get("GSLIDES_LOG_CONSOLE", "1") == "1",
+)

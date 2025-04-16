@@ -16,11 +16,12 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For flash messages and session
 
 # Ensure templates directory exists
-os.makedirs('templates', exist_ok=True)
+os.makedirs("templates", exist_ok=True)
 
 # Create templates/index.html
-with open('templates/index.html', 'w') as f:
-    f.write("""
+with open("templates/index.html", "w") as f:
+    f.write(
+        """
 <!DOCTYPE html>
 <html>
 <head>
@@ -164,150 +165,173 @@ with open('templates/index.html', 'w') as f:
     {% endif %}
 </body>
 </html>
-    """)
+    """
+    )
 
 # Global variables to track translation process
 translation_state = {
-    'running': False,
-    'progress': 0,
-    'console_output': '',
-    'result_url': None
+    "running": False,
+    "progress": 0,
+    "console_output": "",
+    "result_url": None,
 }
+
 
 # Custom stream handler to capture console output
 class StringIOHandler(logging.StreamHandler):
     def __init__(self):
         self.string_io = io.StringIO()
         super().__init__(self.string_io)
-    
+
     def get_output(self):
         self.flush()
         return self.string_io.getvalue()
+
 
 # Create a custom stdout capture
 class CaptureStdout:
     def __init__(self):
         self.buffer = io.StringIO()
-    
+
     def __enter__(self):
         self.old_stdout = sys.stdout
         sys.stdout = self.buffer
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         sys.stdout = self.old_stdout
-    
+
     def get_output(self):
         return self.buffer.getvalue()
+
 
 # Modify the tqdm class to update progress in our state
 class WebUITqdm:
     def __init__(self, total, **kwargs):
         self.total = total
         self.n = 0
-        self.description = kwargs.get('desc', '')
-    
+        self.description = kwargs.get("desc", "")
+
     def update(self, n):
         self.n += n
         if self.total > 0:
-            translation_state['progress'] = int(100 * self.n / self.total)
-    
+            translation_state["progress"] = int(100 * self.n / self.total)
+
     def set_description(self, desc):
         self.description = desc
-    
+
     def close(self):
         pass
 
+
 # Modified translate function that updates progress
-def translate_with_progress(presentation_id, source_language, target_language, api_key=None):
+def translate_with_progress(
+    presentation_id, source_language, target_language, api_key=None
+):
     global translation_state
-    
+
     # Reset state
-    translation_state['running'] = True
-    translation_state['progress'] = 0
-    translation_state['console_output'] = 'Starting translation...\n'
-    translation_state['result_url'] = None
-    
+    translation_state["running"] = True
+    translation_state["progress"] = 0
+    translation_state["console_output"] = "Starting translation...\n"
+    translation_state["result_url"] = None
+
     # Set API key if provided
     if api_key:
         os.environ["CLAUDE_API_KEY"] = api_key
-    
+
     # Capture stdout
     with CaptureStdout() as capture:
         try:
             # Replace tqdm with our custom implementation
             original_tqdm = translator_script.tqdm
             translator_script.tqdm = WebUITqdm
-            
+
             # Run the translation process
             slides_service, drive_service = translator_script.authenticate_google()
-            extracted_text, slide_metadata = translator_script.extract_text(slides_service, presentation_id)
-            translated_texts = translator_script.translate_text(extracted_text, slide_metadata, source_language, target_language)
-            new_presentation_id = translator_script.update_slides(slides_service, drive_service, presentation_id, translated_texts, target_language)
-            
+            extracted_text, slide_metadata = translator_script.extract_text(
+                slides_service, presentation_id
+            )
+            translated_texts = translator_script.translate_text(
+                extracted_text, slide_metadata, source_language, target_language
+            )
+            new_presentation_id = translator_script.update_slides(
+                slides_service,
+                drive_service,
+                presentation_id,
+                translated_texts,
+                target_language,
+            )
+
             # Create the presentation URL
-            presentation_url = f"https://docs.google.com/presentation/d/{new_presentation_id}/edit"
-            translation_state['result_url'] = presentation_url
-            
+            presentation_url = (
+                f"https://docs.google.com/presentation/d/{new_presentation_id}/edit"
+            )
+            translation_state["result_url"] = presentation_url
+
             # Restore original tqdm
             translator_script.tqdm = original_tqdm
-            
+
             return True, presentation_url
-            
+
         except Exception as e:
             error_msg = f"Error during translation: {str(e)}"
             print(error_msg)
             return False, error_msg
         finally:
             # Update console output
-            translation_state['console_output'] += capture.get_output()
-            translation_state['running'] = False
+            translation_state["console_output"] += capture.get_output()
+            translation_state["running"] = False
 
-@app.route('/')
+
+@app.route("/")
 def index():
     # Update session with current translation state
-    session['translation_running'] = translation_state['running']
-    session['progress'] = translation_state['progress']
-    session['console_output'] = translation_state['console_output']
-    session['result_url'] = translation_state['result_url']
-    return render_template('index.html')
+    session["translation_running"] = translation_state["running"]
+    session["progress"] = translation_state["progress"]
+    session["console_output"] = translation_state["console_output"]
+    session["result_url"] = translation_state["result_url"]
+    return render_template("index.html")
 
-@app.route('/translate', methods=['POST'])
+
+@app.route("/translate", methods=["POST"])
 def start_translation():
-    if translation_state['running']:
-        flash('Translation is already in progress', 'warning')
-        return redirect(url_for('index'))
-    
-    presentation_id = request.form.get('presentation_id')
-    source_language = request.form.get('source_language')
-    target_language = request.form.get('target_language')
-    api_key = request.form.get('api_key')
-    
+    if translation_state["running"]:
+        flash("Translation is already in progress", "warning")
+        return redirect(url_for("index"))
+
+    presentation_id = request.form.get("presentation_id")
+    source_language = request.form.get("source_language")
+    target_language = request.form.get("target_language")
+    api_key = request.form.get("api_key")
+
     if not presentation_id or not source_language or not target_language:
-        flash('Please fill all required fields', 'danger')
-        return redirect(url_for('index'))
-    
+        flash("Please fill all required fields", "danger")
+        return redirect(url_for("index"))
+
     # Start translation in a separate thread to not block the web server
     thread = threading.Thread(
         target=translate_with_progress,
-        args=(presentation_id, source_language, target_language, api_key)
+        args=(presentation_id, source_language, target_language, api_key),
     )
     thread.daemon = True
     thread.start()
-    
-    flash('Translation started successfully', 'success')
-    return redirect(url_for('index'))
 
-@app.route('/progress')
+    flash("Translation started successfully", "success")
+    return redirect(url_for("index"))
+
+
+@app.route("/progress")
 def get_progress():
     return {
-        'running': translation_state['running'],
-        'progress': translation_state['progress'],
-        'console_output': translation_state['console_output'],
-        'result_url': translation_state['result_url']
+        "running": translation_state["running"],
+        "progress": translation_state["progress"],
+        "console_output": translation_state["console_output"],
+        "result_url": translation_state["result_url"],
     }
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print("Starting Web UI on http://127.0.0.1:5000")
     print("Press Ctrl+C to stop")
     app.run(debug=True)

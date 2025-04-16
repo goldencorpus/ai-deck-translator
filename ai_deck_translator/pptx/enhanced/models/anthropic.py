@@ -1,6 +1,7 @@
 """
 Anthropic Claude model implementation for translation.
 """
+
 import json
 import time
 import anthropic
@@ -9,13 +10,14 @@ from typing import Dict, Any, Optional
 from .base import TranslationModel, ModelResponse
 from ..utils import extract_json_blocks, estimate_cost
 
+
 class AnthropicTranslator(TranslationModel):
     """Implementation of the TranslationModel interface for Anthropic Claude models"""
-    
+
     def __init__(self, model: str, api_key: Optional[str] = None, max_retries: int = 3):
         """
         Initialize the Anthropic translator.
-        
+
         Args:
             model: Claude model identifier
             api_key: Anthropic API key (optional)
@@ -24,25 +26,27 @@ class AnthropicTranslator(TranslationModel):
         super().__init__(api_key, max_retries)
         self.model = model
         self.client = anthropic.Anthropic(api_key=self.api_key)
-    
+
     def get_model_name(self) -> str:
         """Get the name of this model"""
         return self.model
-    
-    def generate_prompts(self, 
-                        source_language: str,
-                        target_language: str,
-                        content_to_translate: Dict[str, str],
-                        context_info: Dict[str, Any]) -> tuple:
+
+    def generate_prompts(
+        self,
+        source_language: str,
+        target_language: str,
+        content_to_translate: Dict[str, str],
+        context_info: Dict[str, Any],
+    ) -> tuple:
         """
         Generate Claude-specific prompts for translation.
-        
+
         Args:
             source_language: Source language code
             target_language: Target language code
             content_to_translate: Dictionary of content to translate
             context_info: Dictionary of context information
-            
+
         Returns:
             tuple: (system_prompt, user_prompt) optimized for Claude models
         """
@@ -112,32 +116,34 @@ Do not include any explanations or notes outside the JSON object.
 """
 
         return system_prompt, user_prompt
-    
-    def translate(self, 
-                 content_to_translate: Dict[str, str], 
-                 context_info: Dict[str, Any],
-                 source_language: str, 
-                 target_language: str) -> ModelResponse:
+
+    def translate(
+        self,
+        content_to_translate: Dict[str, str],
+        context_info: Dict[str, Any],
+        source_language: str,
+        target_language: str,
+    ) -> ModelResponse:
         """
         Translate content using Anthropic Claude.
-        
+
         Args:
             content_to_translate: Dictionary of content to translate
             context_info: Dictionary of context information
             source_language: Source language code
             target_language: Target language code
-            
+
         Returns:
             ModelResponse: Standardized response with translation results
         """
         system_prompt, user_prompt = self.generate_prompts(
             source_language, target_language, content_to_translate, context_info
         )
-        
+
         # Initialize variables for retry logic
         retry_count = 0
         translated_batch = None
-        
+
         # Try to translate with retries
         while retry_count <= self.max_retries:
             try:
@@ -147,22 +153,18 @@ Do not include any explanations or notes outside the JSON object.
                     max_tokens=150000,
                     temperature=0.0,
                     system=system_prompt,
-                    messages=[
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    metadata={
-                        "user_id": "anonymous_user"
-                    }
+                    messages=[{"role": "user", "content": user_prompt}],
+                    metadata={"user_id": "anonymous_user"},
                 )
-                
+
                 # Calculate cost
                 prompt_tokens = response.usage.input_tokens
                 completion_tokens = response.usage.output_tokens
                 cost = estimate_cost(prompt_tokens, completion_tokens, self.model)
-                
+
                 # Extract the JSON from the response
                 json_content = extract_json_blocks(response.content[0].text)
-                
+
                 if json_content:
                     try:
                         translated_batch = json.loads(json_content)
@@ -171,20 +173,22 @@ Do not include any explanations or notes outside the JSON object.
                         retry_count += 1
                 else:
                     retry_count += 1
-                    
+
             except Exception as e:
                 retry_count += 1
                 time.sleep(2)  # Wait before retrying
-        
+
         # If we couldn't translate after all retries, return an empty dict
         if translated_batch is None:
             translated_batch = {}
-        
+
         return ModelResponse(
             translated_content=translated_batch,
-            prompt_tokens=prompt_tokens if 'prompt_tokens' in locals() else 0,
-            completion_tokens=completion_tokens if 'completion_tokens' in locals() else 0,
+            prompt_tokens=prompt_tokens if "prompt_tokens" in locals() else 0,
+            completion_tokens=(
+                completion_tokens if "completion_tokens" in locals() else 0
+            ),
             model=self.model,
-            cost=cost if 'cost' in locals() else 0.0,
-            raw_response=response if 'response' in locals() else None
-        ) 
+            cost=cost if "cost" in locals() else 0.0,
+            raw_response=response if "response" in locals() else None,
+        )

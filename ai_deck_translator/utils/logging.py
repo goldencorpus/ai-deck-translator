@@ -32,7 +32,7 @@ def setup_logging(log_level=logging.INFO, log_file=None, console=True):
     # Create formatter
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
     # Add console handler if requested
@@ -47,7 +47,7 @@ def setup_logging(log_level=logging.INFO, log_file=None, console=True):
         log_dir = os.path.dirname(log_file)
         if log_dir:
             os.makedirs(log_dir, exist_ok=True)
-            
+
         file_handler = logging.handlers.RotatingFileHandler(
             log_file, maxBytes=10485760, backupCount=5
         )
@@ -60,10 +60,10 @@ def setup_logging(log_level=logging.INFO, log_file=None, console=True):
 def get_logger(name=None):
     """
     Get a logger for the specified module.
-    
+
     Args:
         name (str, optional): Name of the module. If None, returns the root logger.
-        
+
     Returns:
         logging.Logger: Logger for the specified module
     """
@@ -75,21 +75,21 @@ def get_logger(name=None):
 def set_log_level(level):
     """
     Set the log level for the root logger and all its handlers.
-    
+
     Args:
         level: The log level to set (can be a string like 'DEBUG', 'INFO', etc. or a logging constant)
-        
+
     Returns:
         None
     """
     # Convert string level to logging constant if needed
     if isinstance(level, str):
         level = getattr(logging, level.upper())
-    
+
     # Set level on the root logger
     root_logger = logging.getLogger("ai_deck_translator")
     root_logger.setLevel(level)
-    
+
     # Also set level on all handlers
     for handler in root_logger.handlers:
         handler.setLevel(level)
@@ -103,5 +103,5 @@ default_log_file = os.path.join(default_log_dir, "ai_deck_translator.log")
 logger = setup_logging(
     log_level=os.environ.get("AI_DECK_LOG_LEVEL", logging.INFO),
     log_file=os.environ.get("AI_DECK_LOG_FILE", default_log_file),
-    console=os.environ.get("AI_DECK_LOG_CONSOLE", "1") == "1"
-) 
+    console=os.environ.get("AI_DECK_LOG_CONSOLE", "1") == "1",
+)

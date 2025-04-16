@@ -1,7 +1,7 @@
 """
 AI Deck Translator Library
 
-A robust toolkit for translating presentation decks with AI-powered 
+A robust toolkit for translating presentation decks with AI-powered
 language translation capabilities.
 """
 
@@ -27,7 +27,7 @@ from .pptx.enhanced import (
     MODEL_GPT_4O,
     MODEL_GPT_4O_MINI,
     MODEL_GEMINI_15_PRO,
-    MODEL_GEMINI_15_FLASH
+    MODEL_GEMINI_15_FLASH,
 )
 
 # Utility functions
@@ -36,28 +36,25 @@ from .utils.batch import split_into_batches
 
 __all__ = [
     # Core modules
-    'translate',
-    
+    "translate",
     # PPTX modules
-    'translate_pptx',
-    'translate_presentation',
-    'translate_text',
-    'translate_batch',
-    
+    "translate_pptx",
+    "translate_presentation",
+    "translate_text",
+    "translate_batch",
     # Quality and model constants
-    'QUALITY_PROFESSIONAL',
-    'QUALITY_STANDARD',
-    'QUALITY_DRAFT',
-    'QUALITY_ECONOMY',
-    'MODEL_CLAUDE_35_SONNET',
-    'MODEL_CLAUDE_35_HAIKU',
-    'MODEL_GPT_4O',
-    'MODEL_GPT_4O_MINI',
-    'MODEL_GEMINI_15_PRO',
-    'MODEL_GEMINI_15_FLASH',
-    
+    "QUALITY_PROFESSIONAL",
+    "QUALITY_STANDARD",
+    "QUALITY_DRAFT",
+    "QUALITY_ECONOMY",
+    "MODEL_CLAUDE_35_SONNET",
+    "MODEL_CLAUDE_35_HAIKU",
+    "MODEL_GPT_4O",
+    "MODEL_GPT_4O_MINI",
+    "MODEL_GEMINI_15_PRO",
+    "MODEL_GEMINI_15_FLASH",
     # Utility functions
-    'get_logger',
-    'set_log_level',
-    'split_into_batches',
+    "get_logger",
+    "set_log_level",
+    "split_into_batches",
 ]

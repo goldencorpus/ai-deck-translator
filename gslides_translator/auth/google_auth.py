@@ -21,15 +21,15 @@ from gslides_translator.config import CREDENTIALS_PATH, TOKEN_PATH
 
 # Define the scopes needed for API access
 SCOPES = [
-    'https://www.googleapis.com/auth/presentations',
-    'https://www.googleapis.com/auth/drive'
+    "https://www.googleapis.com/auth/presentations",
+    "https://www.googleapis.com/auth/drive",
 ]
 
 
 def get_credentials(
     credentials_path: str = CREDENTIALS_PATH,
     token_path: str = TOKEN_PATH,
-    scopes: List[str] = SCOPES
+    scopes: List[str] = SCOPES,
 ) -> Credentials:
     """
     Get or create user credentials for Google API access.
@@ -61,7 +61,7 @@ def get_credentials(
     if os.path.exists(token_path):
         logger.info(f"Loading credentials from {token_path}")
         try:
-            with open(token_path, 'rb') as token:
+            with open(token_path, "rb") as token:
                 credentials = pickle.load(token)
         except Exception as e:
             logger.warning(f"Failed to load credentials: {e}")
@@ -69,7 +69,7 @@ def get_credentials(
     # If no valid credentials, get new ones
     if not credentials or not credentials.valid:
         logger.info("Credentials not found or invalid, starting authentication flow")
-        
+
         if credentials and credentials.expired and credentials.refresh_token:
             try:
                 logger.info("Refreshing expired credentials")
@@ -77,7 +77,7 @@ def get_credentials(
             except Exception as e:
                 logger.error(f"Failed to refresh credentials: {e}")
                 credentials = None
-        
+
         # If still no valid credentials, start OAuth flow
         if not credentials:
             if not os.path.exists(credentials_path):
@@ -87,17 +87,19 @@ def get_credentials(
                     f"Please download credentials.json from Google Cloud Console "
                     f"and place it at this location."
                 )
-            
+
             try:
-                logger.info(f"Starting OAuth flow with credentials from {credentials_path}")
+                logger.info(
+                    f"Starting OAuth flow with credentials from {credentials_path}"
+                )
                 flow = InstalledAppFlow.from_client_secrets_file(
                     credentials_path, scopes
                 )
                 credentials = flow.run_local_server(port=0)
-                
+
                 # Save the credentials for future use
                 logger.info(f"Saving new credentials to {token_path}")
-                with open(token_path, 'wb') as token:
+                with open(token_path, "wb") as token:
                     pickle.dump(credentials, token)
             except Exception as e:
                 logger.error(f"Authentication flow failed: {e}")
@@ -126,15 +128,17 @@ def get_slides_service(credentials: Optional[Credentials] = None) -> Any:
     """
     if not credentials:
         credentials = get_credentials()
-    
+
     try:
-        service = build('slides', 'v1', credentials=credentials)
+        service = build("slides", "v1", credentials=credentials)
         logger.info("Successfully created Google Slides service")
         return service
     except HttpError as e:
         logger.error(f"Failed to build Slides service: {e}")
         if e.resp.status in (403, 401):
-            raise AuthenticationError(f"Authentication error with Google Slides API: {str(e)}")
+            raise AuthenticationError(
+                f"Authentication error with Google Slides API: {str(e)}"
+            )
         else:
             raise NetworkError(f"Network error with Google Slides API: {str(e)}")
     except Exception as e:
@@ -159,15 +163,17 @@ def get_drive_service(credentials: Optional[Credentials] = None) -> Any:
     """
     if not credentials:
         credentials = get_credentials()
-    
+
     try:
-        service = build('drive', 'v3', credentials=credentials)
+        service = build("drive", "v3", credentials=credentials)
         logger.info("Successfully created Google Drive service")
         return service
     except HttpError as e:
         logger.error(f"Failed to build Drive service: {e}")
         if e.resp.status in (403, 401):
-            raise AuthenticationError(f"Authentication error with Google Drive API: {str(e)}")
+            raise AuthenticationError(
+                f"Authentication error with Google Drive API: {str(e)}"
+            )
         else:
             raise NetworkError(f"Network error with Google Drive API: {str(e)}")
     except Exception as e:
@@ -188,13 +194,13 @@ def revoke_credentials(token_path: str = TOKEN_PATH) -> None:
     if os.path.exists(token_path):
         try:
             credentials = None
-            with open(token_path, 'rb') as token:
+            with open(token_path, "rb") as token:
                 credentials = pickle.load(token)
-            
+
             if credentials:
                 credentials.revoke(Request())
                 logger.info("Successfully revoked credentials")
-            
+
             os.remove(token_path)
             logger.info(f"Deleted token file at {token_path}")
         except Exception as e:
@@ -204,7 +210,9 @@ def revoke_credentials(token_path: str = TOKEN_PATH) -> None:
         logger.warning(f"No token file found at {token_path}")
 
 
-def validate_presentation_permissions(presentation_id: str, credentials: Optional[Credentials] = None) -> bool:
+def validate_presentation_permissions(
+    presentation_id: str, credentials: Optional[Credentials] = None
+) -> bool:
     """
     Validate that the user has permissions to access the presentation.
 
@@ -222,14 +230,13 @@ def validate_presentation_permissions(presentation_id: str, credentials: Optiona
     """
     if not credentials:
         credentials = get_credentials()
-    
+
     service = get_slides_service(credentials)
-    
+
     try:
         # Try to get presentation metadata (minimal request)
         service.presentations().get(
-            presentationId=presentation_id,
-            fields="presentationId"
+            presentationId=presentation_id, fields="presentationId"
         ).execute()
         logger.info(f"Successfully validated access to presentation {presentation_id}")
         return True
@@ -245,4 +252,6 @@ def validate_presentation_permissions(presentation_id: str, credentials: Optiona
             raise NetworkError(f"Network error checking presentation access: {str(e)}")
     except Exception as e:
         logger.error(f"Error validating presentation permissions: {e}")
-        raise AuthenticationError(f"Failed to validate presentation permissions: {str(e)}") 
+        raise AuthenticationError(
+            f"Failed to validate presentation permissions: {str(e)}"
+        )
