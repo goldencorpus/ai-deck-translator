@@ -19,18 +19,20 @@ class TestInit(unittest.TestCase):
 
     def test_version(self):
         """Test that the __version__ attribute is defined."""
-        self.assertTrue(hasattr(gslides_translator, "__version__"))
-        self.assertIsInstance(gslides_translator.__version__, str)
+        from ai_deck_translator import __version__
+
+        self.assertTrue(hasattr(__import__("ai_deck_translator"), "__version__"))
+        self.assertIsInstance(__import__("ai_deck_translator").__version__, str)
 
     def test_author(self):
         """Test that the __author__ attribute is defined."""
-        self.assertTrue(hasattr(gslides_translator, "__author__"))
-        self.assertIsInstance(gslides_translator.__author__, str)
+        self.assertTrue(hasattr(__import__("ai_deck_translator"), "__author__"))
+        self.assertIsInstance(__import__("ai_deck_translator").__author__, str)
 
     def test_description(self):
         """Test that the __description__ attribute is defined."""
-        self.assertTrue(hasattr(gslides_translator, "__description__"))
-        self.assertIsInstance(gslides_translator.__description__, str)
+        self.assertTrue(hasattr(__import__("ai_deck_translator"), "__description__"))
+        self.assertIsInstance(__import__("ai_deck_translator").__description__, str)
 
     def test_imports(self):
         """Test that the package imports work correctly."""

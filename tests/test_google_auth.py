@@ -8,6 +8,7 @@ import os
 import json
 import tempfile
 from ai_deck_translator.auth.google_auth import authenticate_google
+from ai_deck_translator.utils.exceptions import AuthenticationError
 
 
 class TestGoogleAuth(unittest.TestCase):
@@ -64,9 +65,7 @@ class TestGoogleAuth(unittest.TestCase):
         mock_build.side_effect = [mock_slides_service, mock_drive_service]
 
         # Call the function
-        slides_service, drive_service = authenticate_google(
-            credentials_path=self.credentials_path, token_path=self.token_path
-        )
+        slides_service, drive_service = authenticate_google()
 
         # Verify the token was read
         mock_file.assert_called_with(self.token_path, "r")
@@ -107,9 +106,7 @@ class TestGoogleAuth(unittest.TestCase):
         mock_build.side_effect = [mock_slides_service, mock_drive_service]
 
         # Call the function
-        slides_service, drive_service = authenticate_google(
-            credentials_path=self.credentials_path, token_path=self.token_path
-        )
+        slides_service, drive_service = authenticate_google()
 
         # Verify the flow was created
         mock_flow.assert_called_with(
@@ -161,9 +158,7 @@ class TestGoogleAuth(unittest.TestCase):
         mock_build.side_effect = [mock_slides_service, mock_drive_service]
 
         # Call the function
-        slides_service, drive_service = authenticate_google(
-            credentials_path=self.credentials_path, token_path=self.token_path
-        )
+        slides_service, drive_service = authenticate_google()
 
         # Verify the token was read
         mock_file.assert_called_with(self.token_path, "r")
@@ -182,6 +177,82 @@ class TestGoogleAuth(unittest.TestCase):
         # Verify the services were returned
         self.assertEqual(slides_service, mock_slides_service)
         self.assertEqual(drive_service, mock_drive_service)
+
+    @patch("ai_deck_translator.auth.google_auth.build")
+    @patch("ai_deck_translator.auth.google_auth.Credentials")
+    @patch("os.path.exists")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_authenticate_google_token_exists(
+        self, mock_open_func, mock_exists, mock_creds, mock_build
+    ):
+        mock_exists.return_value = True
+        mock_creds.from_authorized_user_file.return_value = MagicMock()
+        mock_build.side_effect = [MagicMock(), MagicMock()]
+
+        slides_service, drive_service = authenticate_google()
+
+        self.assertIsNotNone(slides_service)
+        self.assertIsNotNone(drive_service)
+
+    @patch("ai_deck_translator.auth.google_auth.build")
+    @patch("ai_deck_translator.auth.google_auth.Credentials")
+    @patch("os.path.exists")
+    @patch("builtins.open", new_callable=mock_open)
+    def test_authenticate_google_token_does_not_exist(
+        self, mock_open_func, mock_exists, mock_creds, mock_build
+    ):
+        mock_exists.return_value = False
+        mock_creds.from_authorized_user_file.return_value = MagicMock()
+        mock_build.side_effect = [MagicMock(), MagicMock()]
+
+        slides_service, drive_service = authenticate_google()
+
+        self.assertIsNotNone(slides_service)
+        self.assertIsNotNone(drive_service)
+
+    @patch("builtins.open", new_callable=mock_open, read_data="")
+    @patch("os.path.exists", return_value=True)
+    def test_authenticate_google_token_exists(self, mock_exists, mock_file):
+        # Simulate empty token file, should raise AuthenticationError
+        with self.assertRaises(AuthenticationError):
+            authenticate_google()
+
+    @patch("builtins.open", new_callable=mock_open, read_data="")
+    @patch("os.path.exists", return_value=False)
+    def test_authenticate_google_token_does_not_exist(self, mock_exists, mock_file):
+        # Simulate missing token file, should raise AuthenticationError
+        with self.assertRaises(AuthenticationError):
+            authenticate_google()
+
+    @patch("builtins.open", new_callable=mock_open, read_data='{"installed": {}}')
+    @patch("os.path.exists", return_value=True)
+    def test_authenticate_google_with_expired_token(self, mock_exists, mock_file):
+        # Simulate invalid credentials, should raise AuthenticationError
+        with self.assertRaises(AuthenticationError):
+            authenticate_google()
+
+    @patch("builtins.open", new_callable=mock_open, read_data='{"token": "test"}')
+    @patch("os.path.exists", return_value=True)
+    @patch("ai_deck_translator.auth.google_auth.build")
+    def test_authenticate_google_with_token(self, mock_build, mock_exists, mock_file):
+        # Simulate build raising KeyError('rootUrl')
+        mock_build.side_effect = KeyError("rootUrl")
+        with self.assertRaises(AuthenticationError):
+            authenticate_google()
+
+    @patch("builtins.open", new_callable=mock_open, read_data='{"token": "test"}')
+    @patch("os.path.exists", return_value=False)
+    @patch("ai_deck_translator.auth.google_auth.build")
+    def test_authenticate_google_without_token(
+        self, mock_build, mock_exists, mock_file
+    ):
+        # Simulate build raising UnknownApiNameOrVersion
+        class DummyError(Exception):
+            pass
+
+        mock_build.side_effect = DummyError("name: slides  version: v1")
+        with self.assertRaises(AuthenticationError):
+            authenticate_google()
 
 
 if __name__ == "__main__":

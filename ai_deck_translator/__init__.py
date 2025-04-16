@@ -8,6 +8,9 @@ language translation capabilities.
 __version__ = "2.0.0"
 __author__ = "Emmanuel Prouveze"
 __license__ = "MIT"
+__description__ = (
+    "AI Deck Translator: Translate Google Slides and PowerPoint presentations with AI."
+)
 
 # Core translator modules
 from .core.translator import translate_slides as translate

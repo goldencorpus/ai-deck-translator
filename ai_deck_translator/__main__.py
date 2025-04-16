@@ -2,4 +2,6 @@ import sys
 from .run import main
 
 if __name__ == "__main__":
-    sys.exit(main())
+    from ai_deck_translator.cli.main import main
+
+    main()

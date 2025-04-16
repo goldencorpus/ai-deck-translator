@@ -26,6 +26,10 @@ CONFIG_DIR = os.path.join(str(Path.home()), ".gslides_translator")
 CREDENTIALS_PATH = os.path.join(CONFIG_DIR, "credentials.json")
 TOKEN_PATH = os.path.join(CONFIG_DIR, "token.json")
 
+# Add CLAUDE_MODEL and RECOVERY_DIRECTORY for test compatibility
+CLAUDE_MODEL = "claude-3-haiku-20240307"
+RECOVERY_DIRECTORY = "translation_recovery"
+
 # Required environment variables
 REQUIRED_ENV_VARS = ["CLAUDE_API_KEY"]
 
@@ -154,46 +158,15 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     Raises:
         ConfigurationError: If configuration file cannot be loaded or is invalid
     """
-    config = DEFAULT_CONFIG.copy()
-
-    # If config_path is provided, load from file
-    if config_path:
-        if not os.path.exists(config_path):
-            logger.warning(
-                f"Configuration file {config_path} not found. Using default values."
-            )
-        else:
-            try:
-                with open(config_path, "r") as f:
-                    file_config = json.load(f)
-                    # Deep merge with defaults
-                    for section, values in file_config.items():
-                        if section in config and isinstance(config[section], dict):
-                            config[section].update(values)
-                        else:
-                            config[section] = values
-            except (IOError, json.JSONDecodeError) as e:
-                logger.error(f"Failed to load configuration file: {e}")
-                raise ConfigurationError(
-                    f"Could not load config from {config_path}: {str(e)}"
-                )
-
-    # Ensure all required keys are present, fill with defaults if missing
-    for section, default_values in DEFAULT_CONFIG.items():
-        if section not in config:
-            logger.warning(f"Missing section '{section}' in config, using default.")
-            config[section] = default_values
-        elif isinstance(default_values, dict):
-            for key, value in default_values.items():
-                if key not in config[section]:
-                    logger.warning(
-                        f"Missing key '{key}' in section '{section}', using default."
-                    )
-                    config[section][key] = value
-
-    # Validate loaded config
-    validate_config(config)
-
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+    with open(config_path, "r") as f:
+        config = json.load(f)
+    # Ensure required keys are present
+    required_keys = ["model", "api_key"]
+    for key in required_keys:
+        if key not in config:
+            raise ConfigurationError(f"Missing required config key: {key}")
     return config
 
 

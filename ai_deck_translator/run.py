@@ -36,7 +36,12 @@ def parse_args():
 def main():
     args = parse_args()
     print(f"Command: {args.command}")
-    # Additional logic based on the command
+    if args.command == "web":
+        from ai_deck_translator.web.app import create_app
+
+        app = create_app()
+        app.run(host="0.0.0.0", port=args.port, debug=True)
+    # Additional logic for other commands can be added here
 
 
 if __name__ == "__main__":

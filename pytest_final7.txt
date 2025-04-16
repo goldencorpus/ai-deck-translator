@@ -1,0 +1,46 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-8.3.5, pluggy-1.5.0
+rootdir: /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator
+configfile: setup.cfg
+testpaths: tests
+plugins: anyio-4.9.0, cov-6.1.1
+collected 88 items
+
+tests/test_batch.py ..                                                   [  2%]
+tests/test_config.py ........                                            [ 11%]
+tests/test_development_plan.py .........                                 [ 21%]
+tests/test_extractor.py ...                                              [ 25%]
+tests/test_google_auth.py .....                                          [ 30%]
+tests/test_init.py ....                                                  [ 35%]
+tests/test_main.py .                                                     [ 36%]
+tests/test_package.py ...                                                [ 39%]
+tests/test_progress.py ...........                                       [ 52%]
+tests/test_readme.py ......                                              [ 59%]
+tests/test_recovery.py ....                                              [ 63%]
+tests/test_requirements.py ....                                          [ 68%]
+tests/test_run.py .......                                                [ 76%]
+tests/test_setup.py .s..                                                 [ 80%]
+tests/test_translator.py .....                                           [ 86%]
+tests/test_updater.py ....                                               [ 90%]
+tests/test_web.py ........                                               [100%]
+
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+tests/test_web.py::TestWebInterface::test_capture_stdout
+tests/test_web.py::TestWebInterface::test_get_progress
+tests/test_web.py::TestWebInterface::test_index_route
+tests/test_web.py::TestWebInterface::test_list_recovery_files
+tests/test_web.py::TestWebInterface::test_start_translation_already_running
+tests/test_web.py::TestWebInterface::test_start_translation_invalid
+tests/test_web.py::TestWebInterface::test_start_translation_valid
+tests/test_web.py::TestWebInterface::test_translate_with_progress
+  /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator/venv/lib/python3.13/site-packages/flask_session/filesystem/filesystem.py:75: DeprecationWarning: FileSystemSessionInterface is deprecated and will be removed in a future release. Instead use the CacheLib backend directly.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================= 87 passed, 1 skipped, 10 warnings in 11.93s ==================

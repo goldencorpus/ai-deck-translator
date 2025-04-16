@@ -1,0 +1,363 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-8.3.5, pluggy-1.5.0
+rootdir: /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator
+configfile: setup.cfg
+testpaths: tests
+plugins: anyio-4.9.0, cov-6.1.1
+collected 88 items
+
+tests/test_batch.py ..                                                   [  2%]
+tests/test_config.py ........                                            [ 11%]
+tests/test_development_plan.py .........                                 [ 21%]
+tests/test_extractor.py ...                                              [ 25%]
+tests/test_google_auth.py .....                                          [ 30%]
+tests/test_init.py ....                                                  [ 35%]
+tests/test_main.py .                                                     [ 36%]
+tests/test_package.py ...                                                [ 39%]
+tests/test_progress.py ...........                                       [ 52%]
+tests/test_readme.py ......                                              [ 59%]
+tests/test_recovery.py ....                                              [ 63%]
+tests/test_requirements.py ....                                          [ 68%]
+tests/test_run.py .......                                                [ 76%]
+tests/test_setup.py .s..                                                 [ 80%]
+tests/test_translator.py ....F                                           [ 86%]
+tests/test_updater.py ....                                               [ 90%]
+tests/test_web.py FFFFFFFF                                               [100%]
+
+=================================== FAILURES ===================================
+______________________ TestTranslator.test_translate_text ______________________
+
+self = <tests.test_translator.TestTranslator testMethod=test_translate_text>
+mock_progress = <MagicMock name='create_progress_bar' id='4393360352'>
+mock_deduplicate = <MagicMock name='deduplicate_content' id='4393360016'>
+mock_recovery = <MagicMock name='setup_recovery_system' id='4393359344'>
+mock_split = <MagicMock name='split_dict_into_smart_batches' id='4393362368'>
+
+    @patch("ai_deck_translator.core.translator.split_dict_into_smart_batches")
+    @patch("ai_deck_translator.core.translator.setup_recovery_system")
+    @patch("ai_deck_translator.utils.batch.deduplicate_content")
+    @patch("ai_deck_translator.utils.progress.create_progress_bar")
+    def test_translate_text(
+        self,
+        mock_progress,
+        mock_deduplicate,
+        mock_recovery,
+        mock_split,
+    ):
+        """Test that text is translated correctly with proper recovery and progress tracking."""
+        # Set up mocks
+        mock_recovery.return_value = (
+            {"translated_items": {}, "completed_batches": [], "failed_batches": []},
+            "recovery_file.json",
+            MagicMock(),  # save_recovery_state function
+        )
+    
+        mock_deduplicate.return_value = (
+            {"obj1": "Original text 1", "obj2": "Original text 2"},  # unique_dict
+            {},  # duplicates_map
+        )
+    
+        mock_split.return_value = [
+            {"obj1": "Original text 1"},
+            {"obj2": "Original text 2"},
+        ]
+    
+        mock_progress_instance = MagicMock()
+        mock_progress.return_value = mock_progress_instance
+    
+        # Test data
+        text_dict = {"obj1": "Original text 1", "obj2": "Original text 2"}
+        slide_metadata = [
+            {
+                "slide_number": 1,
+                "title": "Test Slide",
+                "content": ["Original text 1", "Original text 2"],
+            }
+        ]
+    
+        # Patch translation memory to be empty so recovery is triggered
+        with patch("ai_deck_translator.core.translator.TranslationMemory") as mock_tm:
+            mock_tm.return_value.lookup.side_effect = lambda k: None
+            result = translate_text(text_dict, slide_metadata, "en", lambda texts, lang: {k: f"Translated {v}" for k, v in texts.items()}, "fr")
+    
+        # Verify the mocks were called correctly
+>       mock_recovery.assert_called_once()
+
+tests/test_translator.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <MagicMock name='setup_recovery_system' id='4393359344'>
+
+    def assert_called_once(self):
+        """assert that the mock was called only once.
+        """
+        if not self.call_count == 1:
+            msg = ("Expected '%s' to have been called once. Called %s times.%s"
+                   % (self._mock_name or 'mock',
+                      self.call_count,
+                      self._calls_repr()))
+>           raise AssertionError(msg)
+E           AssertionError: Expected 'setup_recovery_system' to have been called once. Called 0 times.
+
+/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py:958: AssertionError
+----------------------------- Captured stdout call -----------------------------
+2025-04-17 01:25:39 - ai_deck_translator.ai_deck_translator.core.translator - INFO - Starting translation of 2 elements to en
+2025-04-17 01:25:39 - ai_deck_translator.ai_deck_translator.core.translator - INFO - Checking translation memory for existing translations
+2025-04-17 01:25:39 - ai_deck_translator.ai_deck_translator.utils.translation_memory - INFO - Translation memory initialized with 5 entries
+2025-04-17 01:25:39 - ai_deck_translator.ai_deck_translator.core.translator - INFO - Found 2 translations in memory
+2025-04-17 01:25:39 - ai_deck_translator.ai_deck_translator.core.translator - INFO - All elements found in translation memory, no need for API translation
+------------------------------ Captured log call -------------------------------
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:354 Starting translation of 2 elements to en
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:400 Checking translation memory for existing translations
+INFO     ai_deck_translator.ai_deck_translator.utils.translation_memory:translation_memory.py:56 Translation memory initialized with 5 entries
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:417 Found 2 translations in memory
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:429 All elements found in translation memory, no need for API translation
+_____________________ TestWebInterface.test_capture_stdout _____________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_capture_stdout>
+
+    def test_capture_stdout(self):
+        """Test that CaptureStdout captures stdout correctly."""
+        # Create a CaptureStdout instance
+        console_output = []
+        capture = CaptureStdout(console_output)
+    
+        # Capture stdout
+        old_stdout = sys.stdout
+        sys.stdout = capture
+    
+        # Print something
+        print("Test output")
+        print("Another line")
+    
+        # Restore stdout
+        sys.stdout = old_stdout
+    
+        # Verify the output was captured
+>       self.assertEqual(console_output, ["Test output", "Another line"])
+E       AssertionError: Lists differ: [] != ['Test output', 'Another line']
+E       
+E       Second list contains 2 additional elements.
+E       First extra element 0:
+E       'Test output'
+E       
+E       - []
+E       + ['Test output', 'Another line']
+
+tests/test_web.py:193: AssertionError
+______________________ TestWebInterface.test_get_progress ______________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_get_progress>
+
+    def test_get_progress(self):
+        """Test getting the translation progress."""
+        # Set the translation state
+        from ai_deck_translator.web.app import translation_state
+    
+        translation_state.update(
+            {
+                "running": True,
+                "progress": 50,
+                "console_output": ["Processing...", "Translating..."],
+                "result_url": "https://docs.google.com/presentation/d/test",
+            }
+        )
+    
+        # Make a request to get the progress
+        response = self.client.get("/get_progress")
+    
+        # Verify the response
+>       self.assertEqual(response.status_code, 200)
+E       AssertionError: 404 != 200
+
+tests/test_web.py:141: AssertionError
+______________________ TestWebInterface.test_index_route _______________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_index_route>
+
+    def test_index_route(self):
+        """Test that the index route returns the correct template."""
+        # Make a request to the index route
+        response = self.client.get("/")
+    
+        # Verify the response
+        self.assertEqual(response.status_code, 200)
+>       self.assertIn(b"Google Slides Translator", response.data)
+E       AssertionError: b'Google Slides Translator' not found in b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>AI Deck Translator</title>\n    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">\n    <style>\n        body {\n            padding-top: 2rem;\n            padding-bottom: 2rem;\n        }\n        .tab-content {\n            padding-top: 1.5rem;\n        }\n        .form-section {\n            margin-bottom: 1.5rem;\n        }\n        .card {\n            margin-bottom: 1.5rem;\n        }\n        .feature-icon {\n            font-size: 2rem;\n            margin-bottom: 1rem;\n            color: #0d6efd;\n        }\n    </style>\n</head>\n<body>\n    <div class="container">\n        <header class="mb-4">\n            <h1 class="text-center">AI Deck Translator</h1>\n            <p class="lead text-center">Translate your presentations with AI</p>\n        </header>\n\n        <div class="row">\n            <div class="col-md-8 mx-auto">\n                \n                    \n                \n\n                <div class="card">\n                    <div class="card-header">\n                        <ul class="nav nav-tabs card-header-tabs" id="translationTabs" role="tablist">\n                            <li class="nav-item" role="presentation">\n                                <button class="nav-link active" id="slides-tab" data-bs-toggle="tab" data-bs-target="#slides" type="button" role="tab" aria-controls="slides" aria-selected="true">Google Slides</button>\n                            </li>\n                            <li class="nav-item" role="presentation">\n                                <button class="nav-link" id="pptx-tab" data-bs-toggle="tab" data-bs-target="#pptx" type="button" role="tab" aria-controls="pptx" aria-selected="false">PowerPoint</button>\n                            </li>\n                        </ul>\n                    </div>\n                    <div class="card-body">\n                        <div class="tab-content" id="translationTabsContent">\n                            <!-- Google Slides Tab -->\n                            <div class="tab-pane fade show active" id="slides" role="tabpanel" aria-labelledby="slides-tab">\n                                <form action="/translate" method="post">\n                                    <div class="form-group mb-3">\n                                        <label for="slides_id">Google Slides ID:</label>\n                                        <input type="text" class="form-control" id="slides_id" name="slides_id" placeholder="Enter Google Slides ID">\n                                        <small class="form-text text-muted">The ID is the part of the URL after "/presentation/d/" and before "/edit".</small>\n                                    </div>\n                                    \n                                    <div class="alert alert-info mb-3">\n                                        <h5>Google Slides Permissions</h5>\n                                        <p>When using Google Slides, please ensure:</p>\n                                        <ul>\n                                            <li>The presentation is shared with the email used for API access</li>\n                                            <li>You have at least <strong>view access</strong> to extract content</li>\n                                            <li>You have <strong>edit access</strong> to save the translated version</li>\n                                        </ul>\n                                        <p>Without proper permissions, you may encounter 403 Forbidden errors.</p>\n                                    </div>\n                                    \n                                    <div class="form-group mb-3">\n                                        <label for="file">Or upload a PowerPoint file:</label>\n                                        <input type="file" class="form-control" id="file" name="file" accept=".pptx">\n                                    </div>\n\n                                    <div class="form-section">\n                                        <label for="target_language" class="form-label">Target Language</label>\n                                        <select class="form-select" id="target_language" name="target_language" required>\n                                            <option value="" selected disabled>Select target language</option>\n                                            <option value="ja">Japanese</option>\n                                            <option value="ko">Korean</option>\n                                            <option value="zh-CN">Chinese (Simplified)</option>\n                                            <option value="zh-TW">Chinese (Traditional)</option>\n                                            <option value="fr">French</option>\n                                            <option value="de">German</option>\n                                            <option value="es">Spanish</option>\n                                            <option value="it">Italian</option>\n                                            <option value="pt">Portuguese</option>\n                                            <option value="ru">Russian</option>\n                                        </select>\n                                    </div>\n\n                                    <div class="form-section">\n                                        <label for="service" class="form-label">Translation Service</label>\n                                        <select class="form-select" id="service" name="service">\n                                            <option value="google" selected>Google Translate</option>\n                                            <option value="anthropic">Anthropic Claude</option>\n                                        </select>\n                                    </div>\n\n                                    <div class="form-section" id="api_key_section" style="display: none;">\n                                        <label for="api_key" class="form-label">API Key</label>\n                                        <input type="password" class="form-control" id="api_key" name="api_key" placeholder="Enter your API key">\n                                        <div class="form-text">Required for Anthropic Claude</div>\n                                    </div>\n\n                                    <div class="form-section">\n                                        <div class="form-check">\n                                            <input class="form-check-input" type="checkbox" id="translate_notes" name="translate_notes" checked>\n                                            <label class="form-check-label" for="translate_notes">\n                                                Translate slide notes\n                                            </label>\n                                        </div>\n                                        <div class="form-text">When checked, speaker notes will also be translated</div>\n                                    </div>\n\n                                    <button type="submit" class="btn btn-primary">Translate</button>\n                                </form>\n                            </div>\n\n                            <!-- PowerPoint Tab -->\n                            <div class="tab-pane fade" id="pptx" role="tabpanel" aria-labelledby="pptx-tab">\n                                <form action="/translate" method="post" enctype="multipart/form-data">\n                                    <div class="form-section">\n                                        <label for="file" class="form-label">PowerPoint File</label>\n                                        <input type="file" class="form-control" id="file" name="file" accept=".pptx" required>\n                                        <div class="form-text">Only .pptx files are supported</div>\n                                    </div>\n\n                                    <div class="form-section">\n                                        <label for="target_language_pptx" class="form-label">Target Language</label>\n                                        <select class="form-select" id="target_language_pptx" name="target_language" required>\n                                            <option value="" selected disabled>Select target language</option>\n                                            <option value="ja">Japanese</option>\n                                            <option value="ko">Korean</option>\n                                            <option value="zh-CN">Chinese (Simplified)</option>\n                                            <option value="zh-TW">Chinese (Traditional)</option>\n                                            <option value="fr">French</option>\n                                            <option value="de">German</option>\n                                            <option value="es">Spanish</option>\n                                            <option value="it">Italian</option>\n                                            <option value="pt">Portuguese</option>\n                                            <option value="ru">Russian</option>\n                                        </select>\n                                    </div>\n\n                                    <div class="form-section">\n                                        <label for="service_pptx" class="form-label">Translation Service</label>\n                                        <select class="form-select" id="service_pptx" name="service">\n                                            <option value="google" selected>Google Translate</option>\n                                            <option value="anthropic">Anthropic Claude</option>\n                                        </select>\n                                    </div>\n\n                                    <div class="form-section" id="api_key_section_pptx" style="display: none;">\n                                        <label for="api_key_pptx" class="form-label">API Key</label>\n                                        <input type="password" class="form-control" id="api_key_pptx" name="api_key" placeholder="Enter your API key">\n                                        <div class="form-text">Required for Anthropic Claude</div>\n                                    </div>\n\n                                    <div class="form-section">\n                                        <div class="form-check">\n                                            <input class="form-check-input" type="checkbox" id="translate_notes_pptx" name="translate_notes" checked>\n                                            <label class="form-check-label" for="translate_notes_pptx">\n                                                Translate slide notes\n                                            </label>\n                                        </div>\n                                        <div class="form-text">When checked, speaker notes will also be translated</div>\n                                    </div>\n\n                                    <button type="submit" class="btn btn-primary">Translate</button>\n                                </form>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="card">\n                    <div class="card-header">\n                        <h5 class="card-title mb-0">Features</h5>\n                    </div>\n                    <div class="card-body">\n                        <div class="row">\n                            <div class="col-md-4 text-center">\n                                <div class="feature-icon">\xf0\x9f\x93\x8a</div>\n                                <h5>Google Slides & PowerPoint</h5>\n                                <p>Translate both Google Slides and PowerPoint presentations</p>\n                            </div>\n                            <div class="col-md-4 text-center">\n                                <div class="feature-icon">\xf0\x9f\x8c\x90</div>\n                                <h5>Multiple Languages</h5>\n                                <p>Support for translating to various languages</p>\n                            </div>\n                            <div class="col-md-4 text-center">\n                                <div class="feature-icon">\xf0\x9f\x94\x8d</div>\n                                <h5>Preserve Formatting</h5>\n                                <p>Maintains original formatting and layout</p>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>\n    <script>\n        // Show/hide API key field based on service selection\n        document.getElementById(\'service\').addEventListener(\'change\', function() {\n            document.getElementById(\'api_key_section\').style.display = \n                this.value === \'anthropic\' ? \'block\' : \'none\';\n        });\n\n        document.getElementById(\'service_pptx\').addEventListener(\'change\', function() {\n            document.getElementById(\'api_key_section_pptx\').style.display = \n                this.value === \'anthropic\' ? \'block\' : \'none\';\n        });\n    </script>\n</body>\n</html> '
+
+tests/test_web.py:53: AssertionError
+__________________ TestWebInterface.test_list_recovery_files ___________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_list_recovery_files>
+mock_list_recovery = <MagicMock name='list_recovery_files' id='4403136896'>
+
+    @patch("ai_deck_translator.utils.recovery.list_recovery_files")
+    def test_list_recovery_files(self, mock_list_recovery):
+        """Test listing recovery files."""
+        # Set up the mock
+        mock_list_recovery.return_value = [
+            {
+                "filename": "recovery_file1.json",
+                "path": "/path/to/recovery_file1.json",
+                "presentation_id": "pres1",
+                "source_language": "en",
+                "target_language": "fr",
+                "progress": "50%",
+                "timestamp": "2023-01-01T12:00:00",
+            }
+        ]
+    
+        # Make a request to list recovery files
+        response = self.client.get("/list_recovery_files")
+    
+        # Verify the response
+>       self.assertEqual(response.status_code, 200)
+E       AssertionError: 404 != 200
+
+tests/test_web.py:170: AssertionError
+___________ TestWebInterface.test_start_translation_already_running ____________
+
+self = <tests.test_web.TestWebInterface testMethod=test_start_translation_already_running>
+
+    def test_start_translation_already_running(self):
+        """Test starting a translation when one is already running."""
+        # Set the translation state to running
+        from ai_deck_translator.web.app import translation_state
+    
+        translation_state["running"] = True
+    
+        # Make a request to start a translation
+        response = self.client.post(
+            "/start_translation",
+            data={
+                "presentation_id": "test_presentation_123",
+                "source_language": "en",
+                "target_language": "fr",
+            },
+            follow_redirects=True,
+        )
+    
+        # Verify the response
+>       self.assertEqual(response.status_code, 200)
+E       AssertionError: 404 != 200
+
+tests/test_web.py:120: AssertionError
+_______________ TestWebInterface.test_start_translation_invalid ________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_start_translation_invalid>
+
+    def test_start_translation_invalid(self):
+        """Test starting a translation with invalid input."""
+        # Make a request with missing presentation_id
+        response = self.client.post(
+            "/start_translation",
+            data={"source_language": "en", "target_language": "fr"},
+            follow_redirects=True,
+        )
+    
+        # Verify the response
+>       self.assertEqual(response.status_code, 200)
+E       AssertionError: 404 != 200
+
+tests/test_web.py:96: AssertionError
+________________ TestWebInterface.test_start_translation_valid _________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_start_translation_valid>
+mock_translate = <MagicMock name='translate_with_progress' id='4403137232'>
+
+    @patch("ai_deck_translator.web.app.translate_with_progress")
+    def test_start_translation_valid(self, mock_translate):
+        """Test starting a translation with valid input."""
+        # Set up the mock
+        mock_translate.return_value = None
+    
+        # Make a request to start a translation
+        response = self.client.post(
+            "/start_translation",
+            data={
+                "presentation_id": "test_presentation_123",
+                "source_language": "en",
+                "target_language": "fr",
+                "api_key": "test_api_key",
+            },
+            follow_redirects=True,
+        )
+    
+        # Verify the response
+>       self.assertEqual(response.status_code, 200)
+E       AssertionError: 404 != 200
+
+tests/test_web.py:75: AssertionError
+________________ TestWebInterface.test_translate_with_progress _________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_translate_with_progress>
+mock_translate_slides = <MagicMock name='translate_slides' id='4403136896'>
+
+    @patch("ai_deck_translator.core.translator.translate_slides")
+    def test_translate_with_progress(self, mock_translate_slides):
+        """Test that translate_with_progress updates the translation state correctly."""
+        # Set up the mock
+        mock_translate_slides.return_value = (
+            "https://docs.google.com/presentation/d/test"
+        )
+    
+        # Get the translation state
+        from ai_deck_translator.web.app import translation_state
+    
+        # Call the function in a thread so it doesn't block
+        thread = threading.Thread(
+            target=translate_with_progress,
+            kwargs={
+                "presentation_id": "test_presentation_123",
+                "source_language": "en",
+                "target_language": "fr",
+                "api_key": "test_api_key",
+            },
+        )
+        thread.daemon = True
+        thread.start()
+    
+        # Wait a bit for the thread to start
+        time.sleep(0.1)
+    
+        # Verify the translation state was updated
+        self.assertEqual(translation_state["running"], True)
+    
+        # Wait for the thread to finish
+        thread.join(timeout=1.0)
+    
+        # Verify the translation state was updated again
+>       self.assertEqual(translation_state["running"], False)
+E       AssertionError: True != False
+
+tests/test_web.py:229: AssertionError
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+tests/test_web.py::TestWebInterface::test_capture_stdout
+tests/test_web.py::TestWebInterface::test_get_progress
+tests/test_web.py::TestWebInterface::test_index_route
+tests/test_web.py::TestWebInterface::test_list_recovery_files
+tests/test_web.py::TestWebInterface::test_start_translation_already_running
+tests/test_web.py::TestWebInterface::test_start_translation_invalid
+tests/test_web.py::TestWebInterface::test_start_translation_valid
+tests/test_web.py::TestWebInterface::test_translate_with_progress
+  /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator/venv/lib/python3.13/site-packages/flask_session/filesystem/filesystem.py:75: DeprecationWarning: FileSystemSessionInterface is deprecated and will be removed in a future release. Instead use the CacheLib backend directly.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_translator.py::TestTranslator::test_translate_text - Assert...
+FAILED tests/test_web.py::TestWebInterface::test_capture_stdout - AssertionEr...
+FAILED tests/test_web.py::TestWebInterface::test_get_progress - AssertionErro...
+FAILED tests/test_web.py::TestWebInterface::test_index_route - AssertionError...
+FAILED tests/test_web.py::TestWebInterface::test_list_recovery_files - Assert...
+FAILED tests/test_web.py::TestWebInterface::test_start_translation_already_running
+FAILED tests/test_web.py::TestWebInterface::test_start_translation_invalid - ...
+FAILED tests/test_web.py::TestWebInterface::test_start_translation_valid - As...
+FAILED tests/test_web.py::TestWebInterface::test_translate_with_progress - As...
+============ 9 failed, 78 passed, 1 skipped, 10 warnings in 13.12s =============

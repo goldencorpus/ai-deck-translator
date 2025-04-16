@@ -73,33 +73,49 @@ class TestBatch(unittest.TestCase):
             "key5": "Duplicate text",  # Same as key1 and key3
         }
 
-        unique_dict, duplicates_map = deduplicate_content(test_dict)
+        result = deduplicate_content(test_dict)
+        unique_dict = result["unique_texts"]
+        text_to_ids = result["text_to_ids"]
+        id_mapping = result["id_mapping"]
 
         # Verify the unique dictionary has only unique content
         self.assertEqual(len(unique_dict), 3)  # 3 unique texts
 
-        # Verify all original keys are represented in the duplicates map
-        self.assertEqual(set(duplicates_map.keys()), {"key1", "key3", "key5"})
+        # Verify all unique texts are represented in the text_to_ids map
+        self.assertEqual(
+            set(text_to_ids.keys()),
+            {"Duplicate text", "Unique text 1", "Unique text 2"},
+        )
 
-        # Verify that all duplicate keys map to a representative key
-        for dup_key, rep_key in duplicates_map.items():
-            self.assertEqual(test_dict[dup_key], test_dict[rep_key])
+        # Verify that all original keys are mapped to a unique_id
+        for orig_key in test_dict:
+            self.assertIn(orig_key, id_mapping)
+            unique_id = id_mapping[orig_key]
+            self.assertIn(unique_id, unique_dict)
+            self.assertEqual(unique_dict[unique_id], test_dict[orig_key])
 
         # Test with no duplicates
         test_dict_unique = {"key1": "Text 1", "key2": "Text 2", "key3": "Text 3"}
 
-        unique_dict, duplicates_map = deduplicate_content(test_dict_unique)
+        result = deduplicate_content(test_dict_unique)
+        unique_dict = result["unique_texts"]
+        text_to_ids = result["text_to_ids"]
+        id_mapping = result["id_mapping"]
 
         # Verify the unique dictionary has all original content
         self.assertEqual(len(unique_dict), 3)
 
-        # Verify the duplicates map is empty
-        self.assertEqual(len(duplicates_map), 0)
+        # Verify the text_to_ids map has all unique texts
+        self.assertEqual(set(text_to_ids.keys()), {"Text 1", "Text 2", "Text 3"})
 
         # Test with empty dictionary
-        unique_dict, duplicates_map = deduplicate_content({})
+        result = deduplicate_content({})
+        unique_dict = result["unique_texts"]
+        text_to_ids = result["text_to_ids"]
+        id_mapping = result["id_mapping"]
         self.assertEqual(len(unique_dict), 0)
-        self.assertEqual(len(duplicates_map), 0)
+        self.assertEqual(len(text_to_ids), 0)
+        self.assertEqual(len(id_mapping), 0)
 
 
 if __name__ == "__main__":

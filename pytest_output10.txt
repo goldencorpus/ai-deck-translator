@@ -1,0 +1,20 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-8.3.5, pluggy-1.5.0
+rootdir: /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator
+configfile: setup.cfg
+testpaths: tests
+plugins: anyio-4.9.0, cov-6.1.1
+collected 88 items
+
+tests/test_batch.py ..                                                   [  2%]
+tests/test_config.py ........                                            [ 11%]
+tests/test_development_plan.py .........                                 [ 21%]
+tests/test_extractor.py ...                                              [ 25%]
+tests/test_google_auth.py .....                                          [ 30%]
+tests/test_init.py ....                                                  [ 35%]
+tests/test_main.py .                                                     [ 36%]
+tests/test_package.py ...                                                [ 39%]
+tests/test_progress.py ...........                                       [ 52%]
+tests/test_readme.py ......                                              [ 59%]
+tests/test_recovery.py ....                                              [ 63%]
+tests/test_requirements.py 

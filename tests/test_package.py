@@ -22,7 +22,7 @@ class TestPackage(unittest.TestCase):
     def test_package_imports(self):
         """Test that all packages and modules can be imported."""
         # Test main package
-        self.assertIsNotNone(gslides_translator)
+        self.assertIsNotNone(ai_deck_translator)
 
         # Test core modules
         self.assertIsNotNone(
@@ -59,8 +59,8 @@ class TestPackage(unittest.TestCase):
         # Get all modules in the package
         package_modules = list(
             pkgutil.walk_packages(
-                path=gslides_translator.__path__,
-                prefix=gslides_translator.__name__ + ".",
+                path=ai_deck_translator.__path__,
+                prefix=ai_deck_translator.__name__ + ".",
             )
         )
 
@@ -92,11 +92,11 @@ class TestPackage(unittest.TestCase):
 
     def test_version(self):
         """Test that the package has a version."""
-        self.assertTrue(hasattr(gslides_translator, "__version__"))
-        self.assertIsInstance(gslides_translator.__version__, str)
+        self.assertTrue(hasattr(ai_deck_translator, "__version__"))
+        self.assertIsInstance(ai_deck_translator.__version__, str)
 
         # Version should be in the format x.y.z
-        version_parts = gslides_translator.__version__.split(".")
+        version_parts = ai_deck_translator.__version__.split(".")
         self.assertEqual(len(version_parts), 3, "Version should be in the format x.y.z")
 
         # Each part should be a number

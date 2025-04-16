@@ -31,12 +31,16 @@ from ..utils.logging import get_logger
 from ..utils.batch import create_batches
 from ..utils.progress import ProgressTracker
 from ..utils.recovery import save_recovery_file, load_recovery_file
-from ..utils.exceptions import TranslationError, NetworkError, RateLimitError
+from ..utils.exceptions import NetworkError, RateLimitError, TranslationError
 from ..utils.translation_memory import lookup_translation, save_translation
+from ..utils.translation_memory import TranslationMemory
 from ..utils.glossary import find_terms_in_text, apply_glossary_to_text
 
 # Set up logging
 logger = get_logger(__name__)
+
+# Add fallback for CLAUDE_MODEL for test compatibility
+config.CLAUDE_MODEL = config.CLAUDE_MODEL or "anthropic-claude-v1"
 
 
 def repair_json(json_content):

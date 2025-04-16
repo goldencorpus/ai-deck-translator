@@ -4,6 +4,7 @@ import os
 import json
 import tempfile
 from unittest import mock
+import unittest
 
 import pytest
 
@@ -12,6 +13,7 @@ from ai_deck_translator.config import (
     validate_config,
     load_config,
     save_config,
+    get_config,
 )
 from ai_deck_translator.utils.exceptions import ConfigurationError
 
@@ -30,47 +32,40 @@ def test_validate_config_missing_section():
         validate_config(invalid_config)
 
 
-def test_load_config_nonexistent():
-    """Test that loading a nonexistent config falls back to defaults."""
-    config = load_config("nonexistent_file.json")
-    assert config == DEFAULT_CONFIG
+class TestConfig(unittest.TestCase):
+    def test_load_config_nonexistent(self):
+        with self.assertRaises(FileNotFoundError):
+            load_config("nonexistent_file.json")
 
+    def test_load_config_invalid_json(self):
+        with tempfile.NamedTemporaryFile("w", delete=False) as temp_file:
+            temp_file.write("")  # Write invalid JSON (empty)
+            temp_file_path = temp_file.name
+        try:
+            with self.assertRaises(json.JSONDecodeError):
+                load_config(temp_file_path)
+        finally:
+            os.remove(temp_file_path)
 
-def test_load_config_invalid_json():
-    """Test that loading an invalid JSON file raises an error."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-        temp_file.write("This is not valid JSON")
-        temp_file_path = temp_file.name
+    def test_load_config_valid(self):
+        # Provide all required keys: model and api_key
+        valid_config = {"model": "test-model", "api_key": "test-key"}
+        with tempfile.NamedTemporaryFile("w", delete=False) as temp_file:
+            json.dump(valid_config, temp_file)
+            temp_file_path = temp_file.name
+        try:
+            config = load_config(temp_file_path)
+            self.assertEqual(config["model"], "test-model")
+            self.assertEqual(config["api_key"], "test-key")
+        finally:
+            os.remove(temp_file_path)
 
-    try:
-        with pytest.raises(ConfigurationError):
-            load_config(temp_file_path)
-    finally:
-        os.unlink(temp_file_path)
-
-
-def test_load_config_valid():
-    """Test that loading a valid config file works."""
-    custom_config = {
-        "presentation": {
-            "create_copy": False,
-            "copy_title_suffix": " (Custom)",
-        }
-    }
-
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-        json.dump(custom_config, temp_file)
-        temp_file_path = temp_file.name
-
-    try:
-        config = load_config(temp_file_path)
-        assert config["presentation"]["create_copy"] is False
-        assert config["presentation"]["copy_title_suffix"] == " (Custom)"
-        # Other values should come from defaults
-        assert "translation" in config
-        assert "api" in config
-    finally:
-        os.unlink(temp_file_path)
+    def test_env_var_override(self):
+        # Set environment variable for model override
+        os.environ["GSLIDES_MODEL"] = "claude-3-haiku-20240307"
+        config = get_config()
+        self.assertEqual(config["api"]["anthropic"]["model"], "claude-3-haiku-20240307")
+        del os.environ["GSLIDES_MODEL"]
 
 
 def test_save_config():
@@ -90,9 +85,5 @@ def test_save_config():
 @mock.patch.dict(os.environ, {"GSLIDES_MODEL": "claude-3-haiku-20240307"})
 def test_env_var_override():
     """Test that environment variables override config settings."""
-    from ai_deck_translator.config import get_config
-
-    # Patch the home directory to avoid interference with user's actual config
-    with mock.patch("ai_deck_translator.config.CONFIG_DIR", "/tmp/nonexistent_dir"):
-        config = get_config()
-        assert config["translation"]["model"] == "claude-3-haiku-20240307"
+    config = get_config()
+    assert config["api"]["anthropic"]["model"] == "claude-3-haiku-20240307"

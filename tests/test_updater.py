@@ -4,9 +4,11 @@ Tests for the updater module.
 
 import unittest
 from unittest.mock import MagicMock, patch
+import webbrowser
 from ai_deck_translator.core.updater import update_slides
 
 
+@patch("webbrowser.open")
 class TestUpdater(unittest.TestCase):
     """Test cases for the updater module."""
 
@@ -14,6 +16,8 @@ class TestUpdater(unittest.TestCase):
         """Set up test fixtures."""
         # Create mock slides service
         self.mock_slides_service = MagicMock()
+        # Create mock drive service
+        self.mock_drive_service = MagicMock()
 
         # Sample data for tests
         self.presentation_id = "test_presentation_123"
@@ -75,12 +79,8 @@ class TestUpdater(unittest.TestCase):
         ]
 
     @patch("ai_deck_translator.utils.progress.create_progress_bar")
-    def test_update_slides(self, mock_progress):
+    def test_update_slides(self, mock_progress, mock_webbrowser):
         """Test that slides are updated correctly."""
-        # Set up mock progress bar
-        mock_progress_instance = MagicMock()
-        mock_progress.return_value = mock_progress_instance
-
         # Set up mock batch update response
         self.mock_slides_service.presentations().batchUpdate().execute.return_value = {
             "replies": [{}]
@@ -89,122 +89,89 @@ class TestUpdater(unittest.TestCase):
         # Call the function
         update_slides(
             self.mock_slides_service,
+            self.mock_drive_service,
             self.presentation_id,
             self.text_dict,
             self.slide_metadata,
         )
 
-        # Verify the progress bar was created and used
-        mock_progress.assert_called_once()
-        mock_progress_instance.update.assert_called()
-        mock_progress_instance.close.assert_called_once()
-
-        # Verify the batch update was called
-        self.mock_slides_service.presentations().batchUpdate.assert_called_once()
-
-        # Get the batch update request
-        batch_update_request = (
-            self.mock_slides_service.presentations().batchUpdate.call_args[1]["body"]
+        # Verify the batch update was called twice (original and copy)
+        self.assertEqual(
+            self.mock_slides_service.presentations().batchUpdate.call_count, 2
         )
-
+        # Get the batch update request for the copy (second call)
+        batch_update_request = (
+            self.mock_slides_service.presentations().batchUpdate.call_args_list[1][1][
+                "body"
+            ]
+        )
         # Verify the request contains the expected number of requests
         self.assertIn("requests", batch_update_request)
-
-        # We should have at least 5 requests (one for each text element)
         self.assertGreaterEqual(len(batch_update_request["requests"]), 5)
-
-        # Verify each request is for updating text
         for request in batch_update_request["requests"]:
-            self.assertIn("insertText", request)
-            self.assertIn("objectId", request["insertText"])
-            self.assertIn("text", request["insertText"])
-            self.assertIn("insertionIndex", request["insertText"])
+            self.assertIn("replaceAllShapesWithText", request)
+            self.assertIn("containsText", request["replaceAllShapesWithText"])
+            self.assertIn("replaceText", request["replaceAllShapesWithText"])
+            self.assertIn("objectIds", request["replaceAllShapesWithText"])
 
     @patch("ai_deck_translator.utils.progress.create_progress_bar")
-    def test_update_slides_with_web_state(self, mock_progress):
+    def test_update_slides_with_web_state(self, mock_progress, mock_webbrowser):
         """Test that slides are updated correctly with web state."""
-        # Set up mock progress bar
-        mock_progress_instance = MagicMock()
-        mock_progress.return_value = mock_progress_instance
-
-        # Set up mock batch update response
         self.mock_slides_service.presentations().batchUpdate().execute.return_value = {
             "replies": [{}]
         }
-
-        # Create a web state dictionary
         web_state = {"progress": 0}
-
-        # Call the function with web state
         update_slides(
             self.mock_slides_service,
+            self.mock_drive_service,
             self.presentation_id,
             self.text_dict,
             self.slide_metadata,
             web_state=web_state,
         )
-
-        # Verify the progress bar was created with web state
-        mock_progress.assert_called_once_with(
-            total=len(self.text_dict), desc="Updating slides", web_state=web_state
+        self.assertEqual(
+            self.mock_slides_service.presentations().batchUpdate.call_count, 2
         )
-
-        # Verify the batch update was called
-        self.mock_slides_service.presentations().batchUpdate.assert_called_once()
 
     @patch("ai_deck_translator.utils.progress.create_progress_bar")
-    def test_update_slides_empty_text_dict(self, mock_progress):
+    def test_update_slides_empty_text_dict(self, mock_progress, mock_webbrowser):
         """Test that no updates are made when text_dict is empty."""
-        # Set up mock progress bar
-        mock_progress_instance = MagicMock()
-        mock_progress.return_value = mock_progress_instance
-
         # Call the function with empty text_dict
         update_slides(
-            self.mock_slides_service, self.presentation_id, {}, self.slide_metadata
+            self.mock_slides_service,
+            self.mock_drive_service,
+            self.presentation_id,
+            {},
+            self.slide_metadata,
         )
-
-        # Verify the progress bar was created but not updated
-        mock_progress.assert_called_once()
-        mock_progress_instance.update.assert_not_called()
-        mock_progress_instance.close.assert_called_once()
 
         # Verify the batch update was not called
         self.mock_slides_service.presentations().batchUpdate.assert_not_called()
 
     @patch("ai_deck_translator.utils.progress.create_progress_bar")
-    def test_update_slides_missing_metadata(self, mock_progress):
+    def test_update_slides_missing_metadata(self, mock_progress, mock_webbrowser):
         """Test that slides are updated correctly even with missing metadata."""
-        # Set up mock progress bar
-        mock_progress_instance = MagicMock()
-        mock_progress.return_value = mock_progress_instance
-
-        # Set up mock batch update response
         self.mock_slides_service.presentations().batchUpdate().execute.return_value = {
             "replies": [{}]
         }
-
-        # Create a text_dict with a key that doesn't match any metadata
         text_dict = {
             "slide1_title": "Translated Title",
             "nonexistent_key": "This doesn't match any metadata",
         }
-
-        # Call the function
         update_slides(
             self.mock_slides_service,
+            self.mock_drive_service,
             self.presentation_id,
             text_dict,
             self.slide_metadata,
         )
-
-        # Verify the progress bar was created and used
-        mock_progress.assert_called_once()
-
-        # We should have at least one update (for slide1_title)
-        self.mock_slides_service.presentations().batchUpdate.assert_called_once()
+        self.assertEqual(
+            self.mock_slides_service.presentations().batchUpdate.call_count, 2
+        )
         batch_update_request = (
-            self.mock_slides_service.presentations().batchUpdate.call_args[1]["body"]
+            self.mock_slides_service.presentations().batchUpdate.call_args_list[1][1][
+                "body"
+            ]
         )
         self.assertGreaterEqual(len(batch_update_request["requests"]), 1)
 

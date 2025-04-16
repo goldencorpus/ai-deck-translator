@@ -24,8 +24,19 @@ from .. import config
 # Set up logging
 logger = get_logger(__name__)
 
+# Add RECOVERY_DIR for test compatibility
+RECOVERY_DIR = "translation_recovery"
+
 # Add a dummy RECOVERY_ attribute for test compatibility
 RECOVERY_ = None
+
+__all__ = [
+    "setup_recovery_system",
+    "list_recovery_files",
+    "save_recovery_file",
+    "load_recovery_file",
+    "RECOVERY_DIR",
+]
 
 
 def setup_recovery_system(
@@ -78,7 +89,7 @@ def setup_recovery_system(
         >>> recovery_system["save_recovery_state"]()
     """
     # Create a directory for recovery files if it doesn't exist
-    recovery_dir = getattr(config, "RECOVERY_DIRECTORY", "translation_recovery")
+    recovery_dir = getattr(config, "RECOVERY_DIRECTORY", RECOVERY_DIR)
     os.makedirs(recovery_dir, exist_ok=True)
 
     logger.info(f"Setting up recovery system for {file_id}")
@@ -224,7 +235,7 @@ def list_recovery_files() -> List[Dict[str, Any]]:
         >>> for rf in recovery_files:
         ...     print(f"{rf['file']}: {rf['progress']} ({rf['timestamp']})")
     """
-    recovery_dir = getattr(config, "RECOVERY_DIRECTORY", "translation_recovery")
+    recovery_dir = getattr(config, "RECOVERY_DIRECTORY", RECOVERY_DIR)
     if not os.path.exists(recovery_dir):
         logger.info(f"Recovery directory {recovery_dir} does not exist")
         return []

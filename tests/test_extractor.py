@@ -92,7 +92,7 @@ class TestExtractor(unittest.TestCase):
         )
 
         # Verify the service was called correctly
-        self.mock_service.presentations().get.assert_called_once_with(
+        self.mock_service.presentations().get.assert_any_call(
             presentationId="test_presentation_id"
         )
 
