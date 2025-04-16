@@ -15,7 +15,7 @@ from pptx import Presentation
 
 # Import our module components
 from .models import get_translator_for_model
-from .models.base import MODEL_CLAUDE_3_HAIKU, MODEL_CLAUDE_3_SONNET, MODEL_GPT_3_5_TURBO, MODEL_GPT_4_TURBO, MODEL_GEMINI_PRO
+from .models.base import MODEL_CLAUDE_35_SONNET, MODEL_CLAUDE_35_HAIKU, MODEL_GPT_4O, MODEL_GPT_4O_MINI, MODEL_GEMINI_15_PRO, MODEL_GEMINI_15_FLASH
 from .cache import (
     get_from_translation_cache,
     save_to_translation_cache,
@@ -55,10 +55,10 @@ QUALITY_ECONOMY = "economy"  # For future use
 
 # Quality levels and their corresponding models
 QUALITY_LEVELS = {
-    QUALITY_DRAFT: [MODEL_CLAUDE_3_HAIKU, MODEL_GPT_3_5_TURBO, MODEL_GEMINI_PRO],
-    QUALITY_STANDARD: [MODEL_CLAUDE_3_HAIKU, MODEL_GPT_3_5_TURBO, MODEL_GEMINI_PRO],
-    QUALITY_PROFESSIONAL: [MODEL_CLAUDE_3_SONNET, MODEL_GPT_4_TURBO, MODEL_GEMINI_PRO],
-    QUALITY_ECONOMY: [MODEL_GEMINI_PRO]  # Fallback to most economical model
+    QUALITY_DRAFT: [MODEL_CLAUDE_35_HAIKU, MODEL_GPT_4O_MINI, MODEL_GEMINI_15_FLASH],
+    QUALITY_STANDARD: [MODEL_CLAUDE_35_HAIKU, MODEL_GPT_4O_MINI, MODEL_GEMINI_15_PRO],
+    QUALITY_PROFESSIONAL: [MODEL_CLAUDE_35_SONNET, MODEL_GPT_4O, MODEL_GEMINI_15_PRO],
+    QUALITY_ECONOMY: [MODEL_GEMINI_15_FLASH]  # Fallback to most economical model
 }
 
 # Cost tracking class
@@ -914,6 +914,9 @@ def list_recovery_files():
             pass
     
     return sorted(result, key=lambda x: x["timestamp"], reverse=True)
+
+# Create alias for translate_pptx as translate_presentation for backward compatibility
+translate_presentation = translate_pptx
 
 if __name__ == "__main__":
     """

@@ -72,6 +72,29 @@ def get_logger(name=None):
     return logger
 
 
+def set_log_level(level):
+    """
+    Set the log level for the root logger and all its handlers.
+    
+    Args:
+        level: The log level to set (can be a string like 'DEBUG', 'INFO', etc. or a logging constant)
+        
+    Returns:
+        None
+    """
+    # Convert string level to logging constant if needed
+    if isinstance(level, str):
+        level = getattr(logging, level.upper())
+    
+    # Set level on the root logger
+    root_logger = logging.getLogger("ai_deck_translator")
+    root_logger.setLevel(level)
+    
+    # Also set level on all handlers
+    for handler in root_logger.handlers:
+        handler.setLevel(level)
+
+
 # Default logger
 default_log_dir = os.path.join(str(Path.home()), ".ai_deck_translator", "logs")
 os.makedirs(default_log_dir, exist_ok=True)

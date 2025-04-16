@@ -9,14 +9,48 @@ Public Functions:
     split_dict_into_smart_batches: Split a dictionary into batches based on token count
     deduplicate_content: Deduplicate content to reduce translation costs
     create_batches: Create batches of elements for processing
+    split_into_batches: Split a list into batches of a specified size
 """
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, TypeVar, Iterable, Iterator, Generic
 from ..utils.logging import get_logger
 from ..utils.exceptions import ValidationError
 from .. import config
 
 # Set up logging
 logger = get_logger(__name__)
+
+T = TypeVar('T')
+
+def split_into_batches(items: List[T], batch_size: int) -> List[List[T]]:
+    """
+    Split a list into batches of a specified size.
+    
+    Args:
+        items (List[T]): List of items to split into batches
+        batch_size (int): Maximum number of items per batch
+        
+    Returns:
+        List[List[T]]: List of batches, where each batch is a list of items
+        
+    Raises:
+        ValidationError: If batch_size is invalid
+        
+    Example:
+        >>> items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        >>> batches = split_into_batches(items, 3)
+        >>> print(batches)
+        [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10]]
+    """
+    if batch_size <= 0:
+        raise ValidationError("Batch size must be a positive integer")
+    
+    # Create batches
+    batches = []
+    for i in range(0, len(items), batch_size):
+        batches.append(items[i:i + batch_size])
+    
+    logger.debug(f"Split {len(items)} items into {len(batches)} batches (batch size: {batch_size})")
+    return batches
 
 def create_batches(ids: List[str], texts: List[str], batch_size: int) -> List[Tuple[List[str], List[str]]]:
     """
