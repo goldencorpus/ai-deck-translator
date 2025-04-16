@@ -938,3 +938,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def translate_with_progress(presentation_id, source_language, target_language, api_key):
+    """
+    Simulates a translation process and updates the global `translation_state`.
+    Args:
+        presentation_id (str): ID of the presentation to translate.
+        source_language (str): Source language code.
+        target_language (str): Target language code.
+        api_key (str): API key for translation.
+    Returns:
+        None
+    """
+    global translation_state
+    translation_state["running"] = True
+    translation_state["progress"] = 0
+    translation_state["console_output"] = []
+    for i in range(1, 101):
+        time.sleep(0.01)
+        translation_state["progress"] = i
+        translation_state["console_output"].append(f"Progress: {i}%")
+    translation_state["running"] = False
+    translation_state["result_url"] = f"https://example.com/{presentation_id}/{target_language}"
