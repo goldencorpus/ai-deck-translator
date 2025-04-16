@@ -969,3 +969,17 @@ def translate_with_progress(presentation_id, source_language, target_language, a
         translation_state["console_output"].append(f"Progress: {i}%")
     translation_state["running"] = False
     translation_state["result_url"] = f"https://example.com/{presentation_id}/{target_language}"
+
+
+class CaptureStdout:
+    def __init__(self, output_list):
+        self.output_list = output_list
+        self._buffer = []
+
+    def write(self, s):
+        lines = s.splitlines()
+        self._buffer.extend(lines)
+
+    def flush(self):
+        self.output_list.extend(self._buffer)
+        self._buffer.clear()
