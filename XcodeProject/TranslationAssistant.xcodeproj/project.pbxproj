@@ -1,0 +1,13 @@
+// !$*UTF8*$!
+{
+    archiveVersion = 1;
+    classes = {
+    };
+    objectVersion = 56;
+    objects = {
+        LastUpgradeCheck = 1420;
+        LastSwiftUpdateCheck = 1420;
+        BuildIndependentTargetsInParallel = 1;
+    };
+    rootObject = ROOT_OBJECT;
+}

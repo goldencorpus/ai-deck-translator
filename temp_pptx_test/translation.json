@@ -1,0 +1,20 @@
+{
+    "translations": {
+        "Sample Presentation": "サンプルプレゼンテーション",
+        "An example PowerPoint presentation with text and tables": "テキストとテーブルを含むPowerPointプレゼンテーションの例",
+        "Introduction": "はじめに",
+        "This presentation demonstrates how to create a simple PPTX file using Python.": "このプレゼンテーションは、Pythonを使用して簡単なPPTXファイルを作成する方法を示しています。",
+        "It contains a title slide, a text slide, and a slide with a table.": "タイトルスライド、テキストスライド、テーブル付きのスライドが含まれています。",
+        "Sample Table": "サンプルテーブル",
+        
+        "Header 1": "ヘッダー 1",
+        "Header 2": "ヘッダー 2",
+        "Header 3": "ヘッダー 3",
+        "Data 1": "データ 1",
+        "Data 2": "データ 2",
+        "Data 3": "データ 3",
+        "Value 1": "値 1",
+        "Value 2": "値 2",
+        "Value 3": "値 3"
+    }
+}
