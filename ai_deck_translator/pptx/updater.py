@@ -11,9 +11,11 @@ Public Functions:
 """
 
 import os
+import copy
 import zipfile
 import xml.etree.ElementTree as ET
 from pptx import Presentation
+from pptx.oxml.ns import qn
 import re
 import shutil
 from ..utils.logging import get_logger
@@ -23,20 +25,41 @@ from ..utils.exceptions import ValidationError, PresentationError
 logger = get_logger(__name__)
 
 
-def _copy_font(src_font, dst_font):
-    """Copy salient run-level font attributes from one run's font to another's."""
+def _clone_rpr(src_run, dst_run):
+    """
+    Deep-copy a source run's ``<a:rPr>`` element onto a destination run.
+
+    Copies the run-properties element wholesale — every font attribute the OOXML
+    format carries (latin/east-asian/complex-script typefaces, theme *and* RGB colours,
+    bold/italic/underline, size, kerning, spacing, language) — which is strictly more
+    faithful than re-setting a handful of python-pptx font attributes by hand.
+    """
     try:
-        if src_font.size is not None:
-            dst_font.size = src_font.size
-        dst_font.bold = src_font.bold
-        dst_font.italic = src_font.italic
-        dst_font.underline = src_font.underline
-        if src_font.name:
-            dst_font.name = src_font.name
-        if src_font.color is not None and src_font.color.type is not None:
-            dst_font.color.rgb = src_font.color.rgb
+        src_rpr = src_run._r.find(qn("a:rPr"))
+        if src_rpr is None:
+            return
+        dst_r = dst_run._r
+        old = dst_r.find(qn("a:rPr"))
+        if old is not None:
+            dst_r.remove(old)
+        dst_r.insert(0, copy.deepcopy(src_rpr))  # rPr must precede <a:t>
     except Exception:
-        # Font copy is best-effort cosmetic work — never let it abort a write.
+        # Formatting clone is best-effort cosmetic work — never abort a write.
+        pass
+
+
+def _clone_ppr(src_paragraph, dst_paragraph):
+    """Deep-copy a paragraph's ``<a:pPr>`` (line spacing, indent, bullet formatting)."""
+    try:
+        src_ppr = src_paragraph._p.find(qn("a:pPr"))
+        if src_ppr is None:
+            return
+        dst_p = dst_paragraph._p
+        old = dst_p.find(qn("a:pPr"))
+        if old is not None:
+            dst_p.remove(old)
+        dst_p.insert(0, copy.deepcopy(src_ppr))  # pPr must be first child of <a:p>
+    except Exception:
         pass
 
 
@@ -73,21 +96,22 @@ def _apply_text_to_text_frame(text_frame, translated):
     lines = translated.split("\n")
     paragraphs = list(text_frame.paragraphs)
 
-    template_run = None
-    for paragraph in paragraphs:
-        if paragraph.runs:
-            template_run = paragraph.runs[0]
-            break
+    # Use the first non-empty paragraph as the formatting template for surplus lines.
+    template_paragraph = next(
+        (p for p in paragraphs if p.runs), paragraphs[0] if paragraphs else None
+    )
 
     for i, paragraph in enumerate(paragraphs):
         _set_paragraph_text(paragraph, lines[i] if i < len(lines) else "")
 
     for j in range(len(paragraphs), len(lines)):
         new_paragraph = text_frame.add_paragraph()
+        if template_paragraph is not None:
+            _clone_ppr(template_paragraph, new_paragraph)
         run = new_paragraph.add_run()
         run.text = lines[j]
-        if template_run is not None:
-            _copy_font(template_run.font, run.font)
+        if template_paragraph is not None and template_paragraph.runs:
+            _clone_rpr(template_paragraph.runs[0], run)
 
 # XML namespaces used in PPTX files
 namespaces = {
