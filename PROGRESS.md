@@ -29,11 +29,33 @@ Active files to fix → premium=`claude-sonnet-4-6`, standard=`claude-haiku-4-5`
 - tests/test_config.py (fixture string)
 - archive/ left as-is (dead/superseded code; claude-3 strings are pricing-table keys, not calls).
 
-## Phase 2 — Skip bug + batch bounding — TODO
-- Completeness gate (source count vs written), retry pass for still_missing, FAIL loudly,
-  log "N/N blocks translated (100%)". Bound batch to ~10 blocks; sane max_tokens.
+## Phase 2 — Skip bug + batch bounding — DONE
+- `IncompleteTranslationError(TranslationError)` added (exceptions.py) with missing_ids + total.
+- `translate_text`: bounded batches (max_items=BLOCKS_PER_BATCH) + retry pass that
+  re-translates genuinely-missing blocks in small batches and merges results.
+- `translate_pptx`: completeness gate — computes source vs written, raises
+  IncompleteTranslationError (does NOT write a partial deck), logs "N/N (100%)" on success.
+- `run.py`: both PPTX call sites now catch and `sys.exit(1)` (previously ignored result).
+- Batch bounding: config `blocks_per_batch=10` (+ env TRANSLATION_BLOCKS_PER_BATCH),
+  `anthropic.max_tokens` 150000 → 8000 (+ env ANTHROPIC_MAX_TOKENS); batch.py gained
+  `max_items` cap. The 150000/100000 values were the documented truncation cause.
+- **Bonus root-cause fix (updater.py):** speaker-notes update used a
+  `while len(paragraphs) > 0` loop that never terminated — the tool would HANG forever on
+  ANY deck with notes. Replaced with the `text_frame.text` setter.
 
-## Phase 3 — Tests + real E2E — TODO
-- Fix the 1 failing test (test_setup.py → sys.executable). Add 100%-coverage test.
-- Real CLI run on a sample multi-slide deck (tables + notes) EN→JA, open output, verify 0 skips.
-- E2E uses repo `.env` CLAUDE_API_KEY (product's own key — small COGS, NOT Lex infra).
+## Phase 3 — Tests + real E2E — DONE
+- Fixed the 1 real failing test (test_setup.py → `sys.executable`; the stale audit's
+  "3 failures in test_translator/test_web" no longer reproduce).
+- Added tests/test_pptx_completeness.py: deterministic end-to-end coverage test (real deck
+  w/ table + notes, faked translator, no API spend) asserting 0 missing blocks + the
+  fail-loud gate (raises + writes nothing on a simulated skip).
+- Suite: **65 passed / 25 skipped / 0 failed**.
+- REAL E2E (product CLAUDE_API_KEY from repo .env; key validated live):
+  `run.py --input-file sample_en.pptx --target-lang ja` → exit 0,
+  **"Completeness check: 16/16 blocks translated (100%)"**. Re-extracted output:
+  16/16 blocks, 0 missing, 0 unchanged, 0 without Japanese (title, subtitle, both speaker
+  notes, all 6 table cells, bullets). Spend ~1090 in / 341 out tokens (≈ a few yen).
+  Minor non-blocking note: multi-line bullets came back joined with full-width spaces
+  (all 3 bullets present, just flattened line breaks) — content complete, not a skip.
+
+## Status: engine fixes COMPLETE on branch revive/engine-fixes (not pushed).
