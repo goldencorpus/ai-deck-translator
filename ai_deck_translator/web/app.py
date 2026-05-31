@@ -88,6 +88,8 @@ def _run_hardened_pptx_translation(
             "progress": 0,
             "percent": 0,
             "last_updated": time.time(),
+            "note": "Translating with the high-accuracy engine. Large decks "
+            "(50+ slides) can take several minutes — please keep this tab open.",
         }
     )
     try:
@@ -494,7 +496,11 @@ def create_app(debug=False):
     app.config["UPLOAD_FOLDER"] = os.path.join(
         tempfile.gettempdir(), "ai_deck_translator_uploads"
     )
-    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB max upload
+    # Real corporate decks (embedded images/video) routinely exceed 16 MB. Translation
+    # cost scales with text-block count, not file size, so allow large uploads.
+    # Override with MAX_UPLOAD_MB if needed.
+    max_upload_mb = int(os.environ.get("MAX_UPLOAD_MB", "200"))
+    app.config["MAX_CONTENT_LENGTH"] = max_upload_mb * 1024 * 1024
     app.config["DEBUG"] = debug
 
     # Ensure upload directory exists
@@ -509,6 +515,15 @@ def create_app(debug=False):
     @app.template_filter("markdown")
     def render_markdown(text):
         return Markup(markdown.markdown(text))
+
+    @app.errorhandler(413)
+    def too_large(_error):
+        flash(
+            f"That file is too large (limit {max_upload_mb} MB). "
+            "Raise MAX_UPLOAD_MB on the server if you need more.",
+            "error",
+        )
+        return redirect(url_for("index")), 413
 
     # Translation state storage
     # Dict to store translation state

@@ -296,7 +296,7 @@
             setTimeout(() => {
                 console.log("Safety timeout reached, clearing interval");
                 clearInterval(progressInterval);
-            }, 5 * 60 * 1000);
+            }, 30 * 60 * 1000);  // large decks (50+ slides) can take several minutes
         }
     </script>
 </body>
