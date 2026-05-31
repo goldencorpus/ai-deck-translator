@@ -22,6 +22,73 @@ from ..utils.exceptions import ValidationError, PresentationError
 # Set up logging
 logger = get_logger(__name__)
 
+
+def _copy_font(src_font, dst_font):
+    """Copy salient run-level font attributes from one run's font to another's."""
+    try:
+        if src_font.size is not None:
+            dst_font.size = src_font.size
+        dst_font.bold = src_font.bold
+        dst_font.italic = src_font.italic
+        dst_font.underline = src_font.underline
+        if src_font.name:
+            dst_font.name = src_font.name
+        if src_font.color is not None and src_font.color.type is not None:
+            dst_font.color.rgb = src_font.color.rgb
+    except Exception:
+        # Font copy is best-effort cosmetic work — never let it abort a write.
+        pass
+
+
+def _set_paragraph_text(paragraph, text):
+    """
+    Replace a paragraph's text while preserving the first run's formatting.
+
+    The full text is written into the first run (keeping its font, size, color, bold,
+    etc.) and every remaining run is deleted. This fixes the corruption where setting
+    only ``runs[0].text`` left later runs in place, leaking untranslated source-language
+    fragments into the output (and duplicating text).
+    """
+    runs = paragraph.runs
+    if runs:
+        runs[0].text = text
+        for extra in runs[1:]:
+            extra._r.getparent().remove(extra._r)
+    else:
+        paragraph.text = text
+
+
+def _apply_text_to_text_frame(text_frame, translated):
+    """
+    Apply translated text to a text frame, preserving per-paragraph run formatting.
+
+    Newlines map to paragraphs. Existing paragraphs keep their first run's formatting;
+    any surplus translated lines become new paragraphs whose formatting is cloned from
+    the first run so no text is dropped and styling stays consistent.
+
+    Note: a single paragraph that mixes several run formats (e.g. one bold word inside a
+    sentence) collapses to the first run's format — true span-level preservation would
+    require aligning translated spans to source runs, which block translation can't do.
+    """
+    lines = translated.split("\n")
+    paragraphs = list(text_frame.paragraphs)
+
+    template_run = None
+    for paragraph in paragraphs:
+        if paragraph.runs:
+            template_run = paragraph.runs[0]
+            break
+
+    for i, paragraph in enumerate(paragraphs):
+        _set_paragraph_text(paragraph, lines[i] if i < len(lines) else "")
+
+    for j in range(len(paragraphs), len(lines)):
+        new_paragraph = text_frame.add_paragraph()
+        run = new_paragraph.add_run()
+        run.text = lines[j]
+        if template_run is not None:
+            _copy_font(template_run.font, run.font)
+
 # XML namespaces used in PPTX files
 namespaces = {
     "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
@@ -93,47 +160,14 @@ def update_slides(pptx_file, output_file, translated_texts):
                     and shape.text.strip()
                     and shape_id in translated_texts
                 ):
-                    # Replace text while preserving paragraph formatting
+                    # Replace text while preserving per-paragraph run formatting
                     if (
                         hasattr(shape, "text_frame")
                         and shape.text != translated_texts[shape_id]
                     ):
-                        # Clear existing paragraphs
-                        existing_paragraphs = list(shape.text_frame.paragraphs)
-
-                        # If there's only one paragraph, simply update the text
-                        if len(existing_paragraphs) == 1:
-                            p = existing_paragraphs[0]
-                            if p.runs:
-                                p.runs[0].text = translated_texts[shape_id]
-                            else:
-                                p.text = translated_texts[shape_id]
-                        else:
-                            # For multiple paragraphs, try to match the structure
-                            translated_lines = translated_texts[shape_id].split("\n")
-
-                            # Update existing paragraphs
-                            for i, p in enumerate(existing_paragraphs):
-                                if i < len(translated_lines):
-                                    if p.runs:
-                                        p.runs[0].text = translated_lines[i]
-                                    else:
-                                        p.text = translated_lines[i]
-                                else:
-                                    # Clear extra paragraphs
-                                    if p.runs:
-                                        p.runs[0].text = ""
-                                    else:
-                                        p.text = ""
-
-                            # Add any additional paragraphs if needed
-                            if len(translated_lines) > len(existing_paragraphs):
-                                for i in range(
-                                    len(existing_paragraphs), len(translated_lines)
-                                ):
-                                    p = shape.text_frame.add_paragraph()
-                                    p.text = translated_lines[i]
-
+                        _apply_text_to_text_frame(
+                            shape.text_frame, translated_texts[shape_id]
+                        )
                         logger.debug(f"Updated text in shape {shape_id}")
 
                 # Update text in tables
@@ -142,8 +176,11 @@ def update_slides(pptx_file, output_file, translated_texts):
                         for col_idx, cell in enumerate(row.cells):
                             cell_id = f"{shape_id}_table_r{row_idx}c{col_idx}"
                             if cell_id in translated_texts:
-                                # Update cell text
-                                cell.text = translated_texts[cell_id]
+                                # Preserve cell run formatting (bold/size/color of the
+                                # header etc.); `cell.text = ...` would reset it all.
+                                _apply_text_to_text_frame(
+                                    cell.text_frame, translated_texts[cell_id]
+                                )
                                 logger.debug(f"Updated text in table cell {cell_id}")
 
             # Update slide notes
@@ -156,12 +193,14 @@ def update_slides(pptx_file, output_file, translated_texts):
                 # Find the notes text shape
                 for notes_shape in slide.notes_slide.shapes:
                     if hasattr(notes_shape, "text") and notes_shape.text.strip():
-                        # Replace the notes text. The TextFrame.text setter safely
-                        # replaces all paragraphs in one step; the previous manual
-                        # paragraph-removal loop spun forever because python-pptx always
-                        # keeps a paragraph element present, so the count never hit 0.
+                        # Replace the notes text, preserving paragraph formatting. The
+                        # previous manual paragraph-removal loop spun forever because
+                        # python-pptx always keeps a paragraph element present, so the
+                        # count never hit 0.
                         if hasattr(notes_shape, "text_frame"):
-                            notes_shape.text_frame.text = translated_texts[notes_id]
+                            _apply_text_to_text_frame(
+                                notes_shape.text_frame, translated_texts[notes_id]
+                            )
                             logger.debug(f"Updated notes for slide {slide_number}")
                             break
 

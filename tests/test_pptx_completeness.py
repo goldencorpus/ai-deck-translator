@@ -15,7 +15,8 @@ import unittest
 from unittest.mock import patch
 
 from pptx import Presentation
-from pptx.util import Inches
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
 
 from ai_deck_translator.pptx import translator as pptx_translator
 from ai_deck_translator.pptx.translator import translate_pptx, missing_block_ids
@@ -121,6 +122,82 @@ class TestPptxCompleteness(unittest.TestCase):
             os.path.exists(self.output_path),
             "a partial deck must never be written",
         )
+
+
+class TestPptxFormattingPreserved(unittest.TestCase):
+    """Translating must keep run formatting and never leak source-language fragments."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.input_path = os.path.join(self.tmp, "fmt.pptx")
+        self.output_path = os.path.join(self.tmp, "fmt_ja.pptx")
+
+        prs = Presentation()
+        slide = prs.slides.add_slide(prs.slide_layouts[5])
+
+        # Mixed-run paragraph: "Revenue " + bold green "grew strongly" + " this year"
+        box = slide.shapes.add_textbox(Pt(50), Pt(80), Pt(500), Pt(80)).text_frame
+        para = box.paragraphs[0]
+        for text, bold, color in [
+            ("Revenue ", None, None),
+            ("grew strongly", True, RGBColor(0x00, 0x70, 0x00)),
+            (" this year", None, None),
+        ]:
+            run = para.add_run()
+            run.text = text
+            run.font.size = Pt(24)
+            run.font.bold = bold
+            if color:
+                run.font.color.rgb = color
+
+        # Styled table header cell.
+        table = slide.shapes.add_table(
+            2, 1, Pt(50), Pt(200), Pt(300), Pt(80)
+        ).table
+        header = table.cell(0, 0)
+        header.text = "Metric"
+        hrun = header.text_frame.paragraphs[0].runs[0]
+        hrun.font.bold = True
+        hrun.font.size = Pt(16)
+        hrun.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+        table.cell(1, 0).text = "Growth"
+
+        prs.save(self.input_path)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_no_leftover_runs_and_table_format_preserved(self):
+        def fake(batch, *args, **kwargs):
+            return {key: "JP_" + value for key, value in batch.items()}
+
+        with patch.object(pptx_translator, "translate_batch", side_effect=fake):
+            translate_pptx(self.input_path, self.output_path, "en", "ja")
+
+        prs = Presentation(self.output_path)
+        slide = prs.slides[0]
+
+        # The mixed-run paragraph must collapse to a single run with no English left.
+        textbox = next(
+            s
+            for s in slide.shapes
+            if s.has_text_frame and "Revenue" in s.text_frame.text
+        )
+        runs = textbox.text_frame.paragraphs[0].runs
+        self.assertEqual(len(runs), 1, "leftover runs would leak source-language text")
+        # Exact text (no duplication): the old bug left the original runs in place,
+        # producing "JP_Revenue grew strongly this yeargrew strongly this year".
+        self.assertEqual(
+            textbox.text_frame.text, "JP_Revenue grew strongly this year"
+        )
+
+        # The styled table header must keep its bold / size / colour.
+        table = next(s for s in slide.shapes if s.has_table).table
+        hrun = table.cell(0, 0).text_frame.paragraphs[0].runs[0]
+        self.assertEqual(hrun.text, "JP_Metric")
+        self.assertTrue(hrun.font.bold)
+        self.assertEqual(hrun.font.size, Pt(16))
+        self.assertEqual(hrun.font.color.rgb, RGBColor(0xFF, 0xFF, 0xFF))
 
 
 if __name__ == "__main__":
