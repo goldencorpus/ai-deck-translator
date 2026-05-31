@@ -113,4 +113,23 @@ To re-run visual QA on any deck:
   Google-Translate-service paths unchanged (still legacy).
 - Legacy pickle-load in gslides_translator/auth NOT addressed (Slides path still deferred).
 
-## Status: engine + format + web-UI fixes COMPLETE & VERIFIED on revive/engine-fixes.
+## Phase 7 — Real-deck bug (JSON parsing) + UX fixes — DONE
+First real customer deck (French "Forum des Îlotiers du Japon", 19 blocks) failed in the
+UI: 5/19 blocks not translated → gate refused to ship (correct!). Root cause via raw-
+response capture: the MODEL returned perfect JSON, but `extract_json_blocks` ALWAYS ran
+`repair_json`, whose `(\w+):` regex mangles valid JSON whose values contain colons —
+e.g. `https://...` → `"https"://...` → parse fail → blocks dropped. Hit any deck with a
+URL or "Heading: text".
+- Fix (pptx/translator.py): parse the model's JSON VERBATIM first; only fall back to
+  repair_json when it's genuinely broken. Re-ran the real deck → 19/19, 100%, rendered
+  slides 3–4 correct (colon-heading translated, URL preserved). Regression test added.
+- Source language: web hardcoded "en" (deck was French). Added a Source-Language selector
+  (default Auto-detect) → form → route → translate_presentation → translate_pptx;
+  translate_batch now handles source="auto" ("detect the source language"). Verified via
+  the web worker: "from auto to ja", 19/19.
+- Frontend (progress.html): `const progressInterval` was block-scoped inside the else
+  branch → ReferenceError in handleError/handleCompletion → polling never stopped after a
+  failure. Hoisted to script scope.
+Suite: **72 passed / 25 skipped / 0 failed**. Server restarted with all fixes (port 5050).
+
+## Status: engine + format + web-UI + real-deck fixes COMPLETE & VERIFIED on revive/engine-fixes.

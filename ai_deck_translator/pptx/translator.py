@@ -91,25 +91,31 @@ def extract_json_blocks(text):
         r'(\{\s*"[^"]+"\s*:[\s\S]*\})',  # Raw JSON object
     ]
 
+    def _valid(candidate):
+        try:
+            json.loads(candidate)
+            return True
+        except Exception:
+            return False
+
     for pattern in patterns:
-        matches = re.findall(pattern, text)
-        if matches:
-            for match in matches:
-                # Try to parse the match as JSON
-                try:
-                    json_str = repair_json(match)
-                    json.loads(json_str)
-                    return json_str
-                except:
-                    continue
+        for match in re.findall(pattern, text):
+            # Prefer the model's JSON verbatim. repair_json is a destructive last
+            # resort: its regexes mangle valid JSON whose string values contain colons
+            # (e.g. "https://...") — only apply it when the JSON is genuinely broken.
+            if _valid(match):
+                return match
+            repaired = repair_json(match)
+            if _valid(repaired):
+                return repaired
 
     # If no valid JSON found, try to extract the entire response
-    try:
-        json_str = repair_json(text)
-        json.loads(json_str)
-        return json_str
-    except:
-        return None
+    if _valid(text):
+        return text
+    repaired = repair_json(text)
+    if _valid(repaired):
+        return repaired
+    return None
 
 
 def standardize_ids(text_dict, slide_metadata):
@@ -487,9 +493,15 @@ def translate_batch(
                         }
                         break
 
+    # Allow an "auto" source language so callers don't have to know the deck's language.
+    if str(source_language).strip().lower() in ("auto", "autodetect", "detect", ""):
+        source_desc = "the source language (auto-detect it)"
+    else:
+        source_desc = source_language
+
     # Create the system prompt
-    system_prompt = f"""You are a professional translator specializing in PowerPoint presentations. 
-Your task is to translate the content from {source_language} to {target_language} while preserving the meaning, tone, and formatting.
+    system_prompt = f"""You are a professional translator specializing in PowerPoint presentations.
+Your task is to translate the content from {source_desc} to {target_language} while preserving the meaning, tone, and formatting.
 
 IMPORTANT GUIDELINES:
 1. Translate all text accurately while maintaining the original meaning and tone.
@@ -510,7 +522,7 @@ The content to translate is provided as a JSON object where each key is a unique
 """
 
     # Create the user prompt
-    user_prompt = f"""Please translate the following presentation content from {source_language} to {target_language}.
+    user_prompt = f"""Please translate the following presentation content from {source_desc} to {target_language}.
 
 Here is the content to translate (with context information):
 ```json

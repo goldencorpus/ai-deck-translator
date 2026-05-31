@@ -128,6 +128,10 @@
         // Track if we've already handled completion
         let completionHandled = false;
         let errorHandled = false;
+        // Declared at script scope so handleError()/handleCompletion() can stop polling.
+        // (Previously a block-scoped const inside the else branch → ReferenceError, and
+        // polling never stopped after a failure.)
+        let progressInterval = null;
 
         // Function to handle completion
         function handleCompletion() {
@@ -286,7 +290,7 @@
             // Update progress immediately and then every 2 seconds
             console.log("Starting progress updates");
             updateProgress();
-            const progressInterval = setInterval(updateProgress, 2000);
+            progressInterval = setInterval(updateProgress, 2000);
             
             // Set a safety timeout - if not completed after 5 minutes, stop checking
             setTimeout(() => {

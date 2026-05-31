@@ -135,6 +135,7 @@ def translate_presentation(
     api_key,
     translate_notes,
     session_id,
+    source_language="auto",
 ):
     """
     Translate a presentation in a background thread.
@@ -189,7 +190,12 @@ def translate_presentation(
                     "including speaker notes"
                 )
             _run_hardened_pptx_translation(
-                input_file, output_file, "en", target_language, api_key, session_id
+                input_file,
+                output_file,
+                source_language,
+                target_language,
+                api_key,
+                session_id,
             )
             return
 
@@ -604,6 +610,7 @@ def create_app(debug=False):
 
         # Get form data
         target_language = request.form.get("target_language")
+        source_language = request.form.get("source_language", "auto") or "auto"
         service = request.form.get("service", "google")
         api_key = request.form.get("api_key", "")
         translate_notes = request.form.get("translate_notes") == "on"
@@ -697,6 +704,7 @@ def create_app(debug=False):
                     api_key,
                     translate_notes,
                     session_id,
+                    source_language,
                 ),
             )
             thread.daemon = True

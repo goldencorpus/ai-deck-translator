@@ -244,5 +244,24 @@ class TestMultiParagraphStructure(unittest.TestCase):
         )
 
 
+class TestJsonExtraction(unittest.TestCase):
+    """Valid model JSON must be parsed verbatim, not mangled by repair_json."""
+
+    def test_valid_json_with_url_value_is_preserved(self):
+        import json
+        from ai_deck_translator.pptx.translator import extract_json_blocks
+
+        # Values containing colons (URLs, "Heading: text") used to be corrupted because
+        # repair_json ran unconditionally and its `(\w+):` regex broke "https://".
+        payload = {
+            "slide1_shape0": "見出し：内容とは？",
+            "slide1_shape1_p1": "https://www.facebook.com/groups/423703416782103",
+        }
+        text = "```json\n" + json.dumps(payload, ensure_ascii=False) + "\n```"
+        result = extract_json_blocks(text)
+        self.assertIsNotNone(result)
+        self.assertEqual(json.loads(result), payload)
+
+
 if __name__ == "__main__":
     unittest.main()
