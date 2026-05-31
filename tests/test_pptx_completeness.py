@@ -200,5 +200,49 @@ class TestPptxFormattingPreserved(unittest.TestCase):
         self.assertEqual(hrun.font.color.rgb, RGBColor(0xFF, 0xFF, 0xFF))
 
 
+class TestMultiParagraphStructure(unittest.TestCase):
+    """A multi-bullet text box must stay multi-bullet — not collapse into one line."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.input_path = os.path.join(self.tmp, "bullets.pptx")
+        self.output_path = os.path.join(self.tmp, "bullets_ja.pptx")
+
+        prs = Presentation()
+        slide = prs.slides.add_slide(prs.slide_layouts[5])
+        box = slide.shapes.add_textbox(Pt(50), Pt(100), Pt(600), Pt(300)).text_frame
+        box.paragraphs[0].text = "First point about speed"
+        for line in ("Second point about cost", "Third point about trust"):
+            box.add_paragraph().text = line
+        prs.save(self.input_path)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_bullets_not_collapsed(self):
+        # Fake translator drops newlines if ever handed a multi-line block — proving the
+        # structure is preserved by per-paragraph extraction, not by echoing newlines.
+        def fake(batch, *args, **kwargs):
+            return {key: "[ja] " + value.replace("\n", " ") for key, value in batch.items()}
+
+        source, _ = extract_text(self.input_path)
+        # Each bullet should be its own extracted block.
+        self.assertEqual(sum(1 for k in source if "_p" in k), 3)
+
+        with patch.object(pptx_translator, "translate_batch", side_effect=fake):
+            translate_pptx(self.input_path, self.output_path, "en", "ja")
+
+        prs = Presentation(self.output_path)
+        box = next(
+            s
+            for s in prs.slides[0].shapes
+            if s.has_text_frame and "[ja]" in s.text_frame.text
+        )
+        non_empty = [p for p in box.text_frame.paragraphs if p.text.strip()]
+        self.assertEqual(
+            len(non_empty), 3, "the three bullets must remain three separate paragraphs"
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

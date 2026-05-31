@@ -179,20 +179,29 @@ def update_slides(pptx_file, output_file, translated_texts):
                 shape_id = f"slide{slide_number}_shape{shape_idx}"
 
                 # Update text in text frames
-                if (
-                    hasattr(shape, "text")
-                    and shape.text.strip()
-                    and shape_id in translated_texts
-                ):
-                    # Replace text while preserving per-paragraph run formatting
+                if hasattr(shape, "text") and shape.text.strip():
+                    # Whole-shape translation (single-paragraph shapes)
                     if (
-                        hasattr(shape, "text_frame")
+                        shape_id in translated_texts
+                        and hasattr(shape, "text_frame")
                         and shape.text != translated_texts[shape_id]
                     ):
                         _apply_text_to_text_frame(
                             shape.text_frame, translated_texts[shape_id]
                         )
                         logger.debug(f"Updated text in shape {shape_id}")
+                    elif hasattr(shape, "text_frame"):
+                        # Per-paragraph translations (multi-paragraph shapes): set each
+                        # paragraph independently so bullet/line structure is preserved.
+                        for para_idx, paragraph in enumerate(
+                            shape.text_frame.paragraphs
+                        ):
+                            para_id = f"{shape_id}_p{para_idx}"
+                            if para_id in translated_texts:
+                                _set_paragraph_text(
+                                    paragraph, translated_texts[para_id]
+                                )
+                                logger.debug(f"Updated text in paragraph {para_id}")
 
                 # Update text in tables
                 if shape.has_table:

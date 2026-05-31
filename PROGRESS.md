@@ -77,4 +77,21 @@ collapses to the paragraph's first-run format — unsolvable via block translati
 - `web/app.py`: `/download` path traversal + dev SECRET_KEY fallback (Flask web UI).
 None touched by this branch; fix before any web/SaaS launch.
 
-## Status: engine + format fixes COMPLETE on branch revive/engine-fixes.
+## Phase 5 — Visual QA (LibreOffice) + per-paragraph fix — DONE
+Installed LibreOffice; rendered the real JA deck to images (`soffice --convert-to pdf`
++ `pdftoppm`) and inspected with fresh eyes (the pptx skill's QA loop). Findings:
+- Slide 1 (title) ✓ CJK renders, colors/layout intact.
+- Slide 3 (table) ✓ white-on-blue header + all cells preserved — client-grade.
+- Slide 2 (bullets) ✗ **3 bullets collapsed into one** — the model dropped the \n when
+  the body was translated as a single block.
+Fix: **per-paragraph extraction** (extractor.py emits `slide{n}_shape{m}_p{k}` for
+multi-paragraph shapes; updater.py sets each paragraph independently). Each bullet is now
+its own translation unit → structure cannot collapse. Re-rendered: 3 distinct bullets ✓.
+Regression test added. Suite: **67 passed / 25 skipped / 0 failed**.
+Note: block count rises (e.g. 16→18) because bullets are now counted per line — expected.
+
+To re-run visual QA on any deck:
+  soffice --headless --convert-to pdf --outdir <dir> deck_ja.pptx
+  pdftoppm -jpeg -r 120 <dir>/deck_ja.pdf <dir>/slide
+
+## Status: engine + format fixes COMPLETE & VISUALLY VERIFIED on revive/engine-fixes.

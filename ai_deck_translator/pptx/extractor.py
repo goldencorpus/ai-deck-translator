@@ -175,17 +175,47 @@ def extract_text(pptx_file):
 
                 # Extract text from text frames
                 if hasattr(shape, "text") and shape.text.strip():
-                    text_dict[shape_id] = shape.text
+                    shape_name = (
+                        shape.name if hasattr(shape, "name") else "Unknown Shape"
+                    )
 
-                    # Add metadata for this shape
-                    element_meta = {
-                        "id": shape_id,
-                        "type": "shape",
-                        "shape_type": (
-                            shape.name if hasattr(shape, "name") else "Unknown Shape"
-                        ),
-                    }
-                    slide_meta["elements"].append(element_meta)
+                    # Multi-paragraph shapes (e.g. bullet lists) are extracted one
+                    # paragraph per ID so each line is translated and written back
+                    # independently. Translating the whole block as one string lets the
+                    # model drop the line breaks, collapsing several bullets into one.
+                    paragraphs = (
+                        list(shape.text_frame.paragraphs)
+                        if shape.has_text_frame
+                        else []
+                    )
+                    nonempty = [
+                        (idx, para)
+                        for idx, para in enumerate(paragraphs)
+                        if para.text.strip()
+                    ]
+
+                    if len(nonempty) > 1:
+                        for para_idx, para in nonempty:
+                            para_id = f"{shape_id}_p{para_idx}"
+                            text_dict[para_id] = para.text
+                            slide_meta["elements"].append(
+                                {
+                                    "id": para_id,
+                                    "type": "shape_paragraph",
+                                    "shape_type": shape_name,
+                                    "parent_shape": shape_id,
+                                    "paragraph_index": para_idx,
+                                }
+                            )
+                    else:
+                        text_dict[shape_id] = shape.text
+                        slide_meta["elements"].append(
+                            {
+                                "id": shape_id,
+                                "type": "shape",
+                                "shape_type": shape_name,
+                            }
+                        )
 
                 # Extract text from tables
                 if shape.has_table:
