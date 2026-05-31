@@ -612,7 +612,9 @@ def create_app(debug=False):
         target_language = request.form.get("target_language")
         source_language = request.form.get("source_language", "auto") or "auto"
         service = request.form.get("service", "google")
-        api_key = request.form.get("api_key", "")
+        # Fall back to the server's configured key so the operator never has to paste it
+        # into the form each time. A form-supplied key still takes precedence.
+        api_key = request.form.get("api_key", "") or os.environ.get("CLAUDE_API_KEY", "")
         translate_notes = request.form.get("translate_notes") == "on"
 
         # Check if target language is provided
@@ -620,9 +622,13 @@ def create_app(debug=False):
             flash("Target language is required", "error")
             return redirect(url_for("index"))
 
-        # Check if API key is provided for Anthropic
+        # Anthropic needs a key from either the form or the server's CLAUDE_API_KEY env.
         if service == "anthropic" and not api_key:
-            flash("API key is required for Anthropic service", "error")
+            flash(
+                "No Anthropic API key found. Enter one, or set CLAUDE_API_KEY on the "
+                "server.",
+                "error",
+            )
             return redirect(url_for("index"))
 
         # Handle Google Slides ID
