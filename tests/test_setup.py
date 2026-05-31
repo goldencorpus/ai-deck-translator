@@ -53,7 +53,7 @@ class TestSetup(unittest.TestCase):
         """Test that setup.py has the required metadata."""
         # Run setup.py --name to get the package name
         result = subprocess.run(
-            ["python3", "setup.py", "--name"],
+            [sys.executable, "setup.py", "--name"],
             cwd=self.root_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -65,7 +65,7 @@ class TestSetup(unittest.TestCase):
 
         # Run setup.py --version to get the version
         result = subprocess.run(
-            ["python3", "setup.py", "--version"],
+            [sys.executable, "setup.py", "--version"],
             cwd=self.root_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -83,7 +83,7 @@ class TestSetup(unittest.TestCase):
 
         # Run setup.py --classifiers to get classifiers
         result = subprocess.run(
-            ["python3", "setup.py", "--classifiers"],
+            [sys.executable, "setup.py", "--classifiers"],
             cwd=self.root_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
