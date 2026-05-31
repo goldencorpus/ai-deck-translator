@@ -108,6 +108,25 @@ class TranslationError(AIDeckTranslatorError):
         super().__init__(message)
 
 
+class IncompleteTranslationError(TranslationError):
+    """
+    Exception raised when a deck could not be fully translated.
+
+    Raised by the PPTX pipeline when, after the retry pass, one or more source
+    text blocks still have no translation. The engine refuses to write a
+    partially-translated deck; callers should treat this as a hard failure.
+
+    Attributes:
+        missing_ids (list): IDs of the source text blocks left untranslated.
+        total (int): Total number of source text blocks in the deck.
+    """
+
+    def __init__(self, message="Translation incomplete", missing_ids=None, total=0):
+        self.missing_ids = missing_ids or []
+        self.total = total
+        super().__init__(message)
+
+
 class PresentationError(AIDeckTranslatorError):
     """
     Exception raised for errors related to presentation manipulation.

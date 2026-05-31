@@ -76,6 +76,7 @@ def main():
         elif args.input_file:
             # PPTX translation
             from ai_deck_translator.pptx.translator import translate_pptx
+            from ai_deck_translator.utils.exceptions import IncompleteTranslationError
 
             # If output file is not provided, generate one
             output_file = args.output_file
@@ -88,14 +89,23 @@ def main():
             )
             print(f"Output will be saved to {output_file}")
 
-            # Run the translation process
-            translate_pptx(
-                input_file=args.input_file,
-                output_file=output_file,
-                source_language=args.source_lang,
-                target_language=args.target_lang,
-                resume_file=args.resume_file,
-            )
+            # Run the translation process. translate_pptx raises on any incomplete or
+            # failed translation rather than writing a partial deck — surface it and
+            # exit non-zero so callers (and shell pipelines) can detect the failure.
+            try:
+                translate_pptx(
+                    input_file=args.input_file,
+                    output_file=output_file,
+                    source_language=args.source_lang,
+                    target_language=args.target_lang,
+                    resume_file=args.resume_file,
+                )
+            except IncompleteTranslationError as e:
+                print(f"\nERROR: {e}", file=sys.stderr)
+                sys.exit(1)
+            except Exception as e:
+                print(f"\nERROR: translation failed: {e}", file=sys.stderr)
+                sys.exit(1)
         else:
             # Interactive mode - ask what to translate
             print("AI Deck Translator")
@@ -119,6 +129,9 @@ def main():
             elif choice == "2":
                 # PPTX translation
                 from ai_deck_translator.pptx.translator import translate_pptx
+                from ai_deck_translator.utils.exceptions import (
+                    IncompleteTranslationError,
+                )
 
                 input_file = input("Enter path to PowerPoint file (.pptx): ")
 
@@ -126,13 +139,20 @@ def main():
                 base_name = os.path.splitext(input_file)[0]
                 output_file = f"{base_name}_{args.target_lang}.pptx"
 
-                translate_pptx(
-                    input_file=input_file,
-                    output_file=output_file,
-                    source_language=args.source_lang,
-                    target_language=args.target_lang,
-                    resume_file=args.resume_file,
-                )
+                try:
+                    translate_pptx(
+                        input_file=input_file,
+                        output_file=output_file,
+                        source_language=args.source_lang,
+                        target_language=args.target_lang,
+                        resume_file=args.resume_file,
+                    )
+                except IncompleteTranslationError as e:
+                    print(f"\nERROR: {e}", file=sys.stderr)
+                    sys.exit(1)
+                except Exception as e:
+                    print(f"\nERROR: translation failed: {e}", file=sys.stderr)
+                    sys.exit(1)
             else:
                 print("Invalid choice. Exiting.")
                 sys.exit(1)

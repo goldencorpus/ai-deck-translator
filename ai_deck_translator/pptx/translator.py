@@ -11,10 +11,12 @@ from datetime import datetime
 from tqdm import tqdm
 import sys
 
+from .. import config
 from ..utils.batch import split_dict_into_smart_batches, deduplicate_content
 from ..utils.recovery import setup_recovery_system
 from ..utils.progress import create_progress_bar
 from ..utils.logging import get_logger
+from ..utils.exceptions import IncompleteTranslationError, TranslationError
 from .extractor import extract_text
 from .updater import update_slides
 
@@ -539,8 +541,8 @@ Do not include any explanations or notes outside the JSON object.
             # Call the Anthropic API
             response = client.messages.create(
                 model="claude-sonnet-4-6",
-                max_tokens=150000,
-                temperature=0.0,
+                max_tokens=config.ANTHROPIC_MAX_TOKENS,
+                temperature=config.ANTHROPIC_TEMPERATURE,
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_prompt}],
                 metadata={"user_id": "anonymous_user"},
@@ -622,6 +624,90 @@ Do not include any explanations or notes outside the JSON object.
     return translated_batch
 
 
+def _is_blank(value):
+    """True if a translation value is missing or effectively empty."""
+    return value is None or not str(value).strip()
+
+
+def missing_block_ids(text_dict, translated_texts):
+    """Return source IDs that have no usable (non-blank) translation."""
+    return [
+        block_id for block_id in text_dict if _is_blank(translated_texts.get(block_id))
+    ]
+
+
+def describe_block(block_id, source_text=""):
+    """Human-readable description of a text block for completeness reporting."""
+    slide_match = re.search(r"slide(\d+)", block_id)
+    slide = slide_match.group(1) if slide_match else "?"
+    if "_notes" in block_id:
+        location = f"slide {slide} speaker notes"
+    elif "_table_" in block_id:
+        cell = re.search(r"_table_r(\d+)c(\d+)", block_id)
+        shape = re.search(r"_shape(\d+)", block_id)
+        rc = f"r{cell.group(1)}c{cell.group(2)}" if cell else "?"
+        sh = shape.group(1) if shape else "?"
+        location = f"slide {slide} table (shape {sh}, cell {rc})"
+    else:
+        shape = re.search(r"_shape(\d+)", block_id)
+        sh = shape.group(1) if shape else "?"
+        location = f"slide {slide} shape {sh}"
+    snippet = str(source_text).strip().replace("\n", " ")
+    if len(snippet) > 60:
+        snippet = snippet[:57] + "..."
+    return f'{block_id} ({location}): "{snippet}"'
+
+
+def _retry_missing_blocks(
+    missing_ids,
+    text_dict,
+    slide_metadata,
+    source_language,
+    target_language,
+    api_key=None,
+    cost_tracker=None,
+):
+    """
+    Re-translate genuinely-missing blocks in small batches and map results back.
+
+    Small batches (config.BLOCKS_PER_BATCH) keep responses short enough to avoid the
+    truncation that drops blocks on large batches. Returns {id: translation} for the
+    blocks that were successfully recovered.
+    """
+    retry_dict = {bid: text_dict[bid] for bid in missing_ids if bid in text_dict}
+    if not retry_dict:
+        return {}
+
+    recovered = {}
+    batches = split_dict_into_smart_batches(
+        retry_dict, max_items=config.BLOCKS_PER_BATCH
+    )
+    for idx, batch in enumerate(batches):
+        result = translate_batch(
+            batch,
+            f"retry-{idx}",
+            slide_metadata,
+            source_language,
+            target_language,
+            api_key=api_key,
+            cost_tracker=cost_tracker,
+        )
+        # Exact-key matches first
+        for bid in batch:
+            if not _is_blank(result.get(bid)):
+                recovered[bid] = result[bid]
+        # Salvage any id-format changes the API introduced on the retry response
+        leftover = [bid for bid in batch if bid not in recovered]
+        if leftover:
+            _, _, fixed = validate_translation_ids(
+                {bid: batch[bid] for bid in leftover}, result, slide_metadata
+            )
+            for bid in leftover:
+                if not _is_blank(fixed.get(bid)):
+                    recovered[bid] = fixed[bid]
+    return recovered
+
+
 def translate_text(
     text_dict,
     slide_metadata,
@@ -673,7 +759,9 @@ def translate_text(
 
         # Split into batches for efficient translation
         logger.info("Splitting content into batches...")
-        batches = split_dict_into_smart_batches(unique_texts, max_input_tokens=100000)
+        batches = split_dict_into_smart_batches(
+            unique_texts, max_input_tokens=100000, max_items=config.BLOCKS_PER_BATCH
+        )
 
         translated_texts = {}
         remaining_batches = list(enumerate(batches))
@@ -743,7 +831,28 @@ def translate_text(
 
         translated_texts = expanded_translations
 
-    # Validate and fix translation IDs
+    # --- Completeness: retry genuinely-missing blocks before any best-effort mapping ---
+    genuine_missing = missing_block_ids(text_dict, translated_texts)
+    if genuine_missing:
+        logger.warning(
+            f"{len(genuine_missing)}/{len(text_dict)} blocks missing after first pass; "
+            f"retrying in small batches of {config.BLOCKS_PER_BATCH}..."
+        )
+        recovered = _retry_missing_blocks(
+            genuine_missing,
+            text_dict,
+            slide_metadata,
+            source_language,
+            target_language,
+            api_key=api_key,
+            cost_tracker=cost_tracker,
+        )
+        translated_texts.update(recovered)
+        logger.info(
+            f"Retry pass recovered {len(recovered)}/{len(genuine_missing)} missing blocks"
+        )
+
+    # Best-effort id-format mapping for any remaining stragglers
     success, missing_ids, fixed_translations = validate_translation_ids(
         text_dict, translated_texts, slide_metadata
     )
@@ -812,12 +921,33 @@ def translate_pptx(
     success, missing, fixed = validate_translation_ids(
         text_dict, translated_texts, slide_metadata
     )
-
     if not success:
-        logger.warning(
-            f"Some translations ({len(missing)}) may not be applied correctly"
-        )
         translated_texts = fixed
+
+    # --- Completeness gate: never write a partially-translated deck ---
+    total_blocks = len(text_dict)
+    still_missing = missing_block_ids(text_dict, translated_texts)
+    if still_missing:
+        details = [describe_block(bid, text_dict.get(bid, "")) for bid in still_missing]
+        logger.error(
+            f"Incomplete translation: {len(still_missing)}/{total_blocks} blocks were "
+            f"not translated. Refusing to write a partial deck."
+        )
+        for line in details:
+            logger.error(f"  UNTRANSLATED: {line}")
+        raise IncompleteTranslationError(
+            message=(
+                f"{len(still_missing)}/{total_blocks} text blocks were not translated; "
+                f"refusing to write a partial deck to {output_file}.\n"
+                "Untranslated blocks:\n" + "\n".join(f"  - {d}" for d in details)
+            ),
+            missing_ids=still_missing,
+            total=total_blocks,
+        )
+
+    logger.info(
+        f"Completeness check: {total_blocks}/{total_blocks} blocks translated (100%)"
+    )
 
     # Update the presentation with translated text
     logger.info("Updating presentation with translated text...")
@@ -826,9 +956,11 @@ def translate_pptx(
     if success:
         logger.info(f"Translation complete. Saved to {output_file}")
         return True
-    else:
-        logger.error("Failed to update presentation with translated text")
-        return False
+
+    logger.error("Failed to update presentation with translated text")
+    raise TranslationError(
+        f"Failed to write the translated presentation to {output_file}"
+    )
 
 
 def list_recovery_files():

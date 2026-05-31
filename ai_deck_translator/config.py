@@ -60,14 +60,17 @@ DEFAULT_CONFIG = {
         "open_browser": True,
     },
     "translation": {
-        "batch_size": 100000,  # Maximum tokens per batch
+        "batch_size": 100000,  # Input token budget per batch
+        "blocks_per_batch": 10,  # Max text blocks per API call — small batches avoid
+        # truncated responses, the documented root cause of skipped blocks (business-plan §8)
         "max_retries": 3,  # Maximum number of retries for API calls
         "timeout": 120,  # Timeout for API calls in seconds
     },
     "api": {
         "anthropic": {
             "model": "claude-sonnet-4-6",
-            "max_tokens": 150000,
+            "max_tokens": 8000,  # Output cap per call — must stay within the model's output
+            # limit; 150000 truncated responses and silently dropped blocks
             "temperature": 0.0,
         },
         "anthropic_api_base": "https://api.anthropic.com/v1",
@@ -258,6 +261,22 @@ def get_config() -> Dict[str, Any]:
     if os.environ.get("GSLIDES_MODEL"):
         config["api"]["anthropic"]["model"] = os.environ.get("GSLIDES_MODEL")
 
+    if os.environ.get("ANTHROPIC_MAX_TOKENS"):
+        try:
+            config["api"]["anthropic"]["max_tokens"] = int(
+                os.environ.get("ANTHROPIC_MAX_TOKENS")
+            )
+        except ValueError:
+            raise ConfigurationError("ANTHROPIC_MAX_TOKENS must be an integer")
+
+    if os.environ.get("TRANSLATION_BLOCKS_PER_BATCH"):
+        try:
+            config["translation"]["blocks_per_batch"] = int(
+                os.environ.get("TRANSLATION_BLOCKS_PER_BATCH")
+            )
+        except ValueError:
+            raise ConfigurationError("TRANSLATION_BLOCKS_PER_BATCH must be an integer")
+
     if os.environ.get("GSLIDES_WEB_HOST"):
         config["web"]["host"] = os.environ.get("GSLIDES_WEB_HOST")
 
@@ -291,6 +310,7 @@ GOOGLE_CREDENTIALS_FILE = API_CONFIG["google"]["credentials_file"]
 GOOGLE_TOKEN_FILE = API_CONFIG["google"]["token_file"]
 
 BATCH_SIZE = TRANSLATION_CONFIG["batch_size"]
+BLOCKS_PER_BATCH = TRANSLATION_CONFIG.get("blocks_per_batch", 10)
 MAX_RETRIES = TRANSLATION_CONFIG["max_retries"]
 TIMEOUT = TRANSLATION_CONFIG["timeout"]
 

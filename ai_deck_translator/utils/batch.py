@@ -105,7 +105,10 @@ def create_batches(
 
 
 def split_dict_into_smart_batches(
-    input_dict: Dict[str, str], max_input_tokens: int = None, prompt_tokens: int = None
+    input_dict: Dict[str, str],
+    max_input_tokens: int = None,
+    prompt_tokens: int = None,
+    max_items: int = None,
 ) -> List[Dict[str, str]]:
     """
     Split a dictionary into batches based on estimated token count to optimize API usage.
@@ -121,6 +124,10 @@ def split_dict_into_smart_batches(
             value from config.MAX_INPUT_TOKENS
         prompt_tokens (int, optional): Estimated tokens used by the prompt template.
             If None, uses the value from config.PROMPT_TOKENS
+        max_items (int, optional): Hard cap on the number of text blocks per batch.
+            When set, a batch is finalized once it reaches this many items even if the
+            token budget is not exhausted. Small caps (e.g. 10) keep API responses short
+            enough to avoid truncation, the documented cause of skipped blocks.
 
     Returns:
         list: List of dictionaries (batches), where each dictionary contains a subset
@@ -169,9 +176,11 @@ def split_dict_into_smart_batches(
             estimate_tokens(key) + estimate_tokens(value) + 10
         )  # +10 for JSON formatting
 
-        # If this item would exceed the batch limit and we already have items in the batch,
-        # finalize the current batch and start a new one
-        if current_token_count + item_tokens > max_input_tokens and current_batch:
+        # If this item would exceed the batch limit (by tokens or by item count) and we
+        # already have items in the batch, finalize the current batch and start a new one
+        exceeds_tokens = current_token_count + item_tokens > max_input_tokens
+        exceeds_items = max_items is not None and len(current_batch) >= max_items
+        if (exceeds_tokens or exceeds_items) and current_batch:
             batches.append(current_batch)
             current_batch = {}
             current_token_count = prompt_tokens
