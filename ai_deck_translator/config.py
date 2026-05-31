@@ -27,7 +27,7 @@ CREDENTIALS_PATH = os.path.join(CONFIG_DIR, "credentials.json")
 TOKEN_PATH = os.path.join(CONFIG_DIR, "token.json")
 
 # Add CLAUDE_MODEL and RECOVERY_DIRECTORY for test compatibility
-CLAUDE_MODEL = "claude-3-haiku-20240307"
+CLAUDE_MODEL = "claude-haiku-4-5"
 RECOVERY_DIRECTORY = "translation_recovery"
 
 # Required environment variables
@@ -66,7 +66,7 @@ DEFAULT_CONFIG = {
     },
     "api": {
         "anthropic": {
-            "model": "claude-3-7-sonnet",
+            "model": "claude-sonnet-4-6",
             "max_tokens": 150000,
             "temperature": 0.0,
         },

@@ -39,7 +39,7 @@ DEFAULT_CONFIG = {
     "translation": {
         "batch_size": 10,
         "max_tokens": 100000,
-        "model": "claude-3-opus-20240229",
+        "model": "claude-sonnet-4-6",
     },
     "api": {
         "anthropic_api_base": "https://api.anthropic.com",

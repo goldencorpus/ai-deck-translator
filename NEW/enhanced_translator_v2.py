@@ -31,8 +31,8 @@ from .updater import update_slides
 logger = get_logger(__name__)
 
 # Define model constants
-MODEL_CLAUDE_35_SONNET = "claude-3-5-sonnet"
-MODEL_CLAUDE_35_HAIKU = "claude-3-5-haiku"
+MODEL_CLAUDE_35_SONNET = "claude-sonnet-4-6"
+MODEL_CLAUDE_35_HAIKU = "claude-haiku-4-5"
 MODEL_GPT_4O = "gpt-4o"
 MODEL_GPT_4O_MINI = "gpt-4o-mini"
 MODEL_GEMINI_15_PRO = "gemini-1.5-pro"

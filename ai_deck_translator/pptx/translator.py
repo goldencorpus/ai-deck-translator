@@ -447,7 +447,7 @@ def translate_batch(
         """Clean text for better translation results"""
         return re.sub(r"\s+", " ", text).strip()
 
-    def estimate_cost(prompt_tokens, completion_tokens, model="claude-3-7-sonnet"):
+    def estimate_cost(prompt_tokens, completion_tokens, model="claude-sonnet-4-6"):
         """Estimate cost of API call based on token counts"""
         # Claude 3.5 Sonnet pricing: $3 per 1M input tokens, $15 per 1M output tokens
         # Claude 3 Sonnet pricing: $3 per 1M input tokens, $15 per 1M output tokens
@@ -538,7 +538,7 @@ Do not include any explanations or notes outside the JSON object.
         try:
             # Call the Anthropic API
             response = client.messages.create(
-                model="claude-3-7-sonnet",
+                model="claude-sonnet-4-6",
                 max_tokens=150000,
                 temperature=0.0,
                 system=system_prompt,

@@ -62,9 +62,9 @@ class TestConfig(unittest.TestCase):
 
     def test_env_var_override(self):
         # Set environment variable for model override
-        os.environ["GSLIDES_MODEL"] = "claude-3-haiku-20240307"
+        os.environ["GSLIDES_MODEL"] = "claude-haiku-4-5"
         config = get_config()
-        self.assertEqual(config["api"]["anthropic"]["model"], "claude-3-haiku-20240307")
+        self.assertEqual(config["api"]["anthropic"]["model"], "claude-haiku-4-5")
         del os.environ["GSLIDES_MODEL"]
 
 
@@ -82,8 +82,8 @@ def test_save_config():
         assert saved_config == DEFAULT_CONFIG
 
 
-@mock.patch.dict(os.environ, {"GSLIDES_MODEL": "claude-3-haiku-20240307"})
+@mock.patch.dict(os.environ, {"GSLIDES_MODEL": "claude-haiku-4-5"})
 def test_env_var_override():
     """Test that environment variables override config settings."""
     config = get_config()
-    assert config["api"]["anthropic"]["model"] == "claude-3-haiku-20240307"
+    assert config["api"]["anthropic"]["model"] == "claude-haiku-4-5"

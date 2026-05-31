@@ -19,7 +19,7 @@ Package dir: `ai_deck_translator/`. Real PPTX CLI entry: repo-root `run.py`
   **1 failed** (test_setup.py — bare `"python3"` escaped the venv). The stale audit's
   "3 failures in test_translator/test_web" no longer reproduce (fixed earlier in 5493a27).
 
-## Phase 1 — Model IDs — IN PROGRESS
+## Phase 1 — Model IDs — DONE (active code grep-clean; suite 63 passed/25 skipped/0 failed)
 Active files to fix → premium=`claude-sonnet-4-6`, standard=`claude-haiku-4-5`:
 - ai_deck_translator/config.py (CLAUDE_MODEL, anthropic.model)
 - ai_deck_translator/pptx/translator.py (real call + estimate_cost default)
