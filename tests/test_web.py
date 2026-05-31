@@ -29,8 +29,9 @@ class TestWebInterface(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        # Create a Flask test client
-        app = create_app()
+        # Create a Flask test client (debug=True → ephemeral key; production requires
+        # SECRET_KEY in the environment).
+        app = create_app(debug=True)
         app.config["TESTING"] = True
         app.config["SECRET_KEY"] = "test_key"
         self.client = app.test_client()

@@ -94,4 +94,23 @@ To re-run visual QA on any deck:
   soffice --headless --convert-to pdf --outdir <dir> deck_ja.pptx
   pdftoppm -jpeg -r 120 <dir>/deck_ja.pdf <dir>/slide
 
-## Status: engine + format fixes COMPLETE & VISUALLY VERIFIED on revive/engine-fixes.
+## Phase 6 — Web UI hardening — DONE
+- Routed the web UI's PPTX+Anthropic path through `pptx.translator.translate_pptx`
+  (completeness gate + retry + fail-loud + format/per-paragraph fixes) instead of the
+  legacy `core.translator` best-effort flow. New `_run_hardened_pptx_translation` worker
+  in web/app.py; surfaces IncompleteTranslationError to the user (status=failed, lists
+  untranslated blocks) — never writes a partial deck. Verified both paths via the worker
+  (complete→100%/file written; incomplete→failed/no file).
+- Security (push-review findings): SECRET_KEY now required in production (RuntimeError if
+  missing; ephemeral random key only in debug — no more "dev_key"). `/download` hardened:
+  realpath must be inside UPLOAD_FOLDER AND basename must start with `{session_id}_`;
+  removed the "serve newest pptx in the folder" cross-session fallback; substring match
+  `session_id in f` → strict `startswith`.
+- Tests: new ungated tests/test_web_security.py (4 tests, all RUN — test_web.py is gated
+  by skipif(openai missing)). Suite: **71 passed / 25 skipped / 0 failed**.
+- Note: web `translate_notes=off` toggle is not honored by the hardened path (engine
+  always translates the full deck incl. notes — over-delivery, logged). Google-Slides and
+  Google-Translate-service paths unchanged (still legacy).
+- Legacy pickle-load in gslides_translator/auth NOT addressed (Slides path still deferred).
+
+## Status: engine + format + web-UI fixes COMPLETE & VERIFIED on revive/engine-fixes.

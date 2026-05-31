@@ -31,6 +31,7 @@ from ..core.translator import translate_text
 from ..core.updater import update_slides as update_slides_gslides
 from ..pptx.extractor import extract_text as extract_text_pptx
 from ..pptx.updater import update_slides as update_slides_pptx
+from ..pptx.translator import translate_pptx
 from ..services.google_translate import translate_batch as google_translate_batch
 from ..services.anthropic import translate_batch as anthropic_translate_batch
 from ..utils.logging import get_logger, setup_logging
@@ -39,6 +40,7 @@ from ..utils.exceptions import (
     TranslationError,
     NetworkError,
     RateLimitError,
+    IncompleteTranslationError,
 )
 from flask_session import Session
 from datetime import timedelta
@@ -64,6 +66,65 @@ def allowed_file(filename, allowed_extensions):
         bool: True if the file has an allowed extension, False otherwise
     """
     return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_extensions
+
+
+def _run_hardened_pptx_translation(
+    input_file, output_file, source_language, target_language, api_key, session_id
+):
+    """
+    Translate a .pptx via the hardened engine (``pptx.translator.translate_pptx``).
+
+    Unlike the legacy path, this enforces the completeness gate + retry pass and refuses
+    to write a partially-translated deck — on any unrecoverable miss it raises
+    IncompleteTranslationError, which we surface to the user instead of silently
+    shipping a deck with missing slides.
+    """
+    state = translation_state[session_id]
+    state.update(
+        {
+            "status": "running",
+            "output_file": output_file,
+            "total": 1,
+            "progress": 0,
+            "percent": 0,
+            "last_updated": time.time(),
+        }
+    )
+    try:
+        translate_pptx(
+            input_file=input_file,
+            output_file=output_file,
+            source_language=source_language,
+            target_language=target_language,
+            api_key=api_key,
+        )
+    except IncompleteTranslationError as e:
+        logger.error(f"[{session_id}] Incomplete translation: {e}")
+        state["status"] = "failed"
+        state["error"] = str(e)
+        return
+    except Exception as e:
+        logger.error(f"[{session_id}] Translation failed: {e}")
+        state["status"] = "failed"
+        state["error"] = f"Translation failed: {e}"
+        return
+
+    if not os.path.exists(output_file):
+        state["status"] = "failed"
+        state["error"] = "Failed to create output file"
+        return
+
+    state.update(
+        {
+            "status": "completed",
+            "progress": 1,
+            "total": 1,
+            "percent": 100,
+            "output_file": output_file,
+            "last_updated": time.time(),
+        }
+    )
+    logger.info(f"[{session_id}] Hardened PPTX translation completed: {output_file}")
 
 
 def translate_presentation(
@@ -111,6 +172,26 @@ def translate_presentation(
         logger.info(
             f"[{session_id}] Input type: {'Google Slides' if is_google_slides else 'PowerPoint'}"
         )
+
+        # Hardened path: Anthropic/Claude + a real .pptx file. Route through the engine
+        # with the completeness gate + fail-loud guarantee instead of the legacy
+        # best-effort flow (which could silently ship a partially-translated deck).
+        if not is_google_slides and service == "anthropic":
+            if not api_key:
+                translation_state[session_id]["status"] = "failed"
+                translation_state[session_id][
+                    "error"
+                ] = "API key is required for Anthropic service"
+                return
+            if not translate_notes:
+                logger.info(
+                    f"[{session_id}] Note: the hardened engine translates the full deck, "
+                    "including speaker notes"
+                )
+            _run_hardened_pptx_translation(
+                input_file, output_file, "en", target_language, api_key, session_id
+            )
+            return
 
         # Extract text from the presentation
         logger.info(f"[{session_id}] Extracting text from presentation...")
@@ -387,7 +468,23 @@ def create_app(debug=False):
         Flask: The configured Flask application.
     """
     app = Flask(__name__, template_folder="templates")
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev_key")
+
+    # Session-signing key. Never ship a hardcoded default: a known SECRET_KEY lets an
+    # attacker forge session cookies. Require it in production; only in debug do we fall
+    # back to an ephemeral random key (sessions reset on restart, which is fine locally).
+    secret_key = os.environ.get("SECRET_KEY")
+    if not secret_key:
+        if debug:
+            secret_key = os.urandom(32).hex()
+            logger.warning(
+                "SECRET_KEY not set — using an ephemeral random key (debug mode only)."
+            )
+        else:
+            raise RuntimeError(
+                "SECRET_KEY environment variable is required to run the web UI. "
+                "Set one, e.g.  export SECRET_KEY=$(openssl rand -hex 32)"
+            )
+    app.config["SECRET_KEY"] = secret_key
     app.config["UPLOAD_FOLDER"] = os.path.join(
         tempfile.gettempdir(), "ai_deck_translator_uploads"
     )
@@ -764,10 +861,12 @@ def create_app(debug=False):
                 try:
                     # Look for files in the temp directory matching this session ID
                     temp_dir = app.config["UPLOAD_FOLDER"]
+                    # Only this session's own files — `session_id in f` (substring) would
+                    # let one session match/serve another session's deck.
                     matching_files = [
                         f
                         for f in os.listdir(temp_dir)
-                        if session_id in f and f.endswith(".pptx")
+                        if f.startswith(f"{session_id}_") and f.endswith(".pptx")
                     ]
 
                     if matching_files:
@@ -821,51 +920,34 @@ def create_app(debug=False):
         output_file = translation_state[session_id]["output_file"]
         logger.info(f"[{session_id}] Sending file for download: {output_file}")
 
-        # Double-check that the file exists on disk
+        # Security: the file must live inside UPLOAD_FOLDER and belong to THIS session.
+        # This blocks path traversal (a poisoned state value pointing outside the folder)
+        # and cross-session access (downloading another session's deck).
+        upload_dir = os.path.realpath(app.config["UPLOAD_FOLDER"])
+        resolved = os.path.realpath(output_file)
+        basename = os.path.basename(resolved)
+        if (
+            os.path.dirname(resolved) != upload_dir
+            or not basename.startswith(f"{session_id}_")
+        ):
+            logger.error(
+                f"[{session_id}] Refusing to serve out-of-scope file: {output_file}"
+            )
+            flash("The translated file could not be found for your session.", "error")
+            return redirect(url_for("index"))
+
+        # Double-check that the file exists on disk. No cross-session fallback: serving
+        # the "most recent pptx in the folder" would leak another user's deck.
         if not os.path.exists(output_file):
             logger.error(f"[{session_id}] Output file not found at path: {output_file}")
-
-            # Aggressive recovery attempt - check for any recently created PPTX files
-            try:
-                temp_dir = app.config["UPLOAD_FOLDER"]
-                all_pptx_files = [
-                    f for f in os.listdir(temp_dir) if f.endswith(".pptx")
-                ]
-                # Sort by modification time, newest first
-                all_pptx_files.sort(
-                    key=lambda f: os.path.getmtime(os.path.join(temp_dir, f)),
-                    reverse=True,
-                )
-
-                if all_pptx_files:
-                    # Take the most recently modified PPTX file
-                    newest_file = os.path.join(temp_dir, all_pptx_files[0])
-                    logger.info(
-                        f"[{session_id}] Attempting to use most recent PPTX file: {newest_file}"
-                    )
-
-                    if os.path.exists(newest_file):
-                        # Update the state with this file
-                        translation_state[session_id]["output_file"] = newest_file
-                        output_file = newest_file
-                        logger.info(
-                            f"[{session_id}] Using alternative file for download: {output_file}"
-                        )
-                    else:
-                        raise FileNotFoundError("Most recent file not accessible")
-                else:
-                    raise FileNotFoundError("No PPTX files found in directory")
-            except Exception as e:
-                logger.error(f"[{session_id}] Secondary recovery attempt failed: {e}")
-                # If we still don't have a file, notify the user and redirect
-                flash(
-                    "The translated file could not be found on the server. The file may have been deleted or failed to generate.",
-                    "error",
-                )
-                # Mark the translation as failed since we couldn't find the output
-                translation_state[session_id]["status"] = "failed"
-                translation_state[session_id]["error"] = "Output file not found"
-                return redirect(url_for("index"))
+            flash(
+                "The translated file could not be found on the server. The file may "
+                "have been deleted or failed to generate.",
+                "error",
+            )
+            translation_state[session_id]["status"] = "failed"
+            translation_state[session_id]["error"] = "Output file not found"
+            return redirect(url_for("index"))
 
         try:
             # Get the original filename for better user experience
