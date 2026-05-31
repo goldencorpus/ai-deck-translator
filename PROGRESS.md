@@ -58,4 +58,23 @@ Active files to fix → premium=`claude-sonnet-4-6`, standard=`claude-haiku-4-5`
   Minor non-blocking note: multi-line bullets came back joined with full-width spaces
   (all 3 bullets present, just flattened line breaks) — content complete, not a skip.
 
-## Status: engine fixes COMPLETE on branch revive/engine-fixes (not pushed).
+## Phase 4 — Format preservation (the real moat) — DONE
+Measured formatting on a styled deck and found the prior updater:
+- corrupted **mixed-run paragraphs** (set runs[0]=full translation but left later runs →
+  leftover/duplicated source-language text), and
+- **stripped all table-cell formatting** (`cell.text = ...` resets bold/size/colour).
+Fix (updater.py): `_apply_text_to_text_frame` / `_set_paragraph_text` / `_copy_font` —
+write into the first run (keeping its font/size/colour/bold), delete leftover runs,
+map newlines→paragraphs, clone first-run format onto any surplus lines. Applied to
+shapes, table cells, and notes. Verified (real API): styled table header キープ
+bold/18pt/colour through EN→JA; mixed-run sentence collapses to one clean run, no
+leftover English. Regression test added. Suite: **66 passed / 25 skipped / 0 failed**.
+Known limit (documented): intra-paragraph mixed emphasis (one bold word mid-sentence)
+collapses to the paragraph's first-run format — unsolvable via block translation.
+
+## Security (push review, pre-existing, NOT in CLI path; for the deferred SaaS phase)
+- `gslides_translator/auth/google_auth.py`: pickle.load on token (legacy Slides path).
+- `web/app.py`: `/download` path traversal + dev SECRET_KEY fallback (Flask web UI).
+None touched by this branch; fix before any web/SaaS launch.
+
+## Status: engine + format fixes COMPLETE on branch revive/engine-fixes.
