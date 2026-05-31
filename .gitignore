@@ -46,3 +46,6 @@ translation_recovery/
 *_es.pptx
 *_zh.pptx
 uploads/
+
+# Virtual environment (was committed by mistake)
+.venv/
