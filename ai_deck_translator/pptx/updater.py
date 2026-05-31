@@ -156,17 +156,12 @@ def update_slides(pptx_file, output_file, translated_texts):
                 # Find the notes text shape
                 for notes_shape in slide.notes_slide.shapes:
                     if hasattr(notes_shape, "text") and notes_shape.text.strip():
-                        # Replace the notes text
+                        # Replace the notes text. The TextFrame.text setter safely
+                        # replaces all paragraphs in one step; the previous manual
+                        # paragraph-removal loop spun forever because python-pptx always
+                        # keeps a paragraph element present, so the count never hit 0.
                         if hasattr(notes_shape, "text_frame"):
-                            # Clear existing paragraphs
-                            while len(notes_shape.text_frame.paragraphs) > 0:
-                                p = notes_shape.text_frame.paragraphs[0]
-                                if hasattr(p, "element"):
-                                    p.element.getparent().remove(p.element)
-
-                            # Add the translated notes
-                            p = notes_shape.text_frame.add_paragraph()
-                            p.text = translated_texts[notes_id]
+                            notes_shape.text_frame.text = translated_texts[notes_id]
                             logger.debug(f"Updated notes for slide {slide_number}")
                             break
 
