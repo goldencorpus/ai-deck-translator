@@ -9,6 +9,7 @@ Usage:
 """
 
 import os
+import re
 import tempfile
 import threading
 import time
@@ -69,6 +70,29 @@ def allowed_file(filename, allowed_extensions):
         bool: True if the file has an allowed extension, False otherwise
     """
     return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_extensions
+
+
+def extract_slides_id(raw):
+    """
+    Accept any Google Slides reference and return the bare presentation ID.
+
+    Handles: a full edit/share URL (``.../presentation/d/<ID>/edit?usp=...``), a Drive
+    ``open?id=<ID>`` URL, a ``/d/<ID>`` short form, or the bare ID itself. Returns the ID,
+    or None if no plausible ID is found. (Don't make the user hand-extract the ID.)
+    """
+    if not raw:
+        return None
+    s = raw.strip()
+    for pattern in (
+        r"/(?:presentation/)?d/([a-zA-Z0-9_-]{20,})",  # .../presentation/d/<ID>/... or /d/<ID>
+        r"[?&]id=([a-zA-Z0-9_-]{20,})",  # Drive open?id=<ID>
+    ):
+        m = re.search(pattern, s)
+        if m:
+            return m.group(1)
+    if re.fullmatch(r"[a-zA-Z0-9_-]{20,}", s):  # already a bare ID
+        return s
+    return None
 
 
 def _run_hardened_pptx_translation(
@@ -196,7 +220,9 @@ def translate_presentation(
         )
 
         # Determine if input is a Google Slides ID or a PPTX file
-        is_google_slides = not os.path.exists(input_file) and len(input_file) == 44
+        is_google_slides = not os.path.exists(input_file) and bool(
+            re.fullmatch(r"[a-zA-Z0-9_-]{20,}", input_file or "")
+        )
         logger.info(
             f"[{session_id}] Input type: {'Google Slides' if is_google_slides else 'PowerPoint'}"
         )
@@ -677,13 +703,17 @@ def create_app(debug=False):
             )
             return redirect(url_for("index"))
 
-        # Handle Google Slides ID
-        slides_id = request.form.get("slides_id")
+        # Handle Google Slides — accept a bare ID OR a full URL (with any params).
+        slides_id_raw = request.form.get("slides_id")
+        slides_id = extract_slides_id(slides_id_raw)
+        if slides_id_raw and not slides_id:
+            flash(
+                "Couldn't read a Google Slides ID from that. Paste the presentation "
+                "URL or its ID.",
+                "error",
+            )
+            return redirect(url_for("index"))
         if slides_id:
-            # Validate Google Slides ID
-            if len(slides_id) != 44:
-                flash("Invalid Google Slides ID", "error")
-                return redirect(url_for("index"))
 
             # Add a note about Google Slides permissions
             translation_state[session_id][
