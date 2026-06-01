@@ -72,6 +72,23 @@ class TestBuildContract(unittest.TestCase):
         self.assertEqual(m.call_count, 2)
         self.assertTrue(is_empty_contract(result))
 
+    def test_salvages_truncated_contract(self):
+        # Model hit max_tokens mid header_backbone: object is unterminated. We should recover
+        # a PARTIAL contract (the complete leading entries), not degrade to empty.
+        truncated = (
+            '{\n"doc_context": "QBR",\n'
+            '"register": {"style": "teineigo (です・ます)", "rules": []},\n'
+            '"glossary": {"Revenue": "売上", "churn": "解約率"},\n'
+            '"proper_nouns": {"Acme": "アクメ"},\n'
+            '"header_backbone": {"slide1_shape0": "四半期業績レ'  # cut off here
+        )
+        with patch.object(contract_mod, "_complete", return_value=truncated):
+            result = build_contract(_deck(40), "en", "ja", api_key="x")
+        self.assertFalse(is_empty_contract(result))
+        self.assertEqual(result["glossary"]["Revenue"], "売上")
+        self.assertEqual(result["proper_nouns"]["Acme"], {"canonical": "アクメ"})
+        self.assertEqual(result["register"]["style"], "teineigo (です・ます)")
+
     def test_degrades_to_empty_on_api_error(self):
         with patch.object(contract_mod, "_complete", side_effect=RuntimeError("429")):
             result = build_contract(_deck(10), "en", "ja", api_key="x")

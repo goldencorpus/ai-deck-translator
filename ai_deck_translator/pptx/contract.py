@@ -36,6 +36,11 @@ logger = get_logger(__name__)
 # contract reproduces the exact pre-contract behaviour (no extra prompt injection).
 EMPTY_CONTRACT: dict = {}
 
+# Contract output cap. The contract JSON scales with deck size (header_backbone has roughly
+# one entry per title/section, plus per-name proper nouns) — a 49-slide enterprise deck needs
+# well over the original 3K. Sized generously; truncation is additionally salvaged below.
+_CONTRACT_MAX_TOKENS = 8000
+
 # Block roles drive both the contract (header backbone, reading-order narrative) and the
 # role-aware keigo sweep. Title-ish roles are noun-phrase (体言止め) and exempt from the
 # です・ます requirement; body-ish roles are checked.
@@ -381,7 +386,7 @@ def build_contract(
                 user,
                 api_key=api_key,
                 cost_tracker=cost_tracker,
-                max_tokens=3000,
+                max_tokens=_CONTRACT_MAX_TOKENS,
                 label="contract",
             )
         except Exception as exc:  # network/API failure — never block translation
@@ -409,19 +414,67 @@ def build_contract(
 
 
 def _parse_contract_json(text):
-    """Parse the contract JSON using the verbatim-first path; return dict or None."""
+    """Parse the contract JSON, salvaging a truncated object if the model hit max_tokens."""
     if not text:
         return None
     # Import lazily to avoid a circular import at module load.
     from .translator import extract_json_blocks
 
     block = extract_json_blocks(text)
-    if block is None:
+    if block is not None:
+        try:
+            return json.loads(block)
+        except json.JSONDecodeError:
+            pass
+    # extract_json_blocks needs a closing brace; a truncated contract has none. Salvage by
+    # closing the object at the last complete top-level entry (drops the half-written tail).
+    salvaged = _salvage_truncated_json(text)
+    if salvaged is not None:
+        try:
+            return json.loads(salvaged)
+        except json.JSONDecodeError:
+            return None
+    return None
+
+
+def _salvage_truncated_json(text):
+    """
+    Recover a truncated JSON object by closing it at the last complete top-level entry.
+
+    Walks the string string-aware; at a top-level comma (depth 1) every nested structure is
+    closed, so everything up to the last such comma is a run of complete "key": value pairs —
+    appending "}" yields valid JSON. Returns None if not even the first entry completed.
+    """
+    start = text.find("{")
+    if start == -1:
         return None
-    try:
-        return json.loads(block)
-    except json.JSONDecodeError:
+    s = text[start:]
+    depth = 0
+    in_str = False
+    esc = False
+    last_top_comma = None
+    for i, ch in enumerate(s):
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch in "{[":
+            depth += 1
+        elif ch in "}]":
+            depth -= 1
+            if depth == 0:
+                return s[: i + 1]  # a complete object after all
+        elif ch == "," and depth == 1:
+            last_top_comma = i
+    if last_top_comma is None:
         return None
+    return s[:last_top_comma] + "}"
 
 
 # --------------------------------------------------------------------------------------
