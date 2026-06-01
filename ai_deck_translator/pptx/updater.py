@@ -242,8 +242,18 @@ def update_slides(pptx_file, output_file, translated_texts):
             logger.info(f"Saving updated presentation to {output_file}")
             prs.save(output_file)
 
-            # Now handle XML-level updates for elements that python-pptx can't update directly
-            update_xml_elements(pptx_file, output_file, translated_texts)
+            # Only run the XML-level pass when there's content python-pptx can't handle
+            # (SmartArt diagrams / raw-XML elements). Re-serialising slide XML with
+            # ElementTree mangles OOXML namespaces (<p:sld> -> <ns0:sld>) and drops
+            # declarations, which strict readers like Google Slides reject — and
+            # python-pptx already wrote a valid, well-compressed package.
+            needs_xml_pass = any(
+                ("_smartart_" in key or "_xml_" in key) for key in translated_texts
+            )
+            if needs_xml_pass:
+                update_xml_elements(pptx_file, output_file, translated_texts)
+            else:
+                logger.info("No SmartArt/raw-XML content — skipping XML repack")
 
             logger.info("Successfully updated presentation")
             return True
@@ -301,6 +311,7 @@ def update_xml_elements(original_file, updated_file, translated_texts):
             # Parse the slide XML
             tree = ET.parse(slide_path)
             root = tree.getroot()
+            slide_modified = False
 
             # Update SmartArt text
             smartart_ids = [
@@ -410,6 +421,7 @@ def update_xml_elements(original_file, updated_file, translated_texts):
                             for i, text_elem in enumerate(text_elements):
                                 if i < len(translated_parts):
                                     text_elem.text = translated_parts[i]
+                        slide_modified = True
 
             # Update slide notes in XML if needed
             notes_id = f"slide{slide_number}_notes"
@@ -451,8 +463,10 @@ def update_xml_elements(original_file, updated_file, translated_texts):
                     except Exception as e:
                         logger.warning(f"Error updating notes slide XML: {e}")
 
-            # Save the updated slide
-            tree.write(slide_path, encoding="utf-8", xml_declaration=True)
+            # Save the updated slide only if we actually changed its XML — re-serialising
+            # an untouched slide just mangles its OOXML namespaces for no reason.
+            if slide_modified:
+                tree.write(slide_path, encoding="utf-8", xml_declaration=True)
 
         # Recreate the PPTX file. Use DEFLATE: the default (ZIP_STORED) leaves media
         # uncompressed, which bloated outputs by ~8-10 MB vs the original.
