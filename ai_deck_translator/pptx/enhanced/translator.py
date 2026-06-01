@@ -5,37 +5,39 @@ This module provides enhanced translation capabilities for PowerPoint presentati
 utilizing multiple AI models for optimal quality and cost efficiency.
 """
 
+import concurrent.futures
+import json
+import logging
 import os
 import sys
 import time
-import json
-import logging
-import concurrent.futures
-from typing import List, Dict, Any, Union, Optional, Tuple, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
 from pptx import Presentation
+
+from .cache import (
+    clear_translation_cache,
+    get_cache_stats,
+    get_from_translation_cache,
+    save_to_translation_cache,
+)
 
 # Import our module components
 from .models import get_translator_for_model
 from .models.base import (
-    MODEL_CLAUDE_35_SONNET,
     MODEL_CLAUDE_35_HAIKU,
+    MODEL_CLAUDE_35_SONNET,
+    MODEL_GEMINI_15_FLASH,
+    MODEL_GEMINI_15_PRO,
     MODEL_GPT_4O,
     MODEL_GPT_4O_MINI,
-    MODEL_GEMINI_15_PRO,
-    MODEL_GEMINI_15_FLASH,
-)
-from .cache import (
-    get_from_translation_cache,
-    save_to_translation_cache,
-    get_cache_stats,
-    clear_translation_cache,
 )
 from .utils import (
-    repair_json,
+    clean_text,
+    estimate_cost,
     extract_json_blocks,
     get_model_pricing,
-    estimate_cost,
-    clean_text,
+    repair_json,
 )
 
 # Configure logger

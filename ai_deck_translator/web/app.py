@@ -9,43 +9,46 @@ Usage:
 """
 
 import os
-import uuid
+import tempfile
 import threading
 import time
-import tempfile
+import uuid
+from datetime import timedelta
+
+import markdown
 from flask import (
     Flask,
-    render_template,
-    request,
-    redirect,
-    url_for,
     flash,
-    send_file,
-    session,
     jsonify,
     make_response,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    session,
+    url_for,
 )
+from markupsafe import Markup
 from werkzeug.utils import secure_filename
+
+from flask_session import Session
+
 from ..core.extractor import extract_text as extract_text_gslides
 from ..core.translator import translate_text
 from ..core.updater import update_slides as update_slides_gslides
 from ..pptx.extractor import extract_text as extract_text_pptx
-from ..pptx.updater import update_slides as update_slides_pptx
 from ..pptx.translator import translate_pptx
-from ..services.google_translate import translate_batch as google_translate_batch
+from ..pptx.updater import update_slides as update_slides_pptx
 from ..services.anthropic import translate_batch as anthropic_translate_batch
-from ..utils.logging import get_logger, setup_logging
+from ..services.google_translate import translate_batch as google_translate_batch
 from ..utils.exceptions import (
-    ValidationError,
-    TranslationError,
+    IncompleteTranslationError,
     NetworkError,
     RateLimitError,
-    IncompleteTranslationError,
+    TranslationError,
+    ValidationError,
 )
-from flask_session import Session
-from datetime import timedelta
-from markupsafe import Markup
-import markdown
+from ..utils.logging import get_logger, setup_logging
 
 # Set up logging
 logger = get_logger(__name__)
@@ -655,7 +658,9 @@ def create_app(debug=False):
         service = request.form.get("service", "google")
         # Fall back to the server's configured key so the operator never has to paste it
         # into the form each time. A form-supplied key still takes precedence.
-        api_key = request.form.get("api_key", "") or os.environ.get("CLAUDE_API_KEY", "")
+        api_key = request.form.get("api_key", "") or os.environ.get(
+            "CLAUDE_API_KEY", ""
+        )
         translate_notes = request.form.get("translate_notes") == "on"
 
         # Check if target language is provided
@@ -983,9 +988,8 @@ def create_app(debug=False):
         upload_dir = os.path.realpath(app.config["UPLOAD_FOLDER"])
         resolved = os.path.realpath(output_file)
         basename = os.path.basename(resolved)
-        if (
-            os.path.dirname(resolved) != upload_dir
-            or not basename.startswith(f"{session_id}_")
+        if os.path.dirname(resolved) != upload_dir or not basename.startswith(
+            f"{session_id}_"
         ):
             logger.error(
                 f"[{session_id}] Refusing to serve out-of-scope file: {output_file}"

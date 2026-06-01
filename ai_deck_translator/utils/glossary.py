@@ -15,10 +15,11 @@ Public Functions:
     import_glossary: Import a glossary from a file
 """
 
-import os
 import json
+import os
 import re
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 from ..utils.logging import get_logger
 
 # Set up logging

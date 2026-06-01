@@ -6,22 +6,22 @@ specifically for PowerPoint (PPTX) files, utilizing multiple AI models for
 optimal quality and cost efficiency.
 """
 
+import concurrent.futures
 import os
 import time
-import concurrent.futures
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from ..core.base_translation_service import BaseTranslationService
-from ..core.translation_interface import TextElements, MetadataType
+from ..core.translation_interface import MetadataType, TextElements
+from ..pptx.enhanced.cache import get_from_translation_cache, save_to_translation_cache
 from ..pptx.enhanced.models import get_translator_for_model
 from ..pptx.enhanced.models.base import (
     MODEL_CLAUDE_3_HAIKU,
     MODEL_CLAUDE_3_SONNET,
+    MODEL_GEMINI_PRO,
     MODEL_GPT_3_5_TURBO,
     MODEL_GPT_4_TURBO,
-    MODEL_GEMINI_PRO,
 )
-from ..pptx.enhanced.cache import get_from_translation_cache, save_to_translation_cache
 
 # Supported language codes
 SUPPORTED_LANGUAGES = {

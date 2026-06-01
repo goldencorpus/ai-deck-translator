@@ -12,10 +12,10 @@ Key functions:
 - quality_checks: Common quality assurance checks
 """
 
-import re
 import json
 import os
-from typing import Dict, List, Any, Tuple, Optional
+import re
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def repair_json(json_content: str) -> str:

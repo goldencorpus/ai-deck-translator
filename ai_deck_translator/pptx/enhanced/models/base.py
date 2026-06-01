@@ -4,8 +4,8 @@ Base class and interfaces for translation models.
 
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, Union
 from dataclasses import dataclass
+from typing import Any, Dict, Optional, Union
 
 # Model constants imported from the enhanced translator
 MODEL_CLAUDE_35_SONNET = "claude-sonnet-4-6"
@@ -107,8 +107,8 @@ def get_translator_for_model(
         TranslationModel: Appropriate translator instance
     """
     from .anthropic import AnthropicTranslator
-    from .openai import OpenAITranslator
     from .gemini import GeminiTranslator
+    from .openai import OpenAITranslator
 
     # Determine the appropriate translator based on the model
     if model.startswith("claude"):

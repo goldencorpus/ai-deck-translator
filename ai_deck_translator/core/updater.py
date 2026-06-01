@@ -10,8 +10,9 @@ Public Functions:
 """
 
 import webbrowser
-from ..utils.logging import get_logger
+
 from ..utils.exceptions import NetworkError, PresentationError
+from ..utils.logging import get_logger
 
 # Set up logging
 logger = get_logger(__name__)

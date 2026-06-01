@@ -11,12 +11,14 @@ Public Functions:
 """
 
 import os
-import zipfile
-import xml.etree.ElementTree as ET
-from pptx import Presentation
 import re
-from ..utils.logging import get_logger
+import xml.etree.ElementTree as ET
+import zipfile
+
+from pptx import Presentation
+
 from ..utils.exceptions import ValidationError
+from ..utils.logging import get_logger
 
 # Set up logging
 logger = get_logger(__name__)

@@ -12,9 +12,9 @@ Public Functions:
     batch_update_presentation: Apply a batch update to a presentation
 """
 
-import os
 import json
-from typing import Dict, Any, Optional, List, Tuple
+import os
+from typing import Any, Dict, List, Optional, Tuple
 
 import google.auth.transport.requests
 from google.oauth2.credentials import Credentials
@@ -22,9 +22,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from ai_deck_translator import config
 from ai_deck_translator.utils.exceptions import AuthenticationError, NetworkError
 from ai_deck_translator.utils.logging import get_logger
-from ai_deck_translator import config
 
 # Set up logging
 logger = get_logger(__name__)
@@ -57,7 +57,9 @@ def authenticate_google() -> Tuple[Any, Any]:
     # Use the absolute ~/.gslides_translator/ paths (config.*_PATH) rather than the
     # bare "credentials.json"/"token.json" names, which would resolve against the CWD.
     token_file = getattr(config, "TOKEN_PATH", config.GOOGLE_TOKEN_FILE)
-    credentials_file = getattr(config, "CREDENTIALS_PATH", config.GOOGLE_CREDENTIALS_FILE)
+    credentials_file = getattr(
+        config, "CREDENTIALS_PATH", config.GOOGLE_CREDENTIALS_FILE
+    )
     scopes = config.GOOGLE_SCOPES
 
     logger.info(f"Authenticating with Google using token file: {token_file}")

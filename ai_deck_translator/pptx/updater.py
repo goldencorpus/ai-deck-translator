@@ -10,17 +10,19 @@ Public Functions:
     update_xml_elements: Update XML elements in a PowerPoint presentation
 """
 
-import os
 import copy
-import zipfile
-import xml.etree.ElementTree as ET
-from pptx import Presentation
-from pptx.oxml.ns import qn
-from pptx.enum.text import MSO_AUTO_SIZE
+import os
 import re
 import shutil
+import xml.etree.ElementTree as ET
+import zipfile
+
+from pptx import Presentation
+from pptx.enum.text import MSO_AUTO_SIZE
+from pptx.oxml.ns import qn
+
+from ..utils.exceptions import PresentationError, ValidationError
 from ..utils.logging import get_logger
-from ..utils.exceptions import ValidationError, PresentationError
 
 # Set up logging
 logger = get_logger(__name__)

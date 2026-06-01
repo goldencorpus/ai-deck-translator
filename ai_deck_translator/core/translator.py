@@ -13,28 +13,38 @@ Public Functions:
     list_recovery_files: List available recovery files for resuming translations
 """
 
-import os
 import json
+import os
 import re
-import anthropic
 import time
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Callable
+from typing import Any, Callable, Dict, List, Optional
+
+import anthropic
+
 from .. import config
 from ..auth.google_auth import authenticate_google
 from ..core.extractor import extract_text
 from ..core.updater import update_slides
-from ..utils.batch import split_dict_into_smart_batches, deduplicate_content
-from ..utils.recovery import setup_recovery_system
-from ..utils.progress import create_progress_bar
-from ..utils.logging import get_logger
-from ..utils.batch import create_batches
-from ..utils.progress import ProgressTracker
-from ..utils.recovery import save_recovery_file, load_recovery_file
+from ..utils.batch import (
+    create_batches,
+    deduplicate_content,
+    split_dict_into_smart_batches,
+)
 from ..utils.exceptions import NetworkError, RateLimitError, TranslationError
-from ..utils.translation_memory import lookup_translation, save_translation
-from ..utils.translation_memory import TranslationMemory
-from ..utils.glossary import find_terms_in_text, apply_glossary_to_text
+from ..utils.glossary import apply_glossary_to_text, find_terms_in_text
+from ..utils.logging import get_logger
+from ..utils.progress import ProgressTracker, create_progress_bar
+from ..utils.recovery import (
+    load_recovery_file,
+    save_recovery_file,
+    setup_recovery_system,
+)
+from ..utils.translation_memory import (
+    TranslationMemory,
+    lookup_translation,
+    save_translation,
+)
 
 # Set up logging
 logger = get_logger(__name__)

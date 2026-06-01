@@ -12,7 +12,7 @@ The original is never modified — a new translated copy is created in the user'
 """
 
 from ..auth.google_auth import authenticate_google
-from ..pptx.translator import translate_text, missing_block_ids, describe_block
+from ..pptx.translator import describe_block, missing_block_ids, translate_text
 from ..utils.exceptions import IncompleteTranslationError, TranslationError
 from ..utils.logging import get_logger
 
@@ -87,7 +87,13 @@ def _build_replace_requests(translated):
                 {"deleteText": {"objectId": block_id, "textRange": {"type": "ALL"}}}
             )
             requests.append(
-                {"insertText": {"objectId": block_id, "insertionIndex": 0, "text": new_text}}
+                {
+                    "insertText": {
+                        "objectId": block_id,
+                        "insertionIndex": 0,
+                        "text": new_text,
+                    }
+                }
             )
     return requests
 

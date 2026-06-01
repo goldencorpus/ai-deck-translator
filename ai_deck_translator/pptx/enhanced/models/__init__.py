@@ -2,13 +2,12 @@
 Model implementations for the enhanced PPTX translator.
 """
 
-from .base import TranslationModel, ModelResponse
 from .anthropic import AnthropicTranslator
-from .openai import OpenAITranslator
-from .gemini import GeminiTranslator
 
 # Export model factory function
-from .base import get_translator_for_model
+from .base import ModelResponse, TranslationModel, get_translator_for_model
+from .gemini import GeminiTranslator
+from .openai import OpenAITranslator
 
 __all__ = [
     "TranslationModel",

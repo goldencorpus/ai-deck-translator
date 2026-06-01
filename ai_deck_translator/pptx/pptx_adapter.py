@@ -6,12 +6,13 @@ for PowerPoint (PPTX) files, handling text extraction and document updating.
 """
 
 import os
-import time
 import shutil
-from typing import Dict, List, Any, Tuple, Optional
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
 from pptx import Presentation
 
-from ..core.translation_interface import DocumentAdapter, TextElements, MetadataType
+from ..core.translation_interface import DocumentAdapter, MetadataType, TextElements
 
 
 class PPTXAdapter(DocumentAdapter):

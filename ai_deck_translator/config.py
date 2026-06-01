@@ -4,11 +4,11 @@ Configuration module for the AI Deck Translator application.
 This module manages configuration settings and environment variables
 """
 
-import os
 import json
 import logging
+import os
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 # Load dotenv before any imports that might use environment variables
 try:

@@ -9,8 +9,8 @@ Public Functions:
     extract_text: Extract all text elements from a Google Slides presentation
 """
 
-from ..utils.logging import get_logger
 from ..utils.exceptions import NetworkError
+from ..utils.logging import get_logger
 
 # Set up logging
 logger = get_logger(__name__)

@@ -2,11 +2,11 @@
 Translation caching system for the enhanced PPTX translator.
 """
 
-import os
-import json
 import hashlib
+import json
+import os
 from datetime import datetime
-from typing import Dict, Any, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 # Set up cache directory
 CACHE_DIR = os.path.join(

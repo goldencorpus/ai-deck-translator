@@ -9,14 +9,16 @@ Public Functions:
     translate_text: Translate a single text element using Claude
 """
 
-import os
 import json
+import os
 import time
+from typing import Any, Dict, List, Optional
+
 import anthropic
-from typing import List, Dict, Any, Optional
-from ..utils.logging import get_logger
-from ..utils.exceptions import TranslationError, NetworkError, RateLimitError
+
 from .. import config
+from ..utils.exceptions import NetworkError, RateLimitError, TranslationError
+from ..utils.logging import get_logger
 
 # Set up logging
 logger = get_logger(__name__)

@@ -8,21 +8,21 @@ translation services.
 
 import time
 from abc import abstractmethod
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from .translation_interface import (
-    TranslationService,
-    DocumentAdapter,
-    TranslationRequest,
-    TranslationResult,
-    DocumentId,
-    TextElements,
-    MetadataType,
-)
 from .shared_utils import (
-    perform_quality_check,
     apply_glossary_to_text,
     find_terms_in_text,
+    perform_quality_check,
+)
+from .translation_interface import (
+    DocumentAdapter,
+    DocumentId,
+    MetadataType,
+    TextElements,
+    TranslationRequest,
+    TranslationResult,
+    TranslationService,
 )
 
 

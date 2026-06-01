@@ -5,8 +5,8 @@ This module provides functionality for extracting text from PowerPoint presentat
 translating the text, and updating the presentations with the translated text.
 """
 
-from .translator import translate_pptx, translate_text, list_recovery_files
 from .extractor import extract_text
+from .translator import list_recovery_files, translate_pptx, translate_text
 from .updater import update_slides
 
 __all__ = [

@@ -4,11 +4,12 @@ Google Gemini model implementation for translation.
 
 import json
 import time
-import google.generativeai as genai
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
-from .base import TranslationModel, ModelResponse
-from ..utils import extract_json_blocks, estimate_cost
+import google.generativeai as genai
+
+from ..utils import estimate_cost, extract_json_blocks
+from .base import ModelResponse, TranslationModel
 
 
 class GeminiTranslator(TranslationModel):

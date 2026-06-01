@@ -11,27 +11,28 @@ Usage:
 import argparse
 import os
 import sys
+
 from ..core.extractor import extract_text as extract_text_gslides
 from ..core.translator import translate_text
 from ..core.updater import update_slides as update_slides_gslides
-from ..pptx.extractor import extract_text as extract_text_pptx
-from ..pptx.updater import update_slides as update_slides_pptx
 from ..pptx.enhanced import (
-    translate_presentation,
-    QUALITY_PROFESSIONAL,
-    QUALITY_STANDARD,
     QUALITY_DRAFT,
     QUALITY_ECONOMY,
+    QUALITY_PROFESSIONAL,
+    QUALITY_STANDARD,
+    translate_presentation,
 )
-from ..services.google_translate import translate_batch as google_translate_batch
+from ..pptx.extractor import extract_text as extract_text_pptx
+from ..pptx.updater import update_slides as update_slides_pptx
 from ..services.anthropic import translate_batch as anthropic_translate_batch
-from ..utils.logging import get_logger, setup_logging
+from ..services.google_translate import translate_batch as google_translate_batch
 from ..utils.exceptions import (
-    ValidationError,
-    TranslationError,
     NetworkError,
     RateLimitError,
+    TranslationError,
+    ValidationError,
 )
+from ..utils.logging import get_logger, setup_logging
 
 # Set up logging
 logger = get_logger(__name__)

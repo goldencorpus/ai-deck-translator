@@ -14,8 +14,10 @@ Public Functions:
     create_progress_bar: Factory function to create the appropriate progress bar
 """
 
-from typing import Callable, Optional, Dict, Any
+from typing import Any, Callable, Dict, Optional
+
 from tqdm import tqdm as tqdm_original
+
 from ..utils.logging import get_logger
 
 # Set up logging

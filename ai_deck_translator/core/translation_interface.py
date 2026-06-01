@@ -17,7 +17,7 @@ and model selection logic.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, Any, Optional, Callable, Union, TypeVar
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
 # Type definitions
 DocumentId = TypeVar("DocumentId", str, object)

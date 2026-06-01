@@ -14,10 +14,11 @@ Public Functions:
     import_memory: Import a translation memory from a file
 """
 
-import os
-import json
 import hashlib
-from typing import Dict, List, Tuple, Optional, Any
+import json
+import os
+from typing import Any, Dict, List, Optional, Tuple
+
 from ..utils.logging import get_logger
 
 # Set up logging
