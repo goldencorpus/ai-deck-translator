@@ -22,6 +22,8 @@ Env (set on the VPS, never committed): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
 WORKER_SHARED_SECRET, STRIPE_SECRET_KEY, CLAUDE_API_KEY, WORKER_CONCURRENCY.
 """
 
+from __future__ import annotations  # PEP 604 unions (dict | None) — VPS runs Python 3.9
+
 import asyncio
 import os
 import tempfile
