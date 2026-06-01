@@ -727,6 +727,7 @@ def translate_text(
     target_language,
     resume_file=None,
     api_key=None,
+    progress_callback=None,
 ):
     """
     Translate text from a PowerPoint presentation.
@@ -790,6 +791,13 @@ def translate_text(
     }
 
     # Process each batch
+    completed_batches = 0
+    if progress_callback:
+        try:
+            progress_callback(0, total_batches)
+        except Exception:
+            pass
+
     while remaining_batches:
         batch_index, batch = remaining_batches.pop(0)
 
@@ -818,6 +826,12 @@ def translate_text(
 
         # Update progress
         progress_bar.update(1)
+        completed_batches += 1
+        if progress_callback:
+            try:
+                progress_callback(completed_batches, total_batches)
+            except Exception:
+                pass
 
     # If we deduplicated content, expand the translations back to all IDs
     if recovery_system.get("is_resuming"):
@@ -892,6 +906,7 @@ def translate_pptx(
     target_language="fr",
     resume_file=None,
     api_key=None,
+    progress_callback=None,
 ):
     """
     Translate a PowerPoint presentation from one language to another.
@@ -926,6 +941,7 @@ def translate_pptx(
         target_language,
         resume_file=resume_file,
         api_key=api_key,
+        progress_callback=progress_callback,
     )
 
     # Validate the translations before updating

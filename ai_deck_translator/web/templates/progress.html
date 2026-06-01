@@ -236,8 +236,10 @@
                     progressBar.textContent = data.percent + '%';
                     
                     // Update progress text
-                    document.getElementById('progress-text').textContent = 
-                        `${data.progress} of ${data.total} elements translated`;
+                    document.getElementById('progress-text').textContent =
+                        data.total > 0
+                            ? `Batch ${data.progress} of ${data.total} (${data.percent}%)`
+                            : 'Preparing…';
                     
                     // Update status container
                     const statusContainer = document.getElementById('status-container');
@@ -260,12 +262,12 @@
                         }
                         
                         statusContainer.innerHTML = statusHtml;
-                        
-                        // Check if progress is at 100% despite status still being 'running'
-                        if (data.progress > 0 && data.total > 0 && data.progress === data.total) {
-                            console.log("Progress is at 100% but status is still 'running', treating as completed");
-                            handleCompletion();
-                        }
+
+                        // NOTE: do NOT treat progress === total as completion. All
+                        // batches translating is not the same as the job being done —
+                        // validation, the completeness gate, and writing the file still
+                        // run after. Only the authoritative status='completed' (set by
+                        // the server once the file is written) triggers the redirect.
                     } else if (data.status === 'completed') {
                         console.log("Status is completed, handling completion");
                         handleCompletion();

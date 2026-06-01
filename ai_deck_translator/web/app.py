@@ -84,7 +84,7 @@ def _run_hardened_pptx_translation(
         {
             "status": "running",
             "output_file": output_file,
-            "total": 1,
+            "total": 0,
             "progress": 0,
             "percent": 0,
             "last_updated": time.time(),
@@ -92,6 +92,16 @@ def _run_hardened_pptx_translation(
             "(50+ slides) can take several minutes — please keep this tab open.",
         }
     )
+
+    def on_progress(done, total):
+        st = translation_state.get(session_id)
+        if st is None:
+            return
+        st["progress"] = done
+        st["total"] = total
+        st["percent"] = round(100 * done / total) if total else 0
+        st["last_updated"] = time.time()
+
     try:
         translate_pptx(
             input_file=input_file,
@@ -99,6 +109,7 @@ def _run_hardened_pptx_translation(
             source_language=source_language,
             target_language=target_language,
             api_key=api_key,
+            progress_callback=on_progress,
         )
     except IncompleteTranslationError as e:
         logger.error(f"[{session_id}] Incomplete translation: {e}")
