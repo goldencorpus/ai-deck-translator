@@ -29,7 +29,22 @@ would each need full engine context and risk divergence. Building directly + det
 - [x] P1  jsonl.py + JSONL output + caching + seed-then-fanout + adaptive sizing — DONE (94 passed)
       Note: cost_tracker token counts may slightly undercount under parallel fan-out (advisory metrics only, not correctness). MAX_CONCURRENT_BATCHES=8 default; tier-discovery is a future refinement.
 - [x] P2  verify.py sweep + patch + wire after assembly — DONE (105 passed). Native path inherits via translate_text. black/isort clean; mypy only has pre-existing `.text` union-attr (matches codebase; baseline mypy=182 errors, CI lint non-blocking).
-- [ ] Real paid E2E (NTT/Forum) — LAST, needs confirmation (NOT YET RUN)
-- Each phase: deterministic no-API tests, per-phase commit. NO PUSH without confirmation.
+- [x] Real paid E2E — DONE on the live NTT DATA × Salesforce deck (49 slides, 662 blocks).
+      Surfaced + fixed two truncation bugs (same class):
+        * contract output capped at 3K → truncated → empty contract → also no caching
+          (prefix < 1024-token min). Fix c348b8a: raise to 8K + salvage partial JSON.
+        * patch critic single call (94 blocks) truncated at 4K → 56/105 applied. Fix
+          e1b8c3d: chunk into bounded parallel calls (_PATCH_CHUNK=25).
+      Validated run: 100% complete; contract = 48 glossary / 26 proper nouns / 52 backbone /
+      register=teineigo + 当社/貴社; caching engaged (cache-read 35,019); sweep 105 violations
+      patched; cost $0.40 (< 1× naive, well under ≤2× budget). Good copy:
+      https://docs.google.com/presentation/d/1qEViX0VxSj7lo0X_gQN2LcR1vZ1Zr_RCZy2YDyOdOwo/edit
+      (Inferior empty-contract copy 1rkce-jOOWp... can be deleted.)
+- Branch revive/engine-fixes pushed through e1b8c3d (P0,P1,P2 + 2 E2E fixes). 107 tests pass.
+
+## Open follow-ups (for the user)
+- Optional: 3rd live run to confirm patch-chunking applies all fixes on the real deck (~$0.40).
+- Open a PR for revive/engine-fixes? (not done — awaiting decision)
+- Delete the duplicate inferior Drive copy (1rkce-...).
 
 ## Baseline: 74 passed, 25 skipped (green) before changes.
