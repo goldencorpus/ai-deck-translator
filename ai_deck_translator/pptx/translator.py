@@ -2,27 +2,35 @@
 PPTX Translator module for translating PowerPoint presentations.
 """
 
-import os
 import json
-import anthropic
+import os
 import re
-import time
+import sys
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+
+import anthropic
 from tqdm import tqdm
-import sys
 
 from .. import config
-from ..utils.batch import split_dict_into_smart_batches, deduplicate_content
-from ..utils.recovery import setup_recovery_system
-from ..utils.progress import create_progress_bar
-from ..utils.logging import get_logger
+from ..utils.batch import deduplicate_content, split_dict_into_smart_batches
 from ..utils.exceptions import IncompleteTranslationError, TranslationError
+from ..utils.logging import get_logger
+from ..utils.progress import create_progress_bar
+from ..utils.recovery import setup_recovery_system
+from .contract import (
+    build_contract,
+    enrich_blocks,
+    estimate_output_tokens,
+    format_contract,
+)
 from .extractor import extract_text
+from .jsonl import format_jsonl_instructions, parse_jsonl_translations
 from .updater import update_slides
-from .contract import build_contract, format_contract, enrich_blocks, estimate_output_tokens
-from .jsonl import parse_jsonl_translations, format_jsonl_instructions
+from .verify import patch as patch_translations
+from .verify import sweep
 
 # Set up logging
 logger = get_logger(__name__)
@@ -531,7 +539,9 @@ PRIVACY NOTICE:
     # This is part of the stable cached prefix — it must NOT contain per-batch content.
     if glossary:
         system_prompt += (
-            "\n\n" + glossary + "\n\nApply the contract above to EVERY translation below."
+            "\n\n"
+            + glossary
+            + "\n\nApply the contract above to EVERY translation below."
         )
 
     # Create the user prompt. Only the per-batch content lives here (after the cache
@@ -661,7 +671,9 @@ Do not modify id formats. Output ONLY the JSON lines."""
                 # missing ids) rather than discarding everything and retrying the whole batch.
                 break
             else:
-                logger.error(f"No usable translation in response for batch {batch_index}")
+                logger.error(
+                    f"No usable translation in response for batch {batch_index}"
+                )
                 retry_count += 1
                 translated_batch = None
 
@@ -677,7 +689,9 @@ Do not modify id formats. Output ONLY the JSON lines."""
                         retry_after = float(headers.get("retry-after"))
                     except (TypeError, ValueError):
                         retry_after = None
-                sleep_s = retry_after if retry_after else min(2 ** (retry_count + 1), 30)
+                sleep_s = (
+                    retry_after if retry_after else min(2 ** (retry_count + 1), 30)
+                )
                 logger.warning(
                     f"Rate limited on batch {batch_index}; backing off {sleep_s:.0f}s"
                 )
@@ -1047,6 +1061,41 @@ def translate_text(
             f"Some translations ({len(missing_ids)}) could not be mapped correctly"
         )
         translated_texts = fixed_translations
+
+    # --- VERIFY: deterministic sweep + one surgical patch (P2) ---
+    # Cheap no-LLM checks flag where the translation broke the Coherence Contract (glossary
+    # drift, proper-noun variants, residual source, keigo leaks); only the flagged blocks go
+    # to a single patch-only critic call. Never blocks — degrades to the unpatched text. The
+    # downstream 100%-or-fail-loud completeness gate is unaffected.
+    if config.SWEEP_ENABLED:
+        violations = sweep(
+            text_dict,
+            translated_texts,
+            contract,
+            blocks_meta=blocks_meta,
+            source_language=source_language,
+            target_language=target_language,
+        )
+        quality = [
+            v
+            for v in violations
+            if v.kind in ("locked_term", "proper_noun", "residual_source", "keigo")
+        ]
+        if quality:
+            logger.info(f"Sweep found {len(quality)} quality violation(s); patching")
+            translated_texts = patch_translations(
+                violations,
+                text_dict,
+                translated_texts,
+                contract,
+                source_language,
+                target_language,
+                api_key=api_key,
+                cost_tracker=cost_tracker,
+                blocks_meta=blocks_meta,
+            )
+        else:
+            logger.info("Sweep: 0 quality violations")
 
     # Log cost information
     if cost_tracker["total_cost"] > 0:

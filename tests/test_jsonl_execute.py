@@ -141,9 +141,7 @@ class TestTranslateBatchJsonl(unittest.TestCase):
         client.messages.create.return_value = _mock_response('{"id": "a", "t": "x"}')
         with patch.object(pptx_translator.config, "PROMPT_CACHE", False):
             translate_batch({"a": "o"}, 0, [], "en", "ja", api_key="k")
-        self.assertIsInstance(
-            client.messages.create.call_args[1]["system"], str
-        )
+        self.assertIsInstance(client.messages.create.call_args[1]["system"], str)
 
 
 class TestSeedThenFanOut(unittest.TestCase):

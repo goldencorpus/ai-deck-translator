@@ -37,7 +37,7 @@ def parse_jsonl_translations(text):
     the END sentinel, and any malformed line (e.g. a truncated final record). Whatever parsed
     cleanly is kept; missing ids are recovered by the caller's retry path.
     """
-    translations = {}
+    translations: dict = {}
     if not text:
         return translations
     for raw_line in text.splitlines():

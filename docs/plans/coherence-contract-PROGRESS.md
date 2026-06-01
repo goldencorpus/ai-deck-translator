@@ -28,8 +28,8 @@ would each need full engine context and risk divergence. Building directly + det
 - [x] P0a block enrichment — DONE (in c19176c)
 - [x] P1  jsonl.py + JSONL output + caching + seed-then-fanout + adaptive sizing — DONE (94 passed)
       Note: cost_tracker token counts may slightly undercount under parallel fan-out (advisory metrics only, not correctness). MAX_CONCURRENT_BATCHES=8 default; tier-discovery is a future refinement.
-- [ ] P2  verify.py sweep + patch + wire after assembly (before completeness gate stays)
-- [ ] Real paid E2E (NTT/Forum) — LAST, needs confirmation
+- [x] P2  verify.py sweep + patch + wire after assembly — DONE (105 passed). Native path inherits via translate_text. black/isort clean; mypy only has pre-existing `.text` union-attr (matches codebase; baseline mypy=182 errors, CI lint non-blocking).
+- [ ] Real paid E2E (NTT/Forum) — LAST, needs confirmation (NOT YET RUN)
 - Each phase: deterministic no-API tests, per-phase commit. NO PUSH without confirmation.
 
 ## Baseline: 74 passed, 25 skipped (green) before changes.

@@ -21,8 +21,8 @@ Public API:
     estimate_output_tokens(text_dict) -> int  # for adaptive single-call sizing (P1)
 """
 
-import os
 import json
+import os
 import re
 
 import anthropic
@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 
 # A degraded/absent contract. Translation must NEVER block on a contract failure — an empty
 # contract reproduces the exact pre-contract behaviour (no extra prompt injection).
-EMPTY_CONTRACT = {}
+EMPTY_CONTRACT: dict = {}
 
 # Block roles drive both the contract (header backbone, reading-order narrative) and the
 # role-aware keigo sweep. Title-ish roles are noun-phrase (体言止め) and exempt from the
@@ -131,7 +131,9 @@ def enrich_blocks(text_dict, slide_metadata=None):
         if role in (None, "table_cell"):
             # Refine table header/cell from the row index in the id; otherwise id fallback.
             id_role = _role_from_id(block_id)
-            role = id_role if role is None else (id_role if "table" in id_role else role)
+            role = (
+                id_role if role is None else (id_role if "table" in id_role else role)
+            )
         slide_number = slide_by_id.get(block_id)
         if slide_number is None:
             slide_number = _slide_number_from_id(block_id)
@@ -195,7 +197,9 @@ def _complete(
     response = client.messages.create(
         model=model or config.ANTHROPIC_MODEL,
         max_tokens=max_tokens,
-        temperature=config.ANTHROPIC_TEMPERATURE if temperature is None else temperature,
+        temperature=(
+            config.ANTHROPIC_TEMPERATURE if temperature is None else temperature
+        ),
         system=system,
         messages=[{"role": "user", "content": user}],
         metadata={"user_id": "anonymous_user"},
@@ -221,9 +225,11 @@ def _validate_contract(raw):
         rules = register.get("rules")
         contract["register"] = {
             "style": style if isinstance(style, str) else "",
-            "rules": [r for r in rules if isinstance(r, str)]
-            if isinstance(rules, list)
-            else [],
+            "rules": (
+                [r for r in rules if isinstance(r, str)]
+                if isinstance(rules, list)
+                else []
+            ),
         }
     else:
         contract["register"] = {"style": "", "rules": []}
@@ -262,7 +268,7 @@ def _normalize_proper_nouns(proper):
         if isinstance(value, str) and value.strip():
             out[str(name)] = {"canonical": value}
         elif isinstance(value, dict):
-            entry = {}
+            entry: dict = {}
             canonical = value.get("canonical")
             if isinstance(canonical, str) and canonical.strip():
                 entry["canonical"] = canonical
@@ -446,7 +452,9 @@ def format_contract(contract):
             lines.append(f"  - {src} -> {tgt}")
     proper = contract.get("proper_nouns") or {}
     if proper:
-        lines.append("Proper nouns (use the EXACT canonical form; never the avoid-list):")
+        lines.append(
+            "Proper nouns (use the EXACT canonical form; never the avoid-list):"
+        )
         for name, entry in proper.items():
             canonical = entry.get("canonical") or entry.get("first_mention", "")
             extra = []
@@ -460,7 +468,9 @@ def format_contract(contract):
             lines.append(f"  - {name} -> {canonical}{suffix}")
     backbone = contract.get("header_backbone") or {}
     if backbone:
-        lines.append("Header backbone (use these locked translations for these block ids):")
+        lines.append(
+            "Header backbone (use these locked translations for these block ids):"
+        )
         for block_id, translation in backbone.items():
             lines.append(f"  - {block_id}: {translation}")
     lines.append("==")

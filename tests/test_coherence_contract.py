@@ -20,7 +20,6 @@ from ai_deck_translator.pptx.contract import (
     EMPTY_CONTRACT,
 )
 
-
 SAMPLE_CONTRACT_JSON = {
     "doc_context": "A QBR deck for enterprise clients.",
     "register": {
@@ -43,7 +42,9 @@ def _deck(n):
 
 class TestBuildContract(unittest.TestCase):
     def test_parses_and_validates_a_well_formed_contract(self):
-        raw = "```json\n" + json.dumps(SAMPLE_CONTRACT_JSON, ensure_ascii=False) + "\n```"
+        raw = (
+            "```json\n" + json.dumps(SAMPLE_CONTRACT_JSON, ensure_ascii=False) + "\n```"
+        )
         with patch.object(contract_mod, "_complete", return_value=raw):
             result = build_contract(_deck(10), "en", "ja", api_key="x")
         self.assertEqual(result["glossary"]["Revenue"], "売上")
@@ -90,7 +91,9 @@ class TestFormatContract(unittest.TestCase):
         self.assertEqual(format_contract({}), "")
 
     def test_rendered_block_contains_locked_decisions(self):
-        rendered = format_contract(contract_mod._validate_contract(SAMPLE_CONTRACT_JSON))
+        rendered = format_contract(
+            contract_mod._validate_contract(SAMPLE_CONTRACT_JSON)
+        )
         self.assertIn("COHERENCE CONTRACT", rendered)
         self.assertIn("Revenue -> 売上", rendered)
         self.assertIn("当社", rendered)
@@ -111,12 +114,20 @@ class TestEnrichBlocks(unittest.TestCase):
             "slide3_notes": "Speaker note",
         }
         slide_metadata = [
-            {"id": "presentation_title", "type": "presentation_title", "slide_number": 0},
+            {
+                "id": "presentation_title",
+                "type": "presentation_title",
+                "slide_number": 0,
+            },
             {
                 "slide_number": 1,
                 "elements": [
                     {"id": "slide1_shape0", "type": "shape", "role": "title"},
-                    {"id": "slide1_shape1_p0", "type": "shape_paragraph", "role": "body_bullet"},
+                    {
+                        "id": "slide1_shape1_p0",
+                        "type": "shape_paragraph",
+                        "role": "body_bullet",
+                    },
                 ],
             },
         ]
