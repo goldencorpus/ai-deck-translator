@@ -263,5 +263,34 @@ class TestJsonExtraction(unittest.TestCase):
         self.assertEqual(json.loads(result), payload)
 
 
+class TestSlideSelection(unittest.TestCase):
+    def test_parse_slide_selection(self):
+        from ai_deck_translator.pptx.translator import parse_slide_selection
+
+        self.assertIsNone(parse_slide_selection(""))
+        self.assertIsNone(parse_slide_selection("all"))
+        self.assertIsNone(parse_slide_selection(None))
+        self.assertEqual(parse_slide_selection("3"), {3})
+        self.assertEqual(parse_slide_selection("1-3,5"), {1, 2, 3, 5})
+        self.assertEqual(parse_slide_selection("5-3"), {3, 4, 5})  # reversed range
+        with self.assertRaises(ValueError):
+            parse_slide_selection("abc")
+
+    def test_filter_blocks_by_slides(self):
+        from ai_deck_translator.pptx.translator import filter_blocks_by_slides
+
+        blocks = {
+            "slide1_shape0": "a",
+            "slide2_shape0": "b",
+            "slide2_shape1_p0": "c",
+            "slide3_notes": "d",
+        }
+        self.assertEqual(filter_blocks_by_slides(blocks, None), blocks)
+        self.assertEqual(
+            filter_blocks_by_slides(blocks, {2}),
+            {"slide2_shape0": "b", "slide2_shape1_p0": "c"},
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -670,6 +670,42 @@ def describe_block(block_id, source_text=""):
     return f'{block_id} ({location}): "{snippet}"'
 
 
+def parse_slide_selection(spec):
+    """
+    Parse a 1-indexed slide selection like "1-3,5,7" into a set of ints.
+
+    Empty / None / "all" / "*" means "all slides" and returns None. Raises ValueError
+    on malformed input so callers can surface a clear error.
+    """
+    if spec is None or str(spec).strip().lower() in ("", "all", "*"):
+        return None
+    selected = set()
+    for part in str(spec).replace(" ", "").split(","):
+        if not part:
+            continue
+        if "-" in part:
+            start_str, end_str = part.split("-", 1)
+            start, end = int(start_str), int(end_str)
+            if start > end:
+                start, end = end, start
+            selected.update(range(start, end + 1))
+        else:
+            selected.add(int(part))
+    return selected or None
+
+
+def filter_blocks_by_slides(text_dict, selected_slides):
+    """Keep only blocks whose slide number is in selected_slides (None → unchanged)."""
+    if selected_slides is None:
+        return text_dict
+    kept = {}
+    for block_id, text in text_dict.items():
+        match = re.match(r"slide(\d+)", block_id)
+        if match and int(match.group(1)) in selected_slides:
+            kept[block_id] = text
+    return kept
+
+
 def _retry_missing_blocks(
     missing_ids,
     text_dict,
@@ -907,6 +943,7 @@ def translate_pptx(
     resume_file=None,
     api_key=None,
     progress_callback=None,
+    slides=None,
 ):
     """
     Translate a PowerPoint presentation from one language to another.
@@ -931,6 +968,27 @@ def translate_pptx(
     logger.info(
         f"Extracted {len(text_dict)} text elements from {len(slide_metadata)} slides"
     )
+
+    # Optional slide selection: translate only the chosen slides; the rest of the deck
+    # is left untouched (update_slides only writes the blocks we hand it).
+    try:
+        selected_slides = parse_slide_selection(slides)
+    except ValueError:
+        raise TranslationError(
+            f"Invalid slide selection {slides!r}. Use formats like '1-3,5,7'."
+        )
+    if selected_slides is not None:
+        before = len(text_dict)
+        text_dict = filter_blocks_by_slides(text_dict, selected_slides)
+        logger.info(
+            f"Slide selection {sorted(selected_slides)}: translating "
+            f"{len(text_dict)}/{before} text blocks"
+        )
+        if not text_dict:
+            raise TranslationError(
+                f"No translatable text found on the selected slides: "
+                f"{sorted(selected_slides)}"
+            )
 
     # Translate the text
     logger.info("Translating text...")

@@ -34,6 +34,10 @@ def main():
         "--api-key", help="Anthropic API key (optional, can use CLAUDE_API_KEY env var)"
     )
     parser.add_argument("--resume-file", help="Recovery file to resume from (optional)")
+    parser.add_argument(
+        "--slides",
+        help="Slides to translate, e.g. '1-3,5,7' (1-indexed; default: all)",
+    )
 
     # Google Slides specific arguments
     parser.add_argument("--presentation-id", help="Google Slides presentation ID")
@@ -99,6 +103,7 @@ def main():
                     source_language=args.source_lang,
                     target_language=args.target_lang,
                     resume_file=args.resume_file,
+                    slides=args.slides,
                 )
             except IncompleteTranslationError as e:
                 print(f"\nERROR: {e}", file=sys.stderr)
@@ -146,6 +151,7 @@ def main():
                         source_language=args.source_lang,
                         target_language=args.target_lang,
                         resume_file=args.resume_file,
+                        slides=args.slides,
                     )
                 except IncompleteTranslationError as e:
                     print(f"\nERROR: {e}", file=sys.stderr)

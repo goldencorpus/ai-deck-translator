@@ -69,7 +69,13 @@ def allowed_file(filename, allowed_extensions):
 
 
 def _run_hardened_pptx_translation(
-    input_file, output_file, source_language, target_language, api_key, session_id
+    input_file,
+    output_file,
+    source_language,
+    target_language,
+    api_key,
+    session_id,
+    slides=None,
 ):
     """
     Translate a .pptx via the hardened engine (``pptx.translator.translate_pptx``).
@@ -110,6 +116,7 @@ def _run_hardened_pptx_translation(
             target_language=target_language,
             api_key=api_key,
             progress_callback=on_progress,
+            slides=slides,
         )
     except IncompleteTranslationError as e:
         logger.error(f"[{session_id}] Incomplete translation: {e}")
@@ -149,6 +156,7 @@ def translate_presentation(
     translate_notes,
     session_id,
     source_language="auto",
+    slides=None,
 ):
     """
     Translate a presentation in a background thread.
@@ -209,6 +217,7 @@ def translate_presentation(
                 target_language,
                 api_key,
                 session_id,
+                slides,
             )
             return
 
@@ -637,6 +646,7 @@ def create_app(debug=False):
         # Get form data
         target_language = request.form.get("target_language")
         source_language = request.form.get("source_language", "auto") or "auto"
+        slides = request.form.get("slides", "").strip()
         service = request.form.get("service", "google")
         # Fall back to the server's configured key so the operator never has to paste it
         # into the form each time. A form-supplied key still takes precedence.
@@ -737,6 +747,7 @@ def create_app(debug=False):
                     translate_notes,
                     session_id,
                     source_language,
+                    slides,
                 ),
             )
             thread.daemon = True
