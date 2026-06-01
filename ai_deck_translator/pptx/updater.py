@@ -334,7 +334,10 @@ def update_xml_elements(original_file, updated_file, translated_texts):
         ]
 
         for slide_file in slide_files:
-            slide_number = int(re.search(r"slide(\d+)\.xml", slide_file).group(1))
+            slide_match = re.search(r"slide(\d+)\.xml", slide_file)
+            if not slide_match:
+                continue
+            slide_number = int(slide_match.group(1))
             slide_path = os.path.join(temp_dir, "ppt", "slides", slide_file)
 
             logger.debug(f"Processing XML for slide {slide_number}")

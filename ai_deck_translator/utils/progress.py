@@ -140,7 +140,7 @@ class CustomTqdm:
         self.n = 0
         self.description = desc
         self.tqdm_instance = tqdm_original(total=total, desc=desc, **kwargs)
-        self.callback = None
+        self.callback: Optional[Callable[[int], None]] = None
 
         logger.debug(f"Created progress bar: {desc} (total: {total})")
 

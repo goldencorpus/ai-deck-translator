@@ -14,6 +14,7 @@ import os
 import re
 import xml.etree.ElementTree as ET
 import zipfile
+from typing import Any
 
 from pptx import Presentation
 
@@ -74,7 +75,7 @@ def extract_from_smartart(pptx_file, rels_path, rel_id):
     Raises:
         ValidationError: If the file cannot be accessed or is invalid
     """
-    texts = []
+    texts: list = []
 
     try:
         with zipfile.ZipFile(pptx_file, "r") as zip_ref:
@@ -191,7 +192,7 @@ def extract_text(pptx_file):
             logger.debug(f"Processing slide {slide_number} with layout: {slide_layout}")
 
             # Add slide metadata
-            slide_meta = {
+            slide_meta: dict = {
                 "slide_number": slide_number,
                 "layout": slide_layout,
                 "elements": [],
@@ -324,7 +325,7 @@ def extract_text(pptx_file):
                     for text_elem in slide_root.findall(".//a:t", namespaces):
                         if text_elem.text and text_elem.text.strip():
                             # Try to find a parent element with an id
-                            parent_elem = text_elem
+                            parent_elem: Any = text_elem
                             parent_id = None
 
                             # Look up the tree for an element with an id
@@ -371,17 +372,17 @@ def extract_text(pptx_file):
                                 )
                                 notes_root = ET.fromstring(notes_content)
 
-                                notes_text = []
+                                notes_parts: list = []
                                 for text_elem in notes_root.findall(
                                     ".//a:t", namespaces
                                 ):
                                     if text_elem.text and text_elem.text.strip():
-                                        notes_text.append(text_elem.text.strip())
+                                        notes_parts.append(text_elem.text.strip())
 
-                                if notes_text:
+                                if notes_parts:
                                     notes_id = f"slide{slide_number}_notes"
-                                    text_dict[notes_id] = "\n".join(notes_text)
-                                    slide_meta["notes"] = "\n".join(notes_text)
+                                    text_dict[notes_id] = "\n".join(notes_parts)
+                                    slide_meta["notes"] = "\n".join(notes_parts)
                                     logger.debug(
                                         f"Extracted notes from XML for slide {slide_number}"
                                     )

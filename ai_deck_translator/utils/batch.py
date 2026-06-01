@@ -12,7 +12,17 @@ Public Functions:
     split_into_batches: Split a list into batches of a specified size
 """
 
-from typing import Any, Dict, Generic, Iterable, Iterator, List, Tuple, TypeVar
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+)
 
 from .. import config
 from ..utils.exceptions import ValidationError
@@ -107,9 +117,9 @@ def create_batches(
 
 def split_dict_into_smart_batches(
     input_dict: Dict[str, str],
-    max_input_tokens: int = None,
-    prompt_tokens: int = None,
-    max_items: int = None,
+    max_input_tokens: Optional[int] = None,
+    prompt_tokens: Optional[int] = None,
+    max_items: Optional[int] = None,
 ) -> List[Dict[str, str]]:
     """
     Split a dictionary into batches based on estimated token count to optimize API usage.
@@ -166,7 +176,7 @@ def split_dict_into_smart_batches(
 
     items = list(input_dict.items())
     batches = []
-    current_batch = {}
+    current_batch: dict = {}
     current_token_count = prompt_tokens
 
     # Sort items by estimated token length (largest first to optimize packing)
@@ -239,7 +249,7 @@ def deduplicate_content(input_dict: Dict[str, str]) -> Dict[str, Any]:
     logger.info(f"Deduplicating content from {len(input_dict)} items")
 
     # Create mappings
-    text_to_ids = {}  # Maps text content to list of IDs with that content
+    text_to_ids: dict = {}  # Maps text content to list of IDs with that content
     id_mapping = {}  # Maps original IDs to unique text IDs
     unique_texts = {}  # Dictionary of unique text content with new IDs
 

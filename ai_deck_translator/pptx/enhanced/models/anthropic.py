@@ -164,7 +164,9 @@ Do not include any explanations or notes outside the JSON object.
                 cost = estimate_cost(prompt_tokens, completion_tokens, self.model)
 
                 # Extract the JSON from the response
-                json_content = extract_json_blocks(response.content[0].text)
+                json_content = extract_json_blocks(
+                    getattr(response.content[0], "text", "")
+                )
 
                 if json_content:
                     try:

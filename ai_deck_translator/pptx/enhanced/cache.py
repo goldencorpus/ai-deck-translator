@@ -6,7 +6,7 @@ import hashlib
 import json
 import os
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, cast
 
 # Set up cache directory
 CACHE_DIR = os.path.join(
@@ -119,10 +119,10 @@ def get_from_translation_cache(
 
         # Load the cache data
         with open(cache_file, "r", encoding="utf-8") as f:
-            cache_data = json.load(f)
+            cache_data: Dict[str, Any] = json.load(f)
 
         # Return the translation
-        return cache_data.get("translation")
+        return cast(Optional[str], cache_data.get("translation"))
     except Exception as e:
         return None
 

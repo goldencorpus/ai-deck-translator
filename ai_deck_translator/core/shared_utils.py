@@ -90,7 +90,7 @@ def extract_json_blocks(text: str) -> Dict[str, Any]:
     for block in potential_json_blocks:
         try:
             # Try to parse the potential JSON block
-            data = json.loads(block)
+            data: Dict[str, Any] = json.loads(block)
             # If successful, return the data
             return data
         except json.JSONDecodeError:
@@ -261,7 +261,7 @@ class GlossaryManager:
         Args:
             glossary_dir: Directory containing glossary files
         """
-        self.glossaries = {}
+        self.glossaries: dict = {}
         self.glossary_dir = glossary_dir or os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "glossaries"
         )
@@ -310,7 +310,7 @@ class GlossaryManager:
         Returns:
             List[str]: List of terms found in the text
         """
-        terms = []
+        terms: list = []
 
         # Check if we have a glossary for this language pair
         glossary = self.glossaries.get((source_language, target_language), {})

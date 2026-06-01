@@ -10,6 +10,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from typing import Any
 
 import anthropic
 from tqdm import tqdm
@@ -311,7 +312,7 @@ def validate_translation_ids(text_dict, translated_dict, slide_metadata):
                 return (slide_num, element_num)
 
             # Group keys by slide/element numbers
-            trans_by_position = {}
+            trans_by_position: dict = {}
             for k in translated_dict.keys():
                 try:
                     pos = extract_numbers(k)
@@ -570,6 +571,7 @@ Do not modify id formats. Output ONLY the JSON lines."""
     # byte-identical prefix shared by every batch. Marking it cache_control=ephemeral makes
     # the first batch a cache-write (+25%) and all later batches cache-reads (~90% cheaper),
     # so injecting full global context into every batch is nearly free. Toggle via PROMPT_CACHE.
+    system_param: Any
     if config.PROMPT_CACHE:
         system_param = [
             {
@@ -623,7 +625,7 @@ Do not modify id formats. Output ONLY the JSON lines."""
                     f"{completion_tokens} output tokens, est. ${cost:.4f}"
                 )
 
-            raw_text = response.content[0].text
+            raw_text = getattr(response.content[0], "text", "")
 
             # Primary path: JSON Lines. A truncated stream (stop_reason == max_tokens) still
             # yields every complete record up to the cut; the missing ids are recovered by the
@@ -679,7 +681,7 @@ Do not modify id formats. Output ONLY the JSON lines."""
 
         except Exception as e:
             # Honour rate-limit backoff when the API signals it (429 / retry-after).
-            sleep_s = 2
+            sleep_s: float = 2
             status = getattr(e, "status_code", None)
             if status == 429 or "rate" in str(e).lower():
                 retry_after = None
@@ -753,7 +755,7 @@ def parse_slide_selection(spec):
     """
     if spec is None or str(spec).strip().lower() in ("", "all", "*"):
         return None
-    selected = set()
+    selected: set = set()
     for part in str(spec).replace(" ", "").split(","):
         if not part:
             continue

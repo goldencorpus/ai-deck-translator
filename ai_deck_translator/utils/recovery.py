@@ -96,7 +96,7 @@ def setup_recovery_system(
     logger.info(f"Setting up recovery system for {file_id}")
 
     # Initialize the recovery system
-    recovery_system = {
+    recovery_system: Dict[str, Any] = {
         "is_resuming": False,
         "text_dict": text_dict,
         "slide_metadata": slide_metadata,
@@ -316,7 +316,7 @@ def load_recovery_file(file_path: str) -> Dict[str, Any]:
     try:
         logger.info(f"Loading recovery state from {file_path}")
         with open(file_path, "r", encoding="utf-8") as f:
-            recovery_state = json.load(f)
+            recovery_state: Dict[str, Any] = json.load(f)
 
         # Validate the recovery state
         required_keys = [

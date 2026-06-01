@@ -18,7 +18,7 @@ Public Functions:
 import json
 import os
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from ..utils.logging import get_logger
 
@@ -152,7 +152,7 @@ class Glossary:
         if term in self.glossary[language_pair]:
             translation = self.glossary[language_pair][term]["translation"]
             logger.debug(f"Found case-sensitive match for '{term}' in glossary")
-            return translation
+            return cast(Optional[str], translation)
 
         # Look up the term (case-insensitive)
         term_lower = term.lower()
@@ -160,7 +160,7 @@ class Glossary:
             if not entry["case_sensitive"] and term_lower == term_key.lower():
                 translation = entry["translation"]
                 logger.debug(f"Found case-insensitive match for '{term}' in glossary")
-                return translation
+                return cast(Optional[str], translation)
 
         logger.debug(f"No match found for '{term}' in glossary")
         return None
@@ -284,7 +284,7 @@ class Glossary:
         Returns:
             dict: Statistics about the glossary
         """
-        stats = {
+        stats: dict = {
             "total_terms": self.get_term_count(),
             "language_pairs": {},
             "glossary_file": self.glossary_file,

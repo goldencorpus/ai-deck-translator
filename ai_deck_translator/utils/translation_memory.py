@@ -17,7 +17,7 @@ Public Functions:
 import hashlib
 import json
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from ..utils.logging import get_logger
 
@@ -167,7 +167,7 @@ class TranslationMemory:
         if text_hash in self.memory[language_pair]:
             translation = self.memory[language_pair][text_hash]["translation"]
             logger.debug(f"Found translation for '{source_text[:30]}...' in memory")
-            return translation
+            return cast(Optional[str], translation)
 
         # Try fuzzy matching if exact match not found
         fuzzy_match = self._find_fuzzy_match(source_text, language_pair)
@@ -202,11 +202,11 @@ class TranslationMemory:
 
             # Check if source text is a substring of the entry
             if source_text_lower in entry_source and len(source_text) > 10:
-                return entry["translation"]
+                return cast(Optional[str], entry["translation"])
 
             # Check if entry is a substring of the source text
             if entry_source in source_text_lower and len(entry["source"]) > 10:
-                return entry["translation"]
+                return cast(Optional[str], entry["translation"])
 
         return None
 
@@ -229,7 +229,7 @@ class TranslationMemory:
         Returns:
             dict: Statistics about the translation memory
         """
-        stats = {
+        stats: dict = {
             "total_entries": self.get_entry_count(),
             "language_pairs": {},
             "memory_file": self.memory_file,

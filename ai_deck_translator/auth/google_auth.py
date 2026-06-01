@@ -14,7 +14,7 @@ Public Functions:
 
 import json
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import google.auth.transport.requests
 from google.oauth2.credentials import Credentials
@@ -151,8 +151,11 @@ def get_presentation(slides_service: Any, presentation_id: str) -> Dict[str, Any
     """
     try:
         logger.info(f"Getting presentation with ID: {presentation_id}")
-        return (
-            slides_service.presentations().get(presentationId=presentation_id).execute()
+        return cast(
+            Dict[str, Any],
+            slides_service.presentations()
+            .get(presentationId=presentation_id)
+            .execute(),
         )
     except HttpError as e:
         if e.resp.status == 404:
@@ -207,7 +210,7 @@ def create_presentation_copy(
         )
 
         logger.info(f"Created new presentation with ID: {copy['id']}")
-        return copy["id"]
+        return cast(str, copy["id"])
     except HttpError as e:
         logger.error(f"Error copying presentation: {str(e)}")
         raise NetworkError(f"Error copying presentation: {str(e)}")
@@ -257,10 +260,11 @@ def batch_update_presentation(
         logger.info(
             f"Applying batch update to presentation {presentation_id} with {len(requests)} requests"
         )
-        return (
+        return cast(
+            Dict[str, Any],
             slides_service.presentations()
             .batchUpdate(presentationId=presentation_id, body={"requests": requests})
-            .execute()
+            .execute(),
         )
     except HttpError as e:
         logger.error(f"Error updating presentation: {str(e)}")

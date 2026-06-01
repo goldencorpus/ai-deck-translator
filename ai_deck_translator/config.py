@@ -194,10 +194,10 @@ def load_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     Raises:
         ConfigurationError: If configuration file cannot be loaded or is invalid
     """
-    if not os.path.exists(config_path):
+    if config_path is None or not os.path.exists(config_path):
         raise FileNotFoundError(f"Config file not found: {config_path}")
     with open(config_path, "r") as f:
-        config = json.load(f)
+        config: Dict[str, Any] = json.load(f)
     # Ensure required keys are present
     required_keys = ["model", "api_key"]
     for key in required_keys:
@@ -280,42 +280,42 @@ def get_config() -> Dict[str, Any]:
         logger.warning("Error loading configuration, falling back to defaults")
         config = DEFAULT_CONFIG.copy()
 
-    # Apply environment variable overrides
-    if os.environ.get("GSLIDES_CREATE_COPY"):
-        config["presentation"]["create_copy"] = (
-            os.environ.get("GSLIDES_CREATE_COPY").lower() == "true"
-        )
+    # Apply environment variable overrides. Each value is bound once so the truthiness
+    # guard narrows away the Optional[str] from os.environ.get.
+    create_copy = os.environ.get("GSLIDES_CREATE_COPY")
+    if create_copy:
+        config["presentation"]["create_copy"] = create_copy.lower() == "true"
 
-    if os.environ.get("GSLIDES_OPEN_BROWSER"):
-        config["presentation"]["open_browser"] = (
-            os.environ.get("GSLIDES_OPEN_BROWSER").lower() == "true"
-        )
+    open_browser = os.environ.get("GSLIDES_OPEN_BROWSER")
+    if open_browser:
+        config["presentation"]["open_browser"] = open_browser.lower() == "true"
 
-    if os.environ.get("GSLIDES_MODEL"):
-        config["api"]["anthropic"]["model"] = os.environ.get("GSLIDES_MODEL")
+    model = os.environ.get("GSLIDES_MODEL")
+    if model:
+        config["api"]["anthropic"]["model"] = model
 
-    if os.environ.get("ANTHROPIC_MAX_TOKENS"):
+    max_tokens = os.environ.get("ANTHROPIC_MAX_TOKENS")
+    if max_tokens:
         try:
-            config["api"]["anthropic"]["max_tokens"] = int(
-                os.environ.get("ANTHROPIC_MAX_TOKENS")
-            )
+            config["api"]["anthropic"]["max_tokens"] = int(max_tokens)
         except ValueError:
             raise ConfigurationError("ANTHROPIC_MAX_TOKENS must be an integer")
 
-    if os.environ.get("TRANSLATION_BLOCKS_PER_BATCH"):
+    blocks_per_batch = os.environ.get("TRANSLATION_BLOCKS_PER_BATCH")
+    if blocks_per_batch:
         try:
-            config["translation"]["blocks_per_batch"] = int(
-                os.environ.get("TRANSLATION_BLOCKS_PER_BATCH")
-            )
+            config["translation"]["blocks_per_batch"] = int(blocks_per_batch)
         except ValueError:
             raise ConfigurationError("TRANSLATION_BLOCKS_PER_BATCH must be an integer")
 
-    if os.environ.get("GSLIDES_WEB_HOST"):
-        config["web"]["host"] = os.environ.get("GSLIDES_WEB_HOST")
+    web_host = os.environ.get("GSLIDES_WEB_HOST")
+    if web_host:
+        config["web"]["host"] = web_host
 
-    if os.environ.get("GSLIDES_WEB_PORT"):
+    web_port = os.environ.get("GSLIDES_WEB_PORT")
+    if web_port:
         try:
-            config["web"]["port"] = int(os.environ.get("GSLIDES_WEB_PORT"))
+            config["web"]["port"] = int(web_port)
         except ValueError:
             raise ConfigurationError("GSLIDES_WEB_PORT must be an integer")
 

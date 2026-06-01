@@ -363,7 +363,7 @@ Please fix the issues and provide the corrected translation, maintaining the ori
                 messages=[{"role": "user", "content": user_prompt}],
                 max_tokens=1000,
             )
-            fixed_translation = response.content[0].text
+            fixed_translation = getattr(response.content[0], "text", "")
         elif "gpt" in model.lower():
             from openai import OpenAI
 

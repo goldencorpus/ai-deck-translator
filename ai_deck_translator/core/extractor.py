@@ -66,7 +66,7 @@ def extract_text(service, presentation_id):
             slide_number = index + 1
             logger.debug(f"Processing slide {slide_number}")
 
-            slide_info = {
+            slide_info: dict = {
                 "slide_number": slide_number,
                 "title": "",
                 "content": [],

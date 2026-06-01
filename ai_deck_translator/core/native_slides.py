@@ -131,7 +131,7 @@ def translate_presentation_native(
         raise TranslationError("No translatable text found in the presentation")
 
     # Reuse the hardened engine (dedup, small batches, verbatim-JSON, retry).
-    slide_metadata = []  # objectId keys carry no slide-number context; not needed
+    slide_metadata: list = []  # objectId keys carry no slide-number context; not needed
     translated = translate_text(
         text_dict,
         slide_metadata,

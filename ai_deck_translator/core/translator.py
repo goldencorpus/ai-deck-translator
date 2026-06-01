@@ -256,7 +256,7 @@ Please respond with ONLY the translated JSON object, maintaining the exact same 
             )
 
             # Extract the content from the response
-            response_text = response.content[0].text
+            response_text = getattr(response.content[0], "text", "")
 
             # Extract JSON from the response
             try:

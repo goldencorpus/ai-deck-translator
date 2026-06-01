@@ -210,7 +210,9 @@ def _complete(
         metadata={"user_id": "anonymous_user"},
     )
     _track_usage(cost_tracker, response, label)
-    return response.content[0].text
+    # content[0] is always a TextBlock for these (non-tool, non-thinking) calls; getattr
+    # keeps that behaviour while sidestepping mypy's content-block union.
+    return getattr(response.content[0], "text", "")
 
 
 # --------------------------------------------------------------------------------------
