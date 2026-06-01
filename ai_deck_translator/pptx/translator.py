@@ -433,6 +433,7 @@ def translate_batch(
     api_key=None,
     max_retries=3,
     cost_tracker=None,
+    glossary="",
 ):
     """
     Translate a batch of text using the Anthropic API.
@@ -520,6 +521,13 @@ PRIVACY NOTICE:
 
 The content to translate is provided as a JSON object where each key is a unique identifier and each value is the text to translate.
 """
+
+    # Inject the deck-wide glossary so terminology stays consistent across batches.
+    if glossary:
+        system_prompt += (
+            "\n\nTERMINOLOGY GLOSSARY — use these EXACT target translations wherever the "
+            "term appears, for consistency across the whole presentation:\n" + glossary + "\n"
+        )
 
     # Create the user prompt
     user_prompt = f"""Please translate the following presentation content from {source_desc} to {target_language}.

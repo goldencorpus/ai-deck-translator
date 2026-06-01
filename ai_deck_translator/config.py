@@ -61,16 +61,18 @@ DEFAULT_CONFIG = {
     },
     "translation": {
         "batch_size": 100000,  # Input token budget per batch
-        "blocks_per_batch": 10,  # Max text blocks per API call — small batches avoid
-        # truncated responses, the documented root cause of skipped blocks (business-plan §8)
+        "blocks_per_batch": 40,  # Text blocks per API call. Larger = more document context
+        # (better terminology coherence) and fewer calls; the completeness gate + retry
+        # still recover any blocks a truncated response would drop. Was 10 (over-cautious
+        # legacy from the original truncation skip-bug).
         "max_retries": 3,  # Maximum number of retries for API calls
         "timeout": 120,  # Timeout for API calls in seconds
     },
     "api": {
         "anthropic": {
             "model": "claude-sonnet-4-6",
-            "max_tokens": 8000,  # Output cap per call — must stay within the model's output
-            # limit; 150000 truncated responses and silently dropped blocks
+            "max_tokens": 16000,  # Output cap per call — well within the model's limit;
+            # sized to comfortably hold ~40 translated blocks. (150000 caused truncation.)
             "temperature": 0.0,
         },
         "anthropic_api_base": "https://api.anthropic.com/v1",
