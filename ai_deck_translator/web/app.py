@@ -76,6 +76,7 @@ def _run_hardened_pptx_translation(
     api_key,
     session_id,
     slides=None,
+    autofit=True,
 ):
     """
     Translate a .pptx via the hardened engine (``pptx.translator.translate_pptx``).
@@ -117,6 +118,7 @@ def _run_hardened_pptx_translation(
             api_key=api_key,
             progress_callback=on_progress,
             slides=slides,
+            autofit=autofit,
         )
     except IncompleteTranslationError as e:
         logger.error(f"[{session_id}] Incomplete translation: {e}")
@@ -157,6 +159,7 @@ def translate_presentation(
     session_id,
     source_language="auto",
     slides=None,
+    autofit=True,
 ):
     """
     Translate a presentation in a background thread.
@@ -218,6 +221,7 @@ def translate_presentation(
                 api_key,
                 session_id,
                 slides,
+                autofit,
             )
             return
 
@@ -647,6 +651,7 @@ def create_app(debug=False):
         target_language = request.form.get("target_language")
         source_language = request.form.get("source_language", "auto") or "auto"
         slides = request.form.get("slides", "").strip()
+        autofit = request.form.get("autofit") == "on"  # default-on via checked attr
         service = request.form.get("service", "google")
         # Fall back to the server's configured key so the operator never has to paste it
         # into the form each time. A form-supplied key still takes precedence.
@@ -748,6 +753,7 @@ def create_app(debug=False):
                     session_id,
                     source_language,
                     slides,
+                    autofit,
                 ),
             )
             thread.daemon = True

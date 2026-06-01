@@ -141,7 +141,7 @@ namespaces = {
 }
 
 
-def update_slides(pptx_file, output_file, translated_texts):
+def update_slides(pptx_file, output_file, translated_texts, autofit=True):
     """
     Update PowerPoint presentation with translated text.
 
@@ -226,8 +226,8 @@ def update_slides(pptx_file, output_file, translated_texts):
                                 logger.debug(f"Updated text in paragraph {para_id}")
 
                     # Translated text is often longer than the source — let it shrink to
-                    # fit so it doesn't overflow the frame.
-                    if shape_updated:
+                    # fit so it doesn't overflow the frame (unless autofit is disabled).
+                    if shape_updated and autofit:
                         _enable_shrink_to_fit(shape.text_frame)
 
                 # Update text in tables
@@ -241,7 +241,8 @@ def update_slides(pptx_file, output_file, translated_texts):
                                 _apply_text_to_text_frame(
                                     cell.text_frame, translated_texts[cell_id]
                                 )
-                                _enable_shrink_to_fit(cell.text_frame)
+                                if autofit:
+                                    _enable_shrink_to_fit(cell.text_frame)
                                 logger.debug(f"Updated text in table cell {cell_id}")
 
             # Update slide notes

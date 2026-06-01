@@ -38,6 +38,13 @@ def main():
         "--slides",
         help="Slides to translate, e.g. '1-3,5,7' (1-indexed; default: all)",
     )
+    parser.add_argument(
+        "--no-autofit",
+        dest="autofit",
+        action="store_false",
+        help="Disable shrink-to-fit on translated text frames (default: enabled)",
+    )
+    parser.set_defaults(autofit=True)
 
     # Google Slides specific arguments
     parser.add_argument("--presentation-id", help="Google Slides presentation ID")
@@ -104,6 +111,7 @@ def main():
                     target_language=args.target_lang,
                     resume_file=args.resume_file,
                     slides=args.slides,
+                    autofit=args.autofit,
                 )
             except IncompleteTranslationError as e:
                 print(f"\nERROR: {e}", file=sys.stderr)
@@ -152,6 +160,7 @@ def main():
                         target_language=args.target_lang,
                         resume_file=args.resume_file,
                         slides=args.slides,
+                        autofit=args.autofit,
                     )
                 except IncompleteTranslationError as e:
                     print(f"\nERROR: {e}", file=sys.stderr)

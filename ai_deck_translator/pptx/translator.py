@@ -944,6 +944,7 @@ def translate_pptx(
     api_key=None,
     progress_callback=None,
     slides=None,
+    autofit=True,
 ):
     """
     Translate a PowerPoint presentation from one language to another.
@@ -1037,7 +1038,7 @@ def translate_pptx(
 
     # Update the presentation with translated text
     logger.info("Updating presentation with translated text...")
-    success = update_slides(input_file, output_file, translated_texts)
+    success = update_slides(input_file, output_file, translated_texts, autofit=autofit)
 
     if success:
         logger.info(f"Translation complete. Saved to {output_file}")
