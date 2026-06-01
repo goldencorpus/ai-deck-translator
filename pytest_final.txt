@@ -1,0 +1,467 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-8.3.5, pluggy-1.5.0
+rootdir: /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator
+configfile: setup.cfg
+testpaths: tests
+plugins: anyio-4.9.0, cov-6.1.1
+collected 88 items
+
+tests/test_batch.py ..                                                   [  2%]
+tests/test_config.py ........                                            [ 11%]
+tests/test_development_plan.py .........                                 [ 21%]
+tests/test_extractor.py ...                                              [ 25%]
+tests/test_google_auth.py .....                                          [ 30%]
+tests/test_init.py ....                                                  [ 35%]
+tests/test_main.py .                                                     [ 36%]
+tests/test_package.py ...                                                [ 39%]
+tests/test_progress.py ...........                                       [ 52%]
+tests/test_readme.py ......                                              [ 59%]
+tests/test_recovery.py ....                                              [ 63%]
+tests/test_requirements.py ....                                          [ 68%]
+tests/test_run.py .......                                                [ 76%]
+tests/test_setup.py .s..                                                 [ 80%]
+tests/test_translator.py ....F                                           [ 86%]
+tests/test_updater.py ....                                               [ 90%]
+tests/test_web.py F......F                                               [100%]
+
+=================================== FAILURES ===================================
+______________________ TestTranslator.test_translate_text ______________________
+
+texts = ['Original text 1', 'Original text 2'], lang = 'en'
+
+>   result = translate_text(text_dict, slide_metadata, "en", lambda texts, lang: {k: f"Translated {v}" for k, v in texts.items()}, "fr")
+E   AttributeError: 'list' object has no attribute 'items'
+
+tests/test_translator.py:150: AttributeError
+
+During handling of the above exception, another exception occurred:
+
+self = <tests.test_translator.TestTranslator testMethod=test_translate_text>
+mock_lookup_translation = <MagicMock name='lookup_translation' id='4471461872'>
+mock_progress = <MagicMock name='create_progress_bar' id='4471462208'>
+mock_deduplicate = <MagicMock name='deduplicate_content' id='4471461536'>
+mock_recovery = <MagicMock name='setup_recovery_system' id='4471464224'>
+mock_split = <MagicMock name='split_dict_into_smart_batches' id='4471455824'>
+
+    @patch("ai_deck_translator.core.translator.split_dict_into_smart_batches")
+    @patch("ai_deck_translator.core.translator.setup_recovery_system")
+    @patch("ai_deck_translator.utils.batch.deduplicate_content")
+    @patch("ai_deck_translator.utils.progress.create_progress_bar")
+    @patch("ai_deck_translator.core.translator.lookup_translation", return_value=None)
+    def test_translate_text(
+        self,
+        mock_lookup_translation,
+        mock_progress,
+        mock_deduplicate,
+        mock_recovery,
+        mock_split,
+    ):
+        """Test that text is translated correctly with proper recovery and progress tracking."""
+        # Set up mocks
+        mock_recovery.return_value = (
+            {"translated_items": {}, "completed_batches": [], "failed_batches": []},
+            "recovery_file.json",
+            MagicMock(),  # save_recovery_state function
+        )
+    
+        mock_deduplicate.return_value = (
+            {"obj1": "Original text 1", "obj2": "Original text 2"},  # unique_dict
+            {},  # duplicates_map
+        )
+    
+        mock_split.return_value = [
+            {"obj1": "Original text 1"},
+            {"obj2": "Original text 2"},
+        ]
+    
+        mock_progress_instance = MagicMock()
+        mock_progress.return_value = mock_progress_instance
+    
+        # Test data
+        text_dict = {"obj1": "Original text 1", "obj2": "Original text 2"}
+        slide_metadata = [
+            {
+                "slide_number": 1,
+                "title": "Test Slide",
+                "content": ["Original text 1", "Original text 2"],
+            }
+        ]
+    
+        # Patch translation memory to be empty so recovery is triggered
+        with patch("ai_deck_translator.core.translator.TranslationMemory") as mock_tm:
+            mock_tm.return_value.lookup.side_effect = lambda k: None
+>           result = translate_text(text_dict, slide_metadata, "en", lambda texts, lang: {k: f"Translated {v}" for k, v in texts.items()}, "fr")
+
+tests/test_translator.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text_elements = {'obj1': 'Original text 1', 'obj2': 'Original text 2'}
+slide_metadata = [{'content': ['Original text 1', 'Original text 2'], 'slide_number': 1, 'title': 'Test Slide'}]
+target_language = 'en'
+translate_func = <function TestTranslator.test_translate_text.<locals>.<lambda> at 0x10a8a6480>
+source_language = 'fr', batch_size = 50, delay = 0.5, recovery_file = None
+progress_callback = None, use_translation_memory = True
+update_translation_memory = True, use_glossary = True
+
+    def translate_text(
+        text_elements: Dict[str, str],
+        slide_metadata: List[Dict[str, Any]],
+        target_language: str,
+        translate_func: Callable[[List[str], str], List[str]],
+        source_language: str = "en",
+        batch_size: int = 50,
+        delay: float = 0.5,
+        recovery_file: Optional[str] = None,
+        progress_callback: Optional[Callable[[int, int], None]] = None,
+        use_translation_memory: bool = True,
+        update_translation_memory: bool = True,
+        use_glossary: bool = True,
+    ) -> Dict[str, str]:
+        """
+        Translate text elements from a presentation.
+    
+        This function translates text elements extracted from a presentation to the target
+        language. It handles batching, rate limiting, and error recovery to ensure efficient
+        and reliable translation.
+    
+        Args:
+            text_elements (Dict[str, str]): Dictionary of text elements with IDs as keys
+            slide_metadata (List[Dict[str, Any]]): List of slide metadata dictionaries
+            target_language (str): Target language code (e.g., 'ja' for Japanese)
+            translate_func (Callable): Function to translate a batch of text
+                The function should accept a list of strings and a target language code,
+                and return a list of translated strings in the same order
+            source_language (str, optional): Source language code. Defaults to "en".
+            batch_size (int, optional): Maximum number of elements per batch. Defaults to 50.
+            delay (float, optional): Delay between batches in seconds. Defaults to 0.5.
+            recovery_file (str, optional): Path to save recovery data. Defaults to None.
+            progress_callback (Callable, optional): Function to report progress. Defaults to None.
+                The function should accept two integers: current progress and total items
+            use_translation_memory (bool, optional): Whether to use the translation memory. Defaults to True.
+            update_translation_memory (bool, optional): Whether to update the translation memory. Defaults to True.
+            use_glossary (bool, optional): Whether to use the glossary for consistent terminology. Defaults to True.
+    
+        Returns:
+            Dict[str, str]: Dictionary of translated text elements with the same IDs as keys
+    
+        Raises:
+            TranslationError: If there's an error during translation
+            NetworkError: If there's a network error during translation
+            RateLimitError: If the translation service rate limit is exceeded
+    
+        Example:
+            >>> from ai_deck_translator.services.google_translate import translate_batch
+            >>> translated = translate_text(
+            ...     text_elements={"slide1_shape1": "Hello world"},
+            ...     slide_metadata=[{"slide_number": 1, "layout": "Title Slide"}],
+            ...     target_language="ja",
+            ...     translate_func=translate_batch
+            ... )
+            >>> print(translated["slide1_shape1"])
+            こんにちは世界
+        """
+        # Initialize progress tracker
+        total_elements = len(text_elements)
+        progress = ProgressTracker(total_elements, progress_callback)
+        logger.info(
+            f"Starting translation of {total_elements} elements to {target_language}"
+        )
+    
+        # Check for recovery file
+        translated_elements = {}
+        start_index = 0
+    
+        if recovery_file and os.path.exists(recovery_file):
+            try:
+                recovery_data = load_recovery_file(recovery_file)
+                if recovery_data and "translated" in recovery_data:
+                    translated_elements = recovery_data["translated"]
+                    start_index = recovery_data.get("progress", 0)
+                    logger.info(
+                        f"Loaded recovery data with {len(translated_elements)} translated elements"
+                    )
+                    progress.update(len(translated_elements))
+            except Exception as e:
+                logger.warning(f"Failed to load recovery data: {e}")
+    
+        # Create batches of text elements
+        element_ids = list(text_elements.keys())
+        element_texts = list(text_elements.values())
+    
+        # Process slide notes separately to ensure they're included
+        notes_ids = []
+        notes_texts = []
+    
+        for metadata in slide_metadata:
+            slide_number = metadata.get("slide_number", 0)
+            notes = metadata.get("notes", "")
+    
+            if notes and notes.strip():
+                notes_id = f"slide{slide_number}_notes"
+                notes_ids.append(notes_id)
+                notes_texts.append(notes)
+    
+        # Add notes to the elements if they're not already included
+        for notes_id, notes_text in zip(notes_ids, notes_texts):
+            if notes_id not in text_elements:
+                element_ids.append(notes_id)
+                element_texts.append(notes_text)
+    
+        # Check translation memory for existing translations
+        if use_translation_memory:
+            logger.info("Checking translation memory for existing translations")
+            memory_hits = 0
+    
+            for i, (element_id, element_text) in enumerate(zip(element_ids, element_texts)):
+                if (
+                    element_id not in translated_elements
+                ):  # Skip already translated elements
+                    # Look up in translation memory
+                    translation = lookup_translation(
+                        element_text, source_language, target_language
+                    )
+                    if translation:
+                        translated_elements[element_id] = translation
+                        memory_hits += 1
+                        progress.update(1)
+    
+            if memory_hits > 0:
+                logger.info(f"Found {memory_hits} translations in memory")
+    
+        # Create batches for translation (only for elements not found in memory)
+        remaining_ids = []
+        remaining_texts = []
+    
+        for element_id, element_text in zip(element_ids, element_texts):
+            if element_id not in translated_elements:
+                remaining_ids.append(element_id)
+                remaining_texts.append(element_text)
+    
+        if not remaining_ids:
+            logger.info(
+                "All elements found in translation memory, no need for API translation"
+            )
+            return translated_elements
+    
+        batches = create_batches(remaining_ids, remaining_texts, batch_size)
+    
+        # Skip batches that are already translated
+        if start_index > 0:
+            batches = batches[start_index:]
+    
+        # Translate each batch
+        for batch_index, (batch_ids, batch_texts) in enumerate(batches):
+            batch_num = batch_index + start_index
+    
+            # Skip elements that are already translated
+            to_translate_indices = []
+            to_translate_texts = []
+    
+            for i, element_id in enumerate(batch_ids):
+                if element_id not in translated_elements:
+                    to_translate_indices.append(i)
+                    to_translate_texts.append(batch_texts[i])
+    
+            if not to_translate_texts:
+                logger.debug(
+                    f"Skipping batch {batch_num + 1}/{len(batches) + start_index} (already translated)"
+                )
+                continue
+    
+            # Translate the batch
+            try:
+                logger.debug(
+                    f"Translating batch {batch_num + 1}/{len(batches) + start_index} ({len(to_translate_texts)} elements)"
+                )
+                translated_batch = translate_func(to_translate_texts, target_language)
+    
+                # Update translated elements
+                for i, translated_text in zip(to_translate_indices, translated_batch):
+                    element_id = batch_ids[i]
+                    original_text = batch_texts[i]
+    
+                    # Apply glossary to the translated text if enabled
+                    if use_glossary:
+                        translated_text = apply_glossary_to_text(
+                            original_text, source_language, target_language, translated_text
+                        )
+    
+                    translated_elements[element_id] = translated_text
+    
+                    # Update translation memory
+                    if update_translation_memory:
+                        # Determine context from element_id
+                        context = {"element_id": element_id}
+                        if element_id.startswith("slide"):
+                            slide_number = int(element_id.split("_")[0][5:])
+                            context["slide_number"] = slide_number
+    
+                            # Add more context from slide metadata
+                            for metadata in slide_metadata:
+                                if metadata.get("slide_number") == slide_number:
+                                    context["slide_layout"] = metadata.get("layout", "")
+                                    break
+    
+                        # Save to translation memory
+                        save_translation(
+                            original_text,
+                            translated_text,
+                            source_language,
+                            target_language,
+                            context,
+                        )
+    
+                # Update progress
+                progress.update(len(to_translate_texts))
+    
+                # Save recovery file
+                if recovery_file:
+                    save_recovery_file(
+                        recovery_file,
+                        {"translated": translated_elements, "progress": batch_num + 1},
+                    )
+                    logger.debug(
+                        f"Saved recovery data with {len(translated_elements)} translated elements"
+                    )
+    
+                # Delay between batches to avoid rate limiting
+                if batch_index < len(batches) - 1 and delay > 0:
+                    time.sleep(delay)
+    
+            except Exception as e:
+                logger.error(f"Error translating batch {batch_num + 1}: {e}")
+    
+                # Save recovery file before raising the exception
+                if recovery_file:
+                    save_recovery_file(
+                        recovery_file,
+                        {"translated": translated_elements, "progress": batch_num},
+                    )
+                    logger.info(
+                        f"Saved recovery data with {len(translated_elements)} translated elements"
+                    )
+    
+                # Raise appropriate exception
+                if "Network error" in str(e):
+                    raise NetworkError(f"Network error during translation: {str(e)}")
+                elif "Rate limit" in str(e):
+                    raise RateLimitError(f"Translation rate limit exceeded: {str(e)}")
+                else:
+>                   raise TranslationError(f"Error during translation: {str(e)}")
+E                   ai_deck_translator.utils.exceptions.TranslationError: Error during translation: 'list' object has no attribute 'items'
+
+ai_deck_translator/core/translator.py:538: TranslationError
+----------------------------- Captured stdout call -----------------------------
+2025-04-17 01:37:30 - ai_deck_translator.ai_deck_translator.core.translator - INFO - Starting translation of 2 elements to en
+2025-04-17 01:37:30 - ai_deck_translator.ai_deck_translator.core.translator - INFO - Checking translation memory for existing translations
+2025-04-17 01:37:30 - ai_deck_translator.ai_deck_translator.core.translator - ERROR - Error translating batch 1: 'list' object has no attribute 'items'
+------------------------------ Captured log call -------------------------------
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:354 Starting translation of 2 elements to en
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:400 Checking translation memory for existing translations
+ERROR    ai_deck_translator.ai_deck_translator.core.translator:translator.py:520 Error translating batch 1: 'list' object has no attribute 'items'
+_____________________ TestWebInterface.test_capture_stdout _____________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_capture_stdout>
+
+    def test_capture_stdout(self):
+        """Test that CaptureStdout captures stdout correctly."""
+        # Create a CaptureStdout instance
+        console_output = []
+        capture = CaptureStdout(console_output)
+    
+        # Capture stdout
+        old_stdout = sys.stdout
+        sys.stdout = capture
+    
+        # Print something
+        print("Test output")
+        print("Another line")
+    
+        # Restore stdout
+        sys.stdout = old_stdout
+    
+        # Verify the output was captured
+>       self.assertEqual(console_output, ["Test output", "Another line"])
+E       AssertionError: Lists differ: ['Test output', '', 'Another line', ''] != ['Test output', 'Another line']
+E       
+E       First differing element 1:
+E       ''
+E       'Another line'
+E       
+E       First list contains 2 additional elements.
+E       First extra element 2:
+E       'Another line'
+E       
+E       - ['Test output', '', 'Another line', '']
+E       ?                 ----              ----
+E       
+E       + ['Test output', 'Another line']
+
+tests/test_web.py:193: AssertionError
+________________ TestWebInterface.test_translate_with_progress _________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_translate_with_progress>
+mock_translate_slides = <MagicMock name='translate_slides' id='4473965600'>
+
+    @patch("ai_deck_translator.core.translator.translate_slides")
+    def test_translate_with_progress(self, mock_translate_slides):
+        """Test that translate_with_progress updates the translation state correctly."""
+        # Set up the mock
+        mock_translate_slides.return_value = (
+            "https://docs.google.com/presentation/d/test"
+        )
+    
+        # Get the translation state
+        from ai_deck_translator.web.app import translation_state
+    
+        # Call the function in a thread so it doesn't block
+        thread = threading.Thread(
+            target=translate_with_progress,
+            kwargs={
+                "presentation_id": "test_presentation_123",
+                "source_language": "en",
+                "target_language": "fr",
+                "api_key": "test_api_key",
+            },
+        )
+        thread.daemon = True
+        thread.start()
+    
+        # Wait a bit for the thread to start
+        time.sleep(0.1)
+    
+        # Verify the translation state was updated
+        self.assertEqual(translation_state["running"], True)
+    
+        # Wait for the thread to finish
+        thread.join(timeout=1.0)
+    
+        # Verify the translation state was updated again
+>       self.assertEqual(translation_state["running"], False)
+E       AssertionError: True != False
+
+tests/test_web.py:229: AssertionError
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+tests/test_web.py::TestWebInterface::test_capture_stdout
+tests/test_web.py::TestWebInterface::test_get_progress
+tests/test_web.py::TestWebInterface::test_index_route
+tests/test_web.py::TestWebInterface::test_list_recovery_files
+tests/test_web.py::TestWebInterface::test_start_translation_already_running
+tests/test_web.py::TestWebInterface::test_start_translation_invalid
+tests/test_web.py::TestWebInterface::test_start_translation_valid
+tests/test_web.py::TestWebInterface::test_translate_with_progress
+  /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator/venv/lib/python3.13/site-packages/flask_session/filesystem/filesystem.py:75: DeprecationWarning: FileSystemSessionInterface is deprecated and will be removed in a future release. Instead use the CacheLib backend directly.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_translator.py::TestTranslator::test_translate_text - ai_dec...
+FAILED tests/test_web.py::TestWebInterface::test_capture_stdout - AssertionEr...
+FAILED tests/test_web.py::TestWebInterface::test_translate_with_progress - As...
+============ 3 failed, 84 passed, 1 skipped, 10 warnings in 13.02s =============

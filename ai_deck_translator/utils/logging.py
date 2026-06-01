@@ -1,0 +1,107 @@
+"""
+Logging configuration for AI Deck Translator.
+
+This module provides a centralized logging configuration for the application,
+enabling consistent logging across all modules with configurable log levels.
+"""
+
+import logging
+import logging.handlers
+import os
+import sys
+from pathlib import Path
+
+
+def setup_logging(log_level=logging.INFO, log_file=None, console=True):
+    """
+    Configure the logging system for the application.
+
+    Args:
+        log_level (int): The logging level (default: logging.INFO)
+        log_file (str, optional): Path to log file. If None, logs will only go to console.
+        console (bool): Whether to output logs to console (default: True)
+
+    Returns:
+        logging.Logger: Configured logger object
+    """
+    # Create logger
+    logger = logging.getLogger("ai_deck_translator")
+    logger.setLevel(log_level)
+    logger.handlers = []  # Clear existing handlers to avoid duplicates
+
+    # Create formatter
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    # Add console handler if requested
+    if console:
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+
+    # Add file handler if log file specified
+    if log_file:
+        # Ensure log directory exists
+        log_dir = os.path.dirname(log_file)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+
+        file_handler = logging.handlers.RotatingFileHandler(
+            log_file, maxBytes=10485760, backupCount=5
+        )
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+    return logger
+
+
+def get_logger(name=None):
+    """
+    Get a logger for the specified module.
+
+    Args:
+        name (str, optional): Name of the module. If None, returns the root logger.
+
+    Returns:
+        logging.Logger: Logger for the specified module
+    """
+    if name:
+        return logging.getLogger(f"ai_deck_translator.{name}")
+    return logger
+
+
+def set_log_level(level):
+    """
+    Set the log level for the root logger and all its handlers.
+
+    Args:
+        level: The log level to set (can be a string like 'DEBUG', 'INFO', etc. or a logging constant)
+
+    Returns:
+        None
+    """
+    # Convert string level to logging constant if needed
+    if isinstance(level, str):
+        level = getattr(logging, level.upper())
+
+    # Set level on the root logger
+    root_logger = logging.getLogger("ai_deck_translator")
+    root_logger.setLevel(level)
+
+    # Also set level on all handlers
+    for handler in root_logger.handlers:
+        handler.setLevel(level)
+
+
+# Default logger
+default_log_dir = os.path.join(str(Path.home()), ".ai_deck_translator", "logs")
+os.makedirs(default_log_dir, exist_ok=True)
+default_log_file = os.path.join(default_log_dir, "ai_deck_translator.log")
+
+logger = setup_logging(
+    log_level=os.environ.get("AI_DECK_LOG_LEVEL", logging.INFO),
+    log_file=os.environ.get("AI_DECK_LOG_FILE", default_log_file),
+    console=os.environ.get("AI_DECK_LOG_CONSOLE", "1") == "1",
+)

@@ -1,0 +1,243 @@
+﻿2025-04-16T15:16:42.6182327Z ##[group]Run # stop the build if there are Python syntax errors or undefined names
+2025-04-16T15:16:42.6183135Z [36;1m# stop the build if there are Python syntax errors or undefined names[0m
+2025-04-16T15:16:42.6183657Z [36;1mflake8 ai_deck_translator/ --count --select=E9,F63,F7,F82 --show-source --statistics[0m
+2025-04-16T15:16:42.6184090Z [36;1m# exit-zero treats all errors as warnings[0m
+2025-04-16T15:16:42.6184556Z [36;1mflake8 ai_deck_translator/ --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics[0m
+2025-04-16T15:16:42.6231064Z shell: /usr/bin/bash -e {0}
+2025-04-16T15:16:42.6231292Z env:
+2025-04-16T15:16:42.6231527Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6231929Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib/pkgconfig
+2025-04-16T15:16:42.6232339Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6232676Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6233279Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.17/x64
+2025-04-16T15:16:42.6233628Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.17/x64/lib
+2025-04-16T15:16:42.6233905Z ##[endgroup]
+2025-04-16T15:16:43.8788251Z 0
+2025-04-16T15:16:44.5273570Z ai_deck_translator/auth/google_auth.py:17:1: F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5274594Z ai_deck_translator/auth/google_auth.py:33:1: C901 'authenticate_google' is too complex (15)
+2025-04-16T15:16:44.5275969Z ai_deck_translator/auth/google_auth.py:140:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5276758Z ai_deck_translator/cli/main.py:142:1: C901 'main' is too complex (17)
+2025-04-16T15:16:44.5277493Z ai_deck_translator/cli/main.py:190:101: E501 line too long (108 > 100 characters)
+2025-04-16T15:16:44.5278259Z ai_deck_translator/cli/main.py:204:101: E501 line too long (104 > 100 characters)
+2025-04-16T15:16:44.5278997Z ai_deck_translator/cli/main.py:250:21: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5279758Z ai_deck_translator/config.py:9:1: F401 'logging' imported but unused
+2025-04-16T15:16:44.5280465Z ai_deck_translator/config.py:11:1: F401 'typing.List' imported but unused
+2025-04-16T15:16:44.5281191Z ai_deck_translator/config.py:220:1: C901 'get_config' is too complex (11)
+2025-04-16T15:16:44.5282081Z ai_deck_translator/core/base_translation_service.py:22:1: F401 '.shared_utils.find_terms_in_text' imported but unused
+2025-04-16T15:16:44.5282717Z ai_deck_translator/core/base_translation_service.py:248:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5284014Z ai_deck_translator/core/extractor.py:19:1: C901 'extract_text' is too complex (24)
+2025-04-16T15:16:44.5284874Z ai_deck_translator/core/extractor.py:51:101: E501 line too long (116 > 100 characters)
+2025-04-16T15:16:44.5285772Z ai_deck_translator/core/shared_utils.py:110:1: C901 'perform_quality_check' is too complex (14)
+2025-04-16T15:16:44.5286669Z ai_deck_translator/core/shared_utils.py:190:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5287224Z ai_deck_translator/core/shared_utils.py:230:101: E501 line too long (130 > 100 characters)
+2025-04-16T15:16:44.5287789Z ai_deck_translator/core/translation_interface.py:20:1: F401 'typing.Union' imported but unused
+2025-04-16T15:16:44.5288565Z ai_deck_translator/core/translator.py:21:1: F401 'datetime.datetime' imported but unused
+2025-04-16T15:16:44.5289542Z ai_deck_translator/core/translator.py:27:1: F401 '..utils.batch.split_dict_into_smart_batches' imported but unused
+2025-04-16T15:16:44.5290263Z ai_deck_translator/core/translator.py:27:1: F401 '..utils.batch.deduplicate_content' imported but unused
+2025-04-16T15:16:44.5291335Z ai_deck_translator/core/translator.py:28:1: F401 '..utils.recovery.setup_recovery_system' imported but unused
+2025-04-16T15:16:44.5292438Z ai_deck_translator/core/translator.py:29:1: F401 '..utils.progress.create_progress_bar' imported but unused
+2025-04-16T15:16:44.5293707Z ai_deck_translator/core/translator.py:36:1: F401 '..utils.glossary.find_terms_in_text' imported but unused
+2025-04-16T15:16:44.5294637Z ai_deck_translator/core/translator.py:131:1: C901 'translate_batch' is too complex (19)
+2025-04-16T15:16:44.5295527Z ai_deck_translator/core/translator.py:208:101: E501 line too long (125 > 100 characters)
+2025-04-16T15:16:44.5296138Z ai_deck_translator/core/translator.py:208:126: W291 trailing whitespace
+2025-04-16T15:16:44.5296581Z ai_deck_translator/core/translator.py:209:1: W293 blank line contains whitespace
+2025-04-16T15:16:44.5297019Z ai_deck_translator/core/translator.py:210:95: W291 trailing whitespace
+2025-04-16T15:16:44.5297460Z ai_deck_translator/core/translator.py:211:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5297907Z ai_deck_translator/core/translator.py:211:115: W291 trailing whitespace
+2025-04-16T15:16:44.5298351Z ai_deck_translator/core/translator.py:225:101: E501 line too long (106 > 100 characters)
+2025-04-16T15:16:44.5298828Z ai_deck_translator/core/translator.py:229:101: E501 line too long (201 > 100 characters)
+2025-04-16T15:16:44.5299303Z ai_deck_translator/core/translator.py:262:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5299779Z ai_deck_translator/core/translator.py:269:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5300255Z ai_deck_translator/core/translator.py:290:1: C901 'translate_text' is too complex (35)
+2025-04-16T15:16:44.5300737Z ai_deck_translator/core/translator.py:324:101: E501 line too long (105 > 100 characters)
+2025-04-16T15:16:44.5301791Z ai_deck_translator/core/translator.py:325:101: E501 line too long (111 > 100 characters)
+2025-04-16T15:16:44.5302407Z ai_deck_translator/core/translator.py:326:101: E501 line too long (112 > 100 characters)
+2025-04-16T15:16:44.5303264Z ai_deck_translator/core/translator.py:458:101: E501 line too long (118 > 100 characters)
+2025-04-16T15:16:44.5303756Z ai_deck_translator/core/translator.py:537:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5304241Z ai_deck_translator/core/translator.py:631:11: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5304726Z ai_deck_translator/core/updater.py:20:1: C901 'update_slides' is too complex (17)
+2025-04-16T15:16:44.5305154Z ai_deck_translator/core/updater.py:151:31: E203 whitespace before ':'
+2025-04-16T15:16:44.5305588Z ai_deck_translator/core/updater.py:153:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5306011Z ai_deck_translator/core/updater.py:169:41: E203 whitespace before ':'
+2025-04-16T15:16:44.5306473Z ai_deck_translator/pptx/enhanced/__init__.py:2:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5306973Z ai_deck_translator/pptx/enhanced/cache.py:9:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5307500Z ai_deck_translator/pptx/enhanced/cache.py:88:5: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5308074Z ai_deck_translator/pptx/enhanced/cache.py:126:5: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5308642Z ai_deck_translator/pptx/enhanced/cache.py:147:5: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5309207Z ai_deck_translator/pptx/enhanced/cache.py:177:5: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5309779Z ai_deck_translator/pptx/enhanced/models/anthropic.py:53:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5310332Z ai_deck_translator/pptx/enhanced/models/anthropic.py:53:104: W291 trailing whitespace
+2025-04-16T15:16:44.5310890Z ai_deck_translator/pptx/enhanced/models/anthropic.py:54:101: E501 line too long (133 > 100 characters)
+2025-04-16T15:16:44.5311472Z ai_deck_translator/pptx/enhanced/models/anthropic.py:80:101: E501 line too long (132 > 100 characters)
+2025-04-16T15:16:44.5312064Z ai_deck_translator/pptx/enhanced/models/anthropic.py:102:101: E501 line too long (122 > 100 characters)
+2025-04-16T15:16:44.5312701Z ai_deck_translator/pptx/enhanced/models/anthropic.py:172:21: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5313729Z ai_deck_translator/pptx/enhanced/models/anthropic.py:177:13: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5314344Z ai_deck_translator/pptx/enhanced/models/base.py:7:1: F401 'typing.Union' imported but unused
+2025-04-16T15:16:44.5314857Z ai_deck_translator/pptx/enhanced/models/gemini.py:53:86: W291 trailing whitespace
+2025-04-16T15:16:44.5315378Z ai_deck_translator/pptx/enhanced/models/gemini.py:65:101: E501 line too long (192 > 100 characters)
+2025-04-16T15:16:44.5315988Z ai_deck_translator/pptx/enhanced/models/gemini.py:138:21: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5316629Z ai_deck_translator/pptx/enhanced/models/gemini.py:143:13: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5317267Z ai_deck_translator/pptx/enhanced/models/openai.py:15:1: F401 '..utils.extract_json_blocks' imported but unused
+2025-04-16T15:16:44.5317864Z ai_deck_translator/pptx/enhanced/models/openai.py:62:101: E501 line too long (124 > 100 characters)
+2025-04-16T15:16:44.5318392Z ai_deck_translator/pptx/enhanced/models/openai.py:62:125: W291 trailing whitespace
+2025-04-16T15:16:44.5318906Z ai_deck_translator/pptx/enhanced/models/openai.py:73:101: E501 line too long (179 > 100 characters)
+2025-04-16T15:16:44.5319464Z ai_deck_translator/pptx/enhanced/models/openai.py:88:101: E501 line too long (106 > 100 characters)
+2025-04-16T15:16:44.5320061Z ai_deck_translator/pptx/enhanced/models/openai.py:158:21: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5320815Z ai_deck_translator/pptx/enhanced/models/openai.py:163:13: F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5321404Z ai_deck_translator/pptx/enhanced/translator.py:14:1: F401 'typing.Union' imported but unused
+2025-04-16T15:16:44.5321956Z ai_deck_translator/pptx/enhanced/translator.py:14:1: F401 'typing.Callable' imported but unused
+2025-04-16T15:16:44.5322520Z ai_deck_translator/pptx/enhanced/translator.py:33:1: F401 '.utils.repair_json' imported but unused
+2025-04-16T15:16:44.5323368Z ai_deck_translator/pptx/enhanced/translator.py:33:1: F401 '.utils.extract_json_blocks' imported but unused
+2025-04-16T15:16:44.5323959Z ai_deck_translator/pptx/enhanced/translator.py:33:1: F401 '.utils.estimate_cost' imported but unused
+2025-04-16T15:16:44.5324542Z ai_deck_translator/pptx/enhanced/translator.py:33:1: F401 '.utils.clean_text' imported but unused
+2025-04-16T15:16:44.5325115Z ai_deck_translator/pptx/enhanced/translator.py:155:1: C901 'perform_quality_check' is too complex (14)
+2025-04-16T15:16:44.5325688Z ai_deck_translator/pptx/enhanced/translator.py:235:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5326238Z ai_deck_translator/pptx/enhanced/translator.py:277:101: E501 line too long (130 > 100 characters)
+2025-04-16T15:16:44.5326774Z ai_deck_translator/pptx/enhanced/translator.py:330:101: E501 line too long (209 > 100 characters)
+2025-04-16T15:16:44.5327316Z ai_deck_translator/pptx/enhanced/translator.py:332:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5327857Z ai_deck_translator/pptx/enhanced/translator.py:335:101: E501 line too long (124 > 100 characters)
+2025-04-16T15:16:44.5328402Z ai_deck_translator/pptx/enhanced/translator.py:337:101: E501 line too long (137 > 100 characters)
+2025-04-16T15:16:44.5328949Z ai_deck_translator/pptx/enhanced/translator.py:346:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5329554Z ai_deck_translator/pptx/enhanced/translator.py:350:5: F841 local variable 'translator' is assigned to but never used
+2025-04-16T15:16:44.5330185Z ai_deck_translator/pptx/enhanced/translator.py:399:1: C901 'translate_batch' is too complex (32)
+2025-04-16T15:16:44.5330779Z ai_deck_translator/pptx/enhanced/translator.py:432:5: F811 redefinition of unused 'clean_text' from line 33
+2025-04-16T15:16:44.5331438Z ai_deck_translator/pptx/enhanced/translator.py:518:13: F841 local variable 'slide_info' is assigned to but never used
+2025-04-16T15:16:44.5332063Z ai_deck_translator/pptx/enhanced/translator.py:531:101: E501 line too long (109 > 100 characters)
+2025-04-16T15:16:44.5333134Z ai_deck_translator/pptx/enhanced/translator.py:560:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5333727Z ai_deck_translator/pptx/enhanced/translator.py:637:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5334270Z ai_deck_translator/pptx/enhanced/translator.py:756:101: E501 line too long (117 > 100 characters)
+2025-04-16T15:16:44.5334839Z ai_deck_translator/pptx/enhanced/translator.py:767:1: C901 'translate_pptx' is too complex (22)
+2025-04-16T15:16:44.5335394Z ai_deck_translator/pptx/enhanced/translator.py:950:101: E501 line too long (117 > 100 characters)
+2025-04-16T15:16:44.5335943Z ai_deck_translator/pptx/enhanced/translator.py:1000:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5336497Z ai_deck_translator/pptx/enhanced/translator.py:1023:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5337006Z ai_deck_translator/pptx/enhanced/utils.py:7:1: F401 'hashlib' imported but unused
+2025-04-16T15:16:44.5337476Z ai_deck_translator/pptx/enhanced/utils.py:8:1: F401 'os' imported but unused
+2025-04-16T15:16:44.5337939Z ai_deck_translator/pptx/enhanced/utils.py:9:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5338436Z ai_deck_translator/pptx/enhanced/utils.py:9:1: F401 'typing.Union' imported but unused
+2025-04-16T15:16:44.5338915Z ai_deck_translator/pptx/enhanced/utils.py:98:17: E722 do not use bare 'except'
+2025-04-16T15:16:44.5339504Z ai_deck_translator/pptx/enhanced/utils.py:106:5: E722 do not use bare 'except'
+2025-04-16T15:16:44.5339995Z ai_deck_translator/pptx/enhanced_translation_service.py:9:1: F401 'os' imported but unused
+2025-04-16T15:16:44.5340538Z ai_deck_translator/pptx/enhanced_translation_service.py:10:1: F401 'time' imported but unused
+2025-04-16T15:16:44.5341252Z ai_deck_translator/pptx/enhanced_translation_service.py:83:5: C901 'EnhancedPPTXTranslationService._translate_text_elements' is too complex (18)
+2025-04-16T15:16:44.5342001Z ai_deck_translator/pptx/enhanced_translation_service.py:114:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5342665Z ai_deck_translator/pptx/enhanced_translation_service.py:170:9: F841 local variable 'translator' is assigned to but never used
+2025-04-16T15:16:44.5343680Z ai_deck_translator/pptx/enhanced_translation_service.py:248:5: C901 'EnhancedPPTXTranslationService._translate_batch' is too complex (14)
+2025-04-16T15:16:44.5344406Z ai_deck_translator/pptx/enhanced_translation_service.py:409:101: E501 line too long (213 > 100 characters)
+2025-04-16T15:16:44.5344997Z ai_deck_translator/pptx/enhanced_translation_service.py:411:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5345592Z ai_deck_translator/pptx/enhanced_translation_service.py:414:101: E501 line too long (124 > 100 characters)
+2025-04-16T15:16:44.5346178Z ai_deck_translator/pptx/enhanced_translation_service.py:416:101: E501 line too long (140 > 100 characters)
+2025-04-16T15:16:44.5346772Z ai_deck_translator/pptx/enhanced_translation_service.py:419:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5347372Z ai_deck_translator/pptx/enhanced_translation_service.py:425:101: E501 line too long (110 > 100 characters)
+2025-04-16T15:16:44.5347882Z ai_deck_translator/pptx/extractor.py:17:1: F401 're' imported but unused
+2025-04-16T15:16:44.5348333Z ai_deck_translator/pptx/extractor.py:96:1: C901 'extract_text' is too complex (36)
+2025-04-16T15:16:44.5348810Z ai_deck_translator/pptx/extractor.py:234:101: E501 line too long (136 > 100 characters)
+2025-04-16T15:16:44.5349290Z ai_deck_translator/pptx/extractor.py:241:101: E501 line too long (108 > 100 characters)
+2025-04-16T15:16:44.5349761Z ai_deck_translator/pptx/extractor.py:261:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5350228Z ai_deck_translator/pptx/extractor.py:282:101: E501 line too long (105 > 100 characters)
+2025-04-16T15:16:44.5350683Z ai_deck_translator/pptx/pptx_adapter.py:9:1: F401 'time' imported but unused
+2025-04-16T15:16:44.5351311Z ai_deck_translator/pptx/pptx_adapter.py:11:1: F401 'typing.Dict' imported but unused
+2025-04-16T15:16:44.5351783Z ai_deck_translator/pptx/pptx_adapter.py:11:1: F401 'typing.List' imported but unused
+2025-04-16T15:16:44.5352256Z ai_deck_translator/pptx/pptx_adapter.py:11:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5352899Z ai_deck_translator/pptx/pptx_adapter.py:11:1: F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5353488Z ai_deck_translator/pptx/pptx_adapter.py:25:5: C901 'PPTXAdapter.extract_text' is too complex (13)
+2025-04-16T15:16:44.5354046Z ai_deck_translator/pptx/pptx_adapter.py:110:5: C901 'PPTXAdapter.update_document' is too complex (11)
+2025-04-16T15:16:44.5354600Z ai_deck_translator/pptx/translator.py:11:1: F401 'tqdm.tqdm' imported but unused
+2025-04-16T15:16:44.5355046Z ai_deck_translator/pptx/translator.py:12:1: F401 'sys' imported but unused
+2025-04-16T15:16:44.5355472Z ai_deck_translator/pptx/translator.py:101:17: E722 do not use bare 'except'
+2025-04-16T15:16:44.5355909Z ai_deck_translator/pptx/translator.py:109:5: E722 do not use bare 'except'
+2025-04-16T15:16:44.5356370Z ai_deck_translator/pptx/translator.py:135:101: E501 line too long (137 > 100 characters)
+2025-04-16T15:16:44.5356849Z ai_deck_translator/pptx/translator.py:136:101: E501 line too long (136 > 100 characters)
+2025-04-16T15:16:44.5357364Z ai_deck_translator/pptx/translator.py:167:1: C901 'validate_translation_ids' is too complex (33)
+2025-04-16T15:16:44.5358129Z ai_deck_translator/pptx/translator.py:197:9: F841 local variable 'orig_text_to_id' is assigned to but never used
+2025-04-16T15:16:44.5358714Z ai_deck_translator/pptx/translator.py:348:1: C901 'verify_translation_keys' is too complex (11)
+2025-04-16T15:16:44.5359308Z ai_deck_translator/pptx/translator.py:384:5: F841 local variable 'advanced_norm_orig' is assigned to but never used
+2025-04-16T15:16:44.5359880Z ai_deck_translator/pptx/translator.py:419:1: C901 'translate_batch' is too complex (22)
+2025-04-16T15:16:44.5360373Z ai_deck_translator/pptx/translator.py:484:101: E501 line too long (113 > 100 characters)
+2025-04-16T15:16:44.5360824Z ai_deck_translator/pptx/translator.py:489:100: W291 trailing whitespace
+2025-04-16T15:16:44.5361276Z ai_deck_translator/pptx/translator.py:490:101: E501 line too long (133 > 100 characters)
+2025-04-16T15:16:44.5361751Z ai_deck_translator/pptx/translator.py:500:101: E501 line too long (151 > 100 characters)
+2025-04-16T15:16:44.5362237Z ai_deck_translator/pptx/translator.py:507:101: E501 line too long (132 > 100 characters)
+2025-04-16T15:16:44.5362716Z ai_deck_translator/pptx/translator.py:511:101: E501 line too long (118 > 100 characters)
+2025-04-16T15:16:44.5363354Z ai_deck_translator/pptx/translator.py:564:101: E501 line too long (141 > 100 characters)
+2025-04-16T15:16:44.5363837Z ai_deck_translator/pptx/translator.py:583:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5364305Z ai_deck_translator/pptx/translator.py:592:101: E501 line too long (113 > 100 characters)
+2025-04-16T15:16:44.5364796Z ai_deck_translator/pptx/translator.py:625:1: C901 'translate_text' is too complex (11)
+2025-04-16T15:16:44.5365280Z ai_deck_translator/pptx/translator.py:759:101: E501 line too long (144 > 100 characters)
+2025-04-16T15:16:44.5365753Z ai_deck_translator/pptx/translator.py:865:101: E501 line too long (114 > 100 characters)
+2025-04-16T15:16:44.5366206Z ai_deck_translator/pptx/translator.py:868:9: E722 do not use bare 'except'
+2025-04-16T15:16:44.5366654Z ai_deck_translator/pptx/updater.py:34:1: C901 'update_slides' is too complex (30)
+2025-04-16T15:16:44.5367124Z ai_deck_translator/pptx/updater.py:194:1: C901 'update_xml_elements' is too complex (32)
+2025-04-16T15:16:44.5367562Z ai_deck_translator/run.py:3:1: E302 expected 2 blank lines, found 1
+2025-04-16T15:16:44.5367938Z ai_deck_translator/run.py:24:1: E302 expected 2 blank lines, found 1
+2025-04-16T15:16:44.5368409Z ai_deck_translator/run.py:29:1: E305 expected 2 blank lines after class or function definition, found 1
+2025-04-16T15:16:44.5368991Z ai_deck_translator/run.py:30:11: W291 trailing whitespace
+2025-04-16T15:16:44.5369330Z ai_deck_translator/run.py:30:12: W292 no newline at end of file
+2025-04-16T15:16:44.5369730Z ai_deck_translator/services/anthropic.py:13:1: F401 'json' imported but unused
+2025-04-16T15:16:44.5370215Z ai_deck_translator/services/anthropic.py:16:1: F401 'typing.Dict' imported but unused
+2025-04-16T15:16:44.5370709Z ai_deck_translator/services/anthropic.py:16:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5371214Z ai_deck_translator/services/anthropic.py:16:1: F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5371727Z ai_deck_translator/services/anthropic.py:25:1: C901 'translate_batch' is too complex (11)
+2025-04-16T15:16:44.5372229Z ai_deck_translator/services/anthropic.py:45:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5372896Z ai_deck_translator/services/anthropic.py:57:9: F841 local variable 'client' is assigned to but never used
+2025-04-16T15:16:44.5373470Z ai_deck_translator/services/google_translate.py:12:1: F401 'os' imported but unused
+2025-04-16T15:16:44.5373991Z ai_deck_translator/services/google_translate.py:14:1: F401 'typing.Dict' imported but unused
+2025-04-16T15:16:44.5374521Z ai_deck_translator/services/google_translate.py:14:1: F401 'typing.Any' imported but unused
+2025-04-16T15:16:44.5375084Z ai_deck_translator/services/google_translate.py:14:1: F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5375772Z ai_deck_translator/services/google_translate.py:17:1: F401 '..config' imported but unused
+2025-04-16T15:16:44.5376264Z ai_deck_translator/utils/batch.py:15:1: F401 'typing.Iterable' imported but unused
+2025-04-16T15:16:44.5376720Z ai_deck_translator/utils/batch.py:15:1: F401 'typing.Iterator' imported but unused
+2025-04-16T15:16:44.5377179Z ai_deck_translator/utils/batch.py:15:1: F401 'typing.Generic' imported but unused
+2025-04-16T15:16:44.5377599Z ai_deck_translator/utils/batch.py:52:31: E203 whitespace before ':'
+2025-04-16T15:16:44.5377986Z ai_deck_translator/utils/batch.py:97:26: E203 whitespace before ':'
+2025-04-16T15:16:44.5378348Z ai_deck_translator/utils/batch.py:98:30: E203 whitespace before ':'
+2025-04-16T15:16:44.5378771Z ai_deck_translator/utils/batch.py:150:101: E501 line too long (115 > 100 characters)
+2025-04-16T15:16:44.5379240Z ai_deck_translator/utils/glossary.py:21:1: F401 'typing.List' imported but unused
+2025-04-16T15:16:44.5379703Z ai_deck_translator/utils/glossary.py:21:1: F401 'typing.Tuple' imported but unused
+2025-04-16T15:16:44.5380168Z ai_deck_translator/utils/glossary.py:21:1: F401 'typing.Set' imported but unused
+2025-04-16T15:16:44.5380672Z ai_deck_translator/utils/glossary.py:167:5: C901 'Glossary.find_terms_in_text' is too complex (11)
+2025-04-16T15:16:44.5381159Z ai_deck_translator/utils/glossary.py:209:56: E203 whitespace before ':'
+2025-04-16T15:16:44.5381607Z ai_deck_translator/utils/glossary.py:263:26: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5382082Z ai_deck_translator/utils/logging.py:80:101: E501 line too long (102 > 100 characters)
+2025-04-16T15:16:44.5382565Z ai_deck_translator/utils/progress.py:81:101: E501 line too long (127 > 100 characters)
+2025-04-16T15:16:44.5383180Z ai_deck_translator/utils/progress.py:167:101: E501 line too long (115 > 100 characters)
+2025-04-16T15:16:44.5383669Z ai_deck_translator/utils/recovery.py:19:1: F401 'typing.Callable' imported but unused
+2025-04-16T15:16:44.5384142Z ai_deck_translator/utils/recovery.py:107:37: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5384613Z ai_deck_translator/utils/recovery.py:115:101: E501 line too long (106 > 100 characters)
+2025-04-16T15:16:44.5385086Z ai_deck_translator/utils/recovery.py:116:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5385548Z ai_deck_translator/utils/recovery.py:247:101: E501 line too long (108 > 100 characters)
+2025-04-16T15:16:44.5386021Z ai_deck_translator/utils/recovery.py:281:101: E501 line too long (103 > 100 characters)
+2025-04-16T15:16:44.5386487Z ai_deck_translator/utils/recovery.py:314:33: F541 f-string is missing placeholders
+2025-04-16T15:16:44.5387101Z ai_deck_translator/utils/recovery.py:318:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5387602Z ai_deck_translator/utils/translation_memory.py:20:1: F401 'typing.List' imported but unused
+2025-04-16T15:16:44.5388132Z ai_deck_translator/utils/translation_memory.py:20:1: F401 'typing.Tuple' imported but unused
+2025-04-16T15:16:44.5388630Z ai_deck_translator/web/app.py:16:1: F401 'flask.make_response' imported but unused
+2025-04-16T15:16:44.5389093Z ai_deck_translator/web/app.py:36:1: F401 '..utils.logging.setup_logging' imported but unused
+2025-04-16T15:16:44.5389585Z ai_deck_translator/web/app.py:69:1: C901 'translate_presentation' is too complex (37)
+2025-04-16T15:16:44.5390026Z ai_deck_translator/web/app.py:148:101: E501 line too long (108 > 100 characters)
+2025-04-16T15:16:44.5390446Z ai_deck_translator/web/app.py:178:101: E501 line too long (104 > 100 characters)
+2025-04-16T15:16:44.5390872Z ai_deck_translator/web/app.py:191:101: E501 line too long (109 > 100 characters)
+2025-04-16T15:16:44.5391267Z ai_deck_translator/web/app.py:238:17: E722 do not use bare 'except'
+2025-04-16T15:16:44.5391663Z ai_deck_translator/web/app.py:300:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5392080Z ai_deck_translator/web/app.py:327:101: E501 line too long (101 > 100 characters)
+2025-04-16T15:16:44.5392493Z ai_deck_translator/web/app.py:379:1: C901 'create_app' is too complex (56)
+2025-04-16T15:16:44.5393196Z ai_deck_translator/web/app.py:535:101: E501 line too long (186 > 100 characters)
+2025-04-16T15:16:44.5393607Z ai_deck_translator/web/app.py:646:101: E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5394069Z ai_deck_translator/web/app.py:666:9: F811 redefinition of unused 'make_response' from line 16
+2025-04-16T15:16:44.5394527Z ai_deck_translator/web/app.py:790:101: E501 line too long (113 > 100 characters)
+2025-04-16T15:16:44.5394946Z ai_deck_translator/web/app.py:802:101: E501 line too long (113 > 100 characters)
+2025-04-16T15:16:44.5395374Z ai_deck_translator/web/app.py:862:101: E501 line too long (130 > 100 characters)
+2025-04-16T15:16:44.5395786Z ai_deck_translator/web/app.py:881:101: E501 line too long (106 > 100 characters)
+2025-04-16T15:16:44.5396149Z 26    C901 'authenticate_google' is too complex (15)
+2025-04-16T15:16:44.5396412Z 6     E203 whitespace before ':'
+2025-04-16T15:16:44.5396643Z 2     E302 expected 2 blank lines, found 1
+2025-04-16T15:16:44.5396970Z 1     E305 expected 2 blank lines after class or function definition, found 1
+2025-04-16T15:16:44.5397309Z 86    E501 line too long (107 > 100 characters)
+2025-04-16T15:16:44.5397552Z 6     E722 do not use bare 'except'
+2025-04-16T15:16:44.5397789Z 54    F401 'typing.Optional' imported but unused
+2025-04-16T15:16:44.5398046Z 5     F541 f-string is missing placeholders
+2025-04-16T15:16:44.5398333Z 2     F811 redefinition of unused 'clean_text' from line 33
+2025-04-16T15:16:44.5398651Z 16    F841 local variable 'e' is assigned to but never used
+2025-04-16T15:16:44.5398920Z 8     W291 trailing whitespace
+2025-04-16T15:16:44.5399130Z 1     W292 no newline at end of file
+2025-04-16T15:16:44.5399361Z 1     W293 blank line contains whitespace
+2025-04-16T15:16:44.5399575Z 214

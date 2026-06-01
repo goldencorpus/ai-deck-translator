@@ -1,0 +1,189 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-8.3.5, pluggy-1.5.0
+rootdir: /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator
+configfile: setup.cfg
+testpaths: tests
+plugins: anyio-4.9.0, cov-6.1.1
+collected 88 items
+
+tests/test_batch.py ..                                                   [  2%]
+tests/test_config.py ........                                            [ 11%]
+tests/test_development_plan.py .........                                 [ 21%]
+tests/test_extractor.py ...                                              [ 25%]
+tests/test_google_auth.py .....                                          [ 30%]
+tests/test_init.py ....                                                  [ 35%]
+tests/test_main.py .                                                     [ 36%]
+tests/test_package.py ...                                                [ 39%]
+tests/test_progress.py ...........                                       [ 52%]
+tests/test_readme.py ......                                              [ 59%]
+tests/test_recovery.py ....                                              [ 63%]
+tests/test_requirements.py ....                                          [ 68%]
+tests/test_run.py .......                                                [ 76%]
+tests/test_setup.py .s..                                                 [ 80%]
+tests/test_translator.py ....F                                           [ 86%]
+tests/test_updater.py ....                                               [ 90%]
+tests/test_web.py .......F                                               [100%]
+
+=================================== FAILURES ===================================
+______________________ TestTranslator.test_translate_text ______________________
+
+self = <tests.test_translator.TestTranslator testMethod=test_translate_text>
+mock_lookup_translation = <MagicMock name='lookup_translation' id='4425258992'>
+mock_progress = <MagicMock name='create_progress_bar' id='4425259328'>
+mock_deduplicate = <MagicMock name='deduplicate_content' id='4425258656'>
+mock_recovery = <MagicMock name='setup_recovery_system' id='4425261344'>
+mock_split = <MagicMock name='split_dict_into_smart_batches' id='4425252944'>
+
+    @patch("ai_deck_translator.core.translator.split_dict_into_smart_batches")
+    @patch("ai_deck_translator.core.translator.setup_recovery_system")
+    @patch("ai_deck_translator.utils.batch.deduplicate_content")
+    @patch("ai_deck_translator.utils.progress.create_progress_bar")
+    @patch("ai_deck_translator.core.translator.lookup_translation", return_value=None)
+    def test_translate_text(
+        self,
+        mock_lookup_translation,
+        mock_progress,
+        mock_deduplicate,
+        mock_recovery,
+        mock_split,
+    ):
+        """Test that text is translated correctly with proper recovery and progress tracking."""
+        # Set up mocks
+        mock_recovery.return_value = (
+            {"translated_items": {}, "completed_batches": [], "failed_batches": []},
+            "recovery_file.json",
+            MagicMock(),  # save_recovery_state function
+        )
+    
+        mock_deduplicate.return_value = (
+            {"obj1": "Original text 1", "obj2": "Original text 2"},  # unique_dict
+            {},  # duplicates_map
+        )
+    
+        mock_split.return_value = [
+            {"obj1": "Original text 1"},
+            {"obj2": "Original text 2"},
+        ]
+    
+        mock_progress_instance = MagicMock()
+        mock_progress.return_value = mock_progress_instance
+    
+        # Test data
+        text_dict = {"obj1": "Original text 1", "obj2": "Original text 2"}
+        slide_metadata = [
+            {
+                "slide_number": 1,
+                "title": "Test Slide",
+                "content": ["Original text 1", "Original text 2"],
+            }
+        ]
+    
+        # Patch translation memory to be empty so recovery is triggered
+        with patch("ai_deck_translator.core.translator.TranslationMemory") as mock_tm:
+            mock_tm.return_value.lookup.side_effect = lambda k: None
+            result = translate_text(text_dict, slide_metadata, "en", lambda texts, lang: [f"Translated {v}" for v in texts], "fr")
+    
+        # Verify the mocks were called correctly
+>       mock_recovery.assert_called_once()
+
+tests/test_translator.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <MagicMock name='setup_recovery_system' id='4425261344'>
+
+    def assert_called_once(self):
+        """assert that the mock was called only once.
+        """
+        if not self.call_count == 1:
+            msg = ("Expected '%s' to have been called once. Called %s times.%s"
+                   % (self._mock_name or 'mock',
+                      self.call_count,
+                      self._calls_repr()))
+>           raise AssertionError(msg)
+E           AssertionError: Expected 'setup_recovery_system' to have been called once. Called 0 times.
+
+/opt/homebrew/Cellar/python@3.13/3.13.3/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/mock.py:958: AssertionError
+----------------------------- Captured stdout call -----------------------------
+2025-04-17 01:38:33 - ai_deck_translator.ai_deck_translator.core.translator - INFO - Starting translation of 2 elements to en
+2025-04-17 01:38:33 - ai_deck_translator.ai_deck_translator.core.translator - INFO - Checking translation memory for existing translations
+2025-04-17 01:38:33 - ai_deck_translator.ai_deck_translator.utils.glossary - INFO - Glossary initialized with 0 terms
+2025-04-17 01:38:33 - ai_deck_translator.ai_deck_translator.utils.translation_memory - INFO - Translation memory initialized with 5 entries
+2025-04-17 01:38:33 - ai_deck_translator.ai_deck_translator.core.translator - INFO - Translation completed: 2 elements translated to en
+------------------------------ Captured log call -------------------------------
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:354 Starting translation of 2 elements to en
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:400 Checking translation memory for existing translations
+INFO     ai_deck_translator.ai_deck_translator.utils.glossary:glossary.py:57 Glossary initialized with 0 terms
+INFO     ai_deck_translator.ai_deck_translator.utils.translation_memory:translation_memory.py:56 Translation memory initialized with 5 entries
+INFO     ai_deck_translator.ai_deck_translator.core.translator:translator.py:540 Translation completed: 2 elements translated to en
+________________ TestWebInterface.test_translate_with_progress _________________
+
+self = <tests.test_web.TestWebInterface testMethod=test_translate_with_progress>
+mock_translate_slides = <MagicMock name='translate_slides' id='4567390192'>
+
+    @patch("ai_deck_translator.core.translator.translate_slides")
+    def test_translate_with_progress(self, mock_translate_slides):
+        """Test that translate_with_progress updates the translation state correctly."""
+        # Set up the mock
+        mock_translate_slides.return_value = (
+            "https://docs.google.com/presentation/d/test"
+        )
+    
+        # Get the translation state
+        from ai_deck_translator.web.app import translation_state
+    
+        # Call the function in a thread so it doesn't block
+        thread = threading.Thread(
+            target=translate_with_progress,
+            kwargs={
+                "presentation_id": "test_presentation_123",
+                "source_language": "en",
+                "target_language": "fr",
+                "api_key": "test_api_key",
+            },
+        )
+        thread.daemon = True
+        thread.start()
+    
+        # Wait a bit for the thread to start
+        time.sleep(0.1)
+    
+        # Verify the translation state was updated
+        self.assertEqual(translation_state["running"], True)
+    
+        # Wait for the thread to finish
+        thread.join(timeout=2.0)
+    
+        # Verify the translation state was updated again
+        self.assertEqual(translation_state["running"], False)
+>       self.assertEqual(
+            translation_state["result_url"],
+            "https://docs.google.com/presentation/d/test",
+        )
+E       AssertionError: 'https://example.com/test_presentation_123/fr' != 'https://docs.google.com/presentation/d/test'
+E       - https://example.com/test_presentation_123/fr
+E       + https://docs.google.com/presentation/d/test
+
+tests/test_web.py:230: AssertionError
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+tests/test_web.py::TestWebInterface::test_capture_stdout
+tests/test_web.py::TestWebInterface::test_get_progress
+tests/test_web.py::TestWebInterface::test_index_route
+tests/test_web.py::TestWebInterface::test_list_recovery_files
+tests/test_web.py::TestWebInterface::test_start_translation_already_running
+tests/test_web.py::TestWebInterface::test_start_translation_invalid
+tests/test_web.py::TestWebInterface::test_start_translation_valid
+tests/test_web.py::TestWebInterface::test_translate_with_progress
+  /Users/emmanuel/Documents/Dev/AI Deck Translator/ai-deck-translator/venv/lib/python3.13/site-packages/flask_session/filesystem/filesystem.py:75: DeprecationWarning: FileSystemSessionInterface is deprecated and will be removed in a future release. Instead use the CacheLib backend directly.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_translator.py::TestTranslator::test_translate_text - Assert...
+FAILED tests/test_web.py::TestWebInterface::test_translate_with_progress - As...
+============ 2 failed, 85 passed, 1 skipped, 10 warnings in 13.14s =============

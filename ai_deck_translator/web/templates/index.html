@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Deck Translator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .tab-content {
+            padding-top: 1.5rem;
+        }
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="mb-4">
+            <h1 class="text-center">AI Deck Translator</h1>
+            <p class="lead text-center">Google Slides Translator</p>
+            <p class="lead text-center">Translate your presentations with AI</p>
+        </header>
+
+        <h2 class="text-center mb-4">Translation Settings</h2>
+
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="translationTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="slides-tab" data-bs-toggle="tab" data-bs-target="#slides" type="button" role="tab" aria-controls="slides" aria-selected="true">Google Slides</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pptx-tab" data-bs-toggle="tab" data-bs-target="#pptx" type="button" role="tab" aria-controls="pptx" aria-selected="false">PowerPoint</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="translationTabsContent">
+                            <!-- Google Slides Tab -->
+                            <div class="tab-pane fade show active" id="slides" role="tabpanel" aria-labelledby="slides-tab">
+                                <form action="/translate" method="post">
+                                    <div class="form-group mb-3">
+                                        <label for="slides_id">Google Slides ID:</label>
+                                        <input type="text" class="form-control" id="slides_id" name="slides_id" placeholder="Enter Google Slides ID">
+                                        <small class="form-text text-muted">The ID is the part of the URL after "/presentation/d/" and before "/edit".</small>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mb-3">
+                                        <h5>Google Slides Permissions</h5>
+                                        <p>When using Google Slides, please ensure:</p>
+                                        <ul>
+                                            <li>The presentation is shared with the email used for API access</li>
+                                            <li>You have at least <strong>view access</strong> to extract content</li>
+                                            <li>You have <strong>edit access</strong> to save the translated version</li>
+                                        </ul>
+                                        <p>Without proper permissions, you may encounter 403 Forbidden errors.</p>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label for="file">Or upload a PowerPoint file:</label>
+                                        <input type="file" class="form-control" id="file" name="file" accept=".pptx">
+                                    </div>
+
+                                    <div class="form-section">
+                                        <label for="target_language" class="form-label">Target Language</label>
+                                        <select class="form-select" id="target_language" name="target_language" required>
+                                            <option value="" selected disabled>Select target language</option>
+                                            <option value="ja">Japanese</option>
+                                            <option value="ko">Korean</option>
+                                            <option value="zh-CN">Chinese (Simplified)</option>
+                                            <option value="zh-TW">Chinese (Traditional)</option>
+                                            <option value="fr">French</option>
+                                            <option value="de">German</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="it">Italian</option>
+                                            <option value="pt">Portuguese</option>
+                                            <option value="ru">Russian</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <label for="service" class="form-label">Translation Service</label>
+                                        <select class="form-select" id="service" name="service">
+                                            <option value="google" selected>Google Translate</option>
+                                            <option value="anthropic">Anthropic Claude</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-section" id="api_key_section" style="display: none;">
+                                        <label for="api_key" class="form-label">API Key <span class="text-muted">(optional)</span></label>
+                                        <input type="password" class="form-control" id="api_key" name="api_key" placeholder="Leave blank to use the server's configured key">
+                                        <small class="text-muted">Leave blank to use the key set on the server (CLAUDE_API_KEY).</small>
+                                        <div class="form-text">Required for Anthropic Claude</div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="translate_notes" name="translate_notes" checked>
+                                            <label class="form-check-label" for="translate_notes">
+                                                Translate slide notes
+                                            </label>
+                                        </div>
+                                        <div class="form-text">When checked, speaker notes will also be translated</div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Translate</button>
+                                </form>
+                            </div>
+
+                            <!-- PowerPoint Tab -->
+                            <div class="tab-pane fade" id="pptx" role="tabpanel" aria-labelledby="pptx-tab">
+                                <form action="/translate" method="post" enctype="multipart/form-data">
+                                    <div class="form-section">
+                                        <label for="file" class="form-label">PowerPoint File</label>
+                                        <input type="file" class="form-control" id="file" name="file" accept=".pptx" required>
+                                        <div class="form-text">Only .pptx files are supported</div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <label for="source_language_pptx" class="form-label">Source Language</label>
+                                        <select class="form-select" id="source_language_pptx" name="source_language">
+                                            <option value="auto" selected>Auto-detect</option>
+                                            <option value="en">English</option>
+                                            <option value="ja">Japanese</option>
+                                            <option value="ko">Korean</option>
+                                            <option value="zh-CN">Chinese (Simplified)</option>
+                                            <option value="zh-TW">Chinese (Traditional)</option>
+                                            <option value="fr">French</option>
+                                            <option value="de">German</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="it">Italian</option>
+                                            <option value="pt">Portuguese</option>
+                                            <option value="ru">Russian</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <label for="target_language_pptx" class="form-label">Target Language</label>
+                                        <select class="form-select" id="target_language_pptx" name="target_language" required>
+                                            <option value="" selected disabled>Select target language</option>
+                                            <option value="ja">Japanese</option>
+                                            <option value="ko">Korean</option>
+                                            <option value="zh-CN">Chinese (Simplified)</option>
+                                            <option value="zh-TW">Chinese (Traditional)</option>
+                                            <option value="fr">French</option>
+                                            <option value="de">German</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="it">Italian</option>
+                                            <option value="pt">Portuguese</option>
+                                            <option value="ru">Russian</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <label for="slides_pptx" class="form-label">Slides <span class="text-muted">(optional)</span></label>
+                                        <input type="text" class="form-control" id="slides_pptx" name="slides" placeholder="e.g. 1-3,5,7 — blank = all slides">
+                                        <small class="text-muted">Translate only these slides; the rest stay in the original language.</small>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <label for="service_pptx" class="form-label">Translation Service</label>
+                                        <select class="form-select" id="service_pptx" name="service">
+                                            <option value="google" selected>Google Translate</option>
+                                            <option value="anthropic">Anthropic Claude</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-section" id="api_key_section_pptx" style="display: none;">
+                                        <label for="api_key_pptx" class="form-label">API Key <span class="text-muted">(optional)</span></label>
+                                        <input type="password" class="form-control" id="api_key_pptx" name="api_key" placeholder="Leave blank to use the server's configured key">
+                                        <small class="text-muted">Leave blank to use the key set on the server (CLAUDE_API_KEY).</small>
+                                        <div class="form-text">Required for Anthropic Claude</div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="translate_notes_pptx" name="translate_notes" checked>
+                                            <label class="form-check-label" for="translate_notes_pptx">
+                                                Translate slide notes
+                                            </label>
+                                        </div>
+                                        <div class="form-text">When checked, speaker notes will also be translated</div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="autofit_pptx" name="autofit" checked>
+                                            <label class="form-check-label" for="autofit_pptx">
+                                                Shrink text to fit
+                                            </label>
+                                        </div>
+                                        <div class="form-text">Auto-shrinks translated text so it doesn't overflow its box (recommended for longer languages like Japanese). Uncheck to keep original font sizes.</div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Translate</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Features</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <div class="feature-icon">📊</div>
+                                <h5>Google Slides & PowerPoint</h5>
+                                <p>Translate both Google Slides and PowerPoint presentations</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="feature-icon">🌐</div>
+                                <h5>Multiple Languages</h5>
+                                <p>Support for translating to various languages</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="feature-icon">🔍</div>
+                                <h5>Preserve Formatting</h5>
+                                <p>Maintains original formatting and layout</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show/hide API key field based on service selection
+        document.getElementById('service').addEventListener('change', function() {
+            document.getElementById('api_key_section').style.display = 
+                this.value === 'anthropic' ? 'block' : 'none';
+        });
+
+        document.getElementById('service_pptx').addEventListener('change', function() {
+            document.getElementById('api_key_section_pptx').style.display = 
+                this.value === 'anthropic' ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html> 

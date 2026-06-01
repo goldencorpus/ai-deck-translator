@@ -1,0 +1,51 @@
+name: Python Linting
+
+on:
+  push:
+    branches: [ main, v2 ]
+  pull_request:
+    branches: [ main, v2 ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort
+        # Install package dependencies first
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        # Install the package in development mode
+        pip install -e .
+        
+    - name: Create .env file
+      run: |
+        echo "CLAUDE_API_KEY=dummy_key_for_testing" > .env
+        
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 ai_deck_translator/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings
+        flake8 ai_deck_translator/ --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+        
+    - name: Check formatting with black
+      run: |
+        black --check --diff ai_deck_translator/
+        
+    - name: Check imports with isort
+      run: |
+        isort --check-only --profile black --diff ai_deck_translator/
+        
+    - name: Type check with mypy
+      run: |
+        mypy ai_deck_translator/ --config-file=mypy.ini 
