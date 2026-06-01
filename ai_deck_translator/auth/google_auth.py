@@ -54,8 +54,10 @@ def authenticate_google() -> Tuple[Any, Any]:
         >>> # Now you can use these services to interact with Google Slides and Drive
     """
     creds = None
-    token_file = config.GOOGLE_TOKEN_FILE
-    credentials_file = config.GOOGLE_CREDENTIALS_FILE
+    # Use the absolute ~/.gslides_translator/ paths (config.*_PATH) rather than the
+    # bare "credentials.json"/"token.json" names, which would resolve against the CWD.
+    token_file = getattr(config, "TOKEN_PATH", config.GOOGLE_TOKEN_FILE)
+    credentials_file = getattr(config, "CREDENTIALS_PATH", config.GOOGLE_CREDENTIALS_FILE)
     scopes = config.GOOGLE_SCOPES
 
     logger.info(f"Authenticating with Google using token file: {token_file}")
@@ -97,8 +99,13 @@ def authenticate_google() -> Tuple[Any, Any]:
         # Save the credentials for the next run
         try:
             logger.info(f"Saving credentials to {token_file}")
+            os.makedirs(os.path.dirname(token_file) or ".", exist_ok=True)
             with open(token_file, "w") as token:
                 token.write(creds.to_json())
+            try:
+                os.chmod(token_file, 0o600)  # OAuth token is a secret
+            except OSError:
+                pass
         except Exception as e:
             logger.error(f"Error saving credentials: {str(e)}")
             raise AuthenticationError(f"Error saving credentials: {str(e)}")
