@@ -16,6 +16,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from pptx import Presentation
 from pptx.oxml.ns import qn
+from pptx.enum.text import MSO_AUTO_SIZE
 import re
 import shutil
 from ..utils.logging import get_logger
@@ -113,6 +114,24 @@ def _apply_text_to_text_frame(text_frame, translated):
         if template_paragraph is not None and template_paragraph.runs:
             _clone_rpr(template_paragraph.runs[0], run)
 
+
+def _enable_shrink_to_fit(text_frame):
+    """
+    Make a text frame shrink its font to fit (PowerPoint "Shrink text on overflow").
+
+    Translated text — especially CJK — is often longer/wider than the source, so a frame
+    sized for the original overflows. Setting normAutofit lets PowerPoint/Google Slides
+    recompute a fitting font size on open; frames whose text already fits are unaffected.
+    """
+    try:
+        text_frame.word_wrap = True
+        # TEXT_TO_FIT_SHAPE == OOXML <a:normAutofit/> ("shrink text on overflow").
+        text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+    except Exception:
+        # Autofit is a best-effort cosmetic improvement — never abort a write for it.
+        pass
+
+
 # XML namespaces used in PPTX files
 namespaces = {
     "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
@@ -180,6 +199,7 @@ def update_slides(pptx_file, output_file, translated_texts):
 
                 # Update text in text frames
                 if hasattr(shape, "text") and shape.text.strip():
+                    shape_updated = False
                     # Whole-shape translation (single-paragraph shapes)
                     if (
                         shape_id in translated_texts
@@ -189,6 +209,7 @@ def update_slides(pptx_file, output_file, translated_texts):
                         _apply_text_to_text_frame(
                             shape.text_frame, translated_texts[shape_id]
                         )
+                        shape_updated = True
                         logger.debug(f"Updated text in shape {shape_id}")
                     elif hasattr(shape, "text_frame"):
                         # Per-paragraph translations (multi-paragraph shapes): set each
@@ -201,7 +222,13 @@ def update_slides(pptx_file, output_file, translated_texts):
                                 _set_paragraph_text(
                                     paragraph, translated_texts[para_id]
                                 )
+                                shape_updated = True
                                 logger.debug(f"Updated text in paragraph {para_id}")
+
+                    # Translated text is often longer than the source — let it shrink to
+                    # fit so it doesn't overflow the frame.
+                    if shape_updated:
+                        _enable_shrink_to_fit(shape.text_frame)
 
                 # Update text in tables
                 if shape.has_table:
@@ -214,6 +241,7 @@ def update_slides(pptx_file, output_file, translated_texts):
                                 _apply_text_to_text_frame(
                                     cell.text_frame, translated_texts[cell_id]
                                 )
+                                _enable_shrink_to_fit(cell.text_frame)
                                 logger.debug(f"Updated text in table cell {cell_id}")
 
             # Update slide notes
