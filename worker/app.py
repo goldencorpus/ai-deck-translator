@@ -44,7 +44,7 @@ WORKER_CONCURRENCY = int(os.environ.get("WORKER_CONCURRENCY", "2"))
 INPUT_BUCKET = "deck-input"
 OUTPUT_BUCKET = "deck-output"
 
-app = FastAPI(title="decktr-worker")
+app = FastAPI(title="slideverso-worker")
 _semaphore = asyncio.Semaphore(WORKER_CONCURRENCY)
 
 
