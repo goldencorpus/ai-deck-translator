@@ -454,8 +454,11 @@ def update_xml_elements(original_file, updated_file, translated_texts):
             # Save the updated slide
             tree.write(slide_path, encoding="utf-8", xml_declaration=True)
 
-        # Recreate the PPTX file
-        with zipfile.ZipFile(updated_file, "w") as zip_ref:
+        # Recreate the PPTX file. Use DEFLATE: the default (ZIP_STORED) leaves media
+        # uncompressed, which bloated outputs by ~8-10 MB vs the original.
+        with zipfile.ZipFile(
+            updated_file, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6
+        ) as zip_ref:
             for root_dir, _, files in os.walk(temp_dir):
                 for file in files:
                     file_path = os.path.join(root_dir, file)
