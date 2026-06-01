@@ -125,6 +125,34 @@ class TestPatch(unittest.TestCase):
             result = patch_translations(violations, src, tgt, CONTRACT, "en", "ja")
         self.assertEqual(result, tgt)  # unchanged, never blocks
 
+    def test_patch_chunks_many_blocks(self):
+        # 60 flagged blocks must all be fixed across multiple bounded critic calls — not
+        # dropped to truncation of a single oversized call.
+        src = {f"slide1_shape{i}": "Our Synergy plan" for i in range(60)}
+        tgt = {f"slide1_shape{i}": "我々の相乗効果計画です" for i in range(60)}
+        violations = sweep(src, tgt, CONTRACT, target_language="ja")
+
+        calls = []
+
+        def fake_complete(system, user, **kwargs):
+            ids = re.findall(r"slide1_shape\d+", user)
+            calls.append(len(ids))
+            return "\n".join(
+                json.dumps(
+                    {"id": i, "fix": "我々のシナジー計画です"}, ensure_ascii=False
+                )
+                for i in dict.fromkeys(ids)
+            )
+
+        with patch.object(verify_mod, "_complete", side_effect=fake_complete):
+            result = patch_translations(violations, src, tgt, CONTRACT, "en", "ja")
+
+        # 60 blocks / 25-per-chunk -> 3 chunks, none oversized.
+        self.assertEqual(len(calls), 3)
+        self.assertTrue(all(n <= verify_mod._PATCH_CHUNK for n in calls))
+        for i in range(60):
+            self.assertEqual(result[f"slide1_shape{i}"], "我々のシナジー計画です")
+
     def test_patch_noop_when_no_fixable_violations(self):
         src = {"a": "x"}
         tgt = {"a": "翻訳"}

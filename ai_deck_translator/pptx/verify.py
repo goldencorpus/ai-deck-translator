@@ -13,13 +13,19 @@ downstream is unaffected.
 """
 
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 
+from .. import config
 from ..utils.logging import get_logger
 from .contract import _complete, format_contract, is_empty_contract
 from .jsonl import parse_jsonl_translations
 
 logger = get_logger(__name__)
+
+# Max flagged blocks per patch critic call. Many flagged blocks in ONE call truncate the
+# output (JSONL recovers what arrived, but dropped fixes go unapplied) — so chunk the patch.
+_PATCH_CHUNK = 25
 
 # Quality violations the patch critic can fix. Completeness/orphan ids are handled by the
 # retry pass + completeness gate, not by the critic.
@@ -258,52 +264,63 @@ def patch(
     for v in fixable:
         reasons.setdefault(v.id, []).append(v.detail)
 
-    logger.info(
-        f"Sweep flagged {len(reasons)} block(s) across {len(fixable)} violation(s); "
-        f"requesting one surgical patch"
-    )
-
     contract_block = format_contract(contract)
-    lines = []
-    for block_id, issues in reasons.items():
-        lines.append(
-            "{id}\n  source: {src}\n  current: {cur}\n  issues: {iss}".format(
-                id=block_id,
-                src=str(text_dict[block_id]).replace("\n", " "),
-                cur=str(translated.get(block_id, "")).replace("\n", " "),
-                iss="; ".join(issues),
-            )
-        )
-    blocks_text = "\n\n".join(lines)
-
     system = (
         f"You are a translation consistency editor fixing {target_language} slide-deck "
         "translations that violated the deck's style contract. Re-translate ONLY the blocks "
         "given, fixing the listed issues while obeying the contract. Keep meaning and length "
         "similar.\n\n" + (contract_block or "")
     )
-    user = (
-        "Fix these blocks. Output JSON Lines, one per block, exactly "
-        '{"id": "<id>", "fix": "<corrected translation>"} — no other text.\n\n'
-        + blocks_text
+
+    # Chunk the flagged blocks so no single critic call truncates (each chunk's JSONL output
+    # stays well under max_tokens). Chunks are independent -> run them in parallel.
+    items = list(reasons.items())
+    chunks = [items[i : i + _PATCH_CHUNK] for i in range(0, len(items), _PATCH_CHUNK)]
+    logger.info(
+        f"Sweep flagged {len(reasons)} block(s) across {len(fixable)} violation(s); "
+        f"patching in {len(chunks)} chunk(s) of up to {_PATCH_CHUNK}"
     )
 
-    try:
-        text = _complete(
-            system,
-            user,
-            api_key=api_key,
-            cost_tracker=cost_tracker,
-            max_tokens=4000,
-            label="patch",
+    def run_chunk(chunk):
+        lines = [
+            "{id}\n  source: {src}\n  current: {cur}\n  issues: {iss}".format(
+                id=block_id,
+                src=str(text_dict[block_id]).replace("\n", " "),
+                cur=str(translated.get(block_id, "")).replace("\n", " "),
+                iss="; ".join(issues),
+            )
+            for block_id, issues in chunk
+        ]
+        user = (
+            "Fix these blocks. Output JSON Lines, one per block, exactly "
+            '{"id": "<id>", "fix": "<corrected translation>"} — no other text.\n\n'
+            + "\n\n".join(lines)
         )
-    except Exception as exc:  # never block on a patch failure
-        logger.warning(
-            f"Patch critic call failed; keeping unpatched translation: {exc}"
-        )
-        return translated
+        try:
+            text = _complete(
+                system,
+                user,
+                api_key=api_key,
+                cost_tracker=cost_tracker,
+                max_tokens=4000,
+                label="patch",
+            )
+        except Exception as exc:  # never block on a patch failure
+            logger.warning(f"Patch chunk failed; skipping those blocks: {exc}")
+            return {}
+        return _parse_fixes(text)
 
-    fixes = _parse_fixes(text)
+    fixes: dict = {}
+    if len(chunks) <= 1:
+        fixes = run_chunk(chunks[0]) if chunks else {}
+    else:
+        workers = max(1, min(config.MAX_CONCURRENT_BATCHES, len(chunks)))
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            for future in as_completed(
+                [executor.submit(run_chunk, chunk) for chunk in chunks]
+            ):
+                fixes.update(future.result())
+
     if not fixes:
         logger.warning(
             "Patch critic returned no usable fixes; keeping unpatched translation"
