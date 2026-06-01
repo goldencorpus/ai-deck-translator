@@ -19,6 +19,7 @@ from ..utils.logging import get_logger
 from ..utils.exceptions import IncompleteTranslationError, TranslationError
 from .extractor import extract_text
 from .updater import update_slides
+from .contract import build_contract, format_contract, enrich_blocks
 
 # Set up logging
 logger = get_logger(__name__)
@@ -722,6 +723,7 @@ def _retry_missing_blocks(
     target_language,
     api_key=None,
     cost_tracker=None,
+    contract_text="",
 ):
     """
     Re-translate genuinely-missing blocks in small batches and map results back.
@@ -747,6 +749,7 @@ def _retry_missing_blocks(
             target_language,
             api_key=api_key,
             cost_tracker=cost_tracker,
+            glossary=contract_text,
         )
         # Exact-key matches first
         for bid in batch:
@@ -834,6 +837,21 @@ def translate_text(
         "total_cost": 0,
     }
 
+    # --- COMPILE: build the deck-wide Coherence Contract once, inject into every batch ---
+    # One cheap whole-deck survey locks glossary / proper nouns / register / deixis / header
+    # backbone, so independent batches translate against the same decisions. Degrades to an
+    # empty string (current behaviour) when disabled, on a small deck, or on a parse failure.
+    blocks_meta = enrich_blocks(text_dict, slide_metadata)
+    contract = build_contract(
+        text_dict,
+        source_language,
+        target_language,
+        api_key=api_key,
+        cost_tracker=cost_tracker,
+        blocks_meta=blocks_meta,
+    )
+    contract_text = format_contract(contract)
+
     # Process each batch
     completed_batches = 0
     if progress_callback:
@@ -858,6 +876,7 @@ def translate_text(
             target_language,
             api_key=api_key,
             cost_tracker=cost_tracker,
+            glossary=contract_text,
         )
 
         # Update translated texts
@@ -916,6 +935,7 @@ def translate_text(
             target_language,
             api_key=api_key,
             cost_tracker=cost_tracker,
+            contract_text=contract_text,
         )
         translated_texts.update(recovered)
         logger.info(

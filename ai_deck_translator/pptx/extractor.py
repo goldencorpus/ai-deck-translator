@@ -30,6 +30,33 @@ namespaces = {
 }
 
 
+def _shape_role(shape):
+    """
+    Best-effort coarse role for a shape, used by the Coherence Contract / keigo sweep.
+
+    Reads the placeholder type when available (the authoritative signal); returns None when
+    the shape carries no role hint so callers fall back to their own heuristics.
+    """
+    try:
+        from pptx.enum.shapes import PP_PLACEHOLDER
+
+        if getattr(shape, "is_placeholder", False):
+            ph_type = shape.placeholder_format.type
+            if ph_type in (
+                PP_PLACEHOLDER.TITLE,
+                PP_PLACEHOLDER.CENTER_TITLE,
+                PP_PLACEHOLDER.VERTICAL_TITLE,
+            ):
+                return "title"
+            if ph_type == PP_PLACEHOLDER.SUBTITLE:
+                return "header"
+            if ph_type in (PP_PLACEHOLDER.BODY, PP_PLACEHOLDER.OBJECT):
+                return "body_bullet"
+    except Exception:
+        pass
+    return None
+
+
 def extract_from_smartart(pptx_file, rels_path, rel_id):
     """
     Extract text from SmartArt diagrams that python-pptx cannot access directly.
@@ -178,6 +205,7 @@ def extract_text(pptx_file):
                     shape_name = (
                         shape.name if hasattr(shape, "name") else "Unknown Shape"
                     )
+                    shape_role = _shape_role(shape)
 
                     # Multi-paragraph shapes (e.g. bullet lists) are extracted one
                     # paragraph per ID so each line is translated and written back
@@ -205,6 +233,7 @@ def extract_text(pptx_file):
                                     "shape_type": shape_name,
                                     "parent_shape": shape_id,
                                     "paragraph_index": para_idx,
+                                    "role": shape_role,
                                 }
                             )
                     else:
@@ -214,6 +243,7 @@ def extract_text(pptx_file):
                                 "id": shape_id,
                                 "type": "shape",
                                 "shape_type": shape_name,
+                                "role": shape_role,
                             }
                         )
 

@@ -72,9 +72,11 @@ class TestPptxCompleteness(unittest.TestCase):
         self.assertTrue(any(bid.endswith("_notes") for bid in source), "no notes block")
         self.assertGreaterEqual(len(source), 6)
 
+        # The contract compile-pass is a separate concern here; stub it so this test stays
+        # API-free and deterministic (its own coverage lives in test_coherence_contract.py).
         with patch.object(
             pptx_translator, "translate_batch", side_effect=fake_translate_batch
-        ):
+        ), patch.object(pptx_translator, "build_contract", return_value={}):
             result = translate_pptx(self.input_path, self.output_path, "en", "ja")
 
         self.assertTrue(result)

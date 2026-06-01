@@ -90,6 +90,17 @@ DEFAULT_CONFIG = {
         "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         "date_format": "%Y-%m-%d %H:%M:%S",
     },
+    # Coherence Contract (compile-then-execute) — see docs/plans/coherence-contract-*.md.
+    # All knobs default to the new coherent path; flip CONTRACT_ENABLED / PROMPT_CACHE /
+    # SWEEP_ENABLED to false for the exact pre-contract proven path (kill switch).
+    "coherence": {
+        "contract_enabled": True,  # P0: build + inject the deck-wide Coherence Contract
+        "contract_min_blocks": 8,  # decks smaller than this skip the contract (overhead)
+        "prompt_cache": True,  # P1: cache the stable prefix + seed-then-fan-out batches
+        "single_call_first": False,  # P1: attempt one full-deck JSONL call when it fits (opt-in)
+        "single_call_max_fraction": 0.7,  # only single-call when est. output < this * max_tokens
+        "sweep_enabled": True,  # P2: deterministic sweep + one surgical patch call
+    },
     "recovery": {"enabled": True, "directory": "translation_recovery"},
     "web": {
         "secret_key": os.urandom(24).hex(),
@@ -98,6 +109,25 @@ DEFAULT_CONFIG = {
         "debug": False,
     },
 }
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    """Parse a boolean environment variable; falls back to default when unset."""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
+def _env_float(name: str, default: float) -> float:
+    """Parse a float environment variable; falls back to default when unset/invalid."""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
 
 
 def validate_config(config: Dict[str, Any]) -> bool:
@@ -322,6 +352,29 @@ LOGGING_DATE_FORMAT = LOGGING_CONFIG["date_format"]
 
 RECOVERY_ENABLED = RECOVERY_CONFIG["enabled"]
 RECOVERY_DIRECTORY = RECOVERY_CONFIG["directory"]
+
+# Coherence Contract knobs. Read from the (possibly file-loaded) config with safe
+# defaults, then allow per-run environment overrides. Defaults keep the new coherent
+# path ON; export CONTRACT_ENABLED=false / PROMPT_CACHE=false / SWEEP_ENABLED=false to
+# fall back to the exact pre-contract proven path.
+COHERENCE_CONFIG = config.get("coherence", DEFAULT_CONFIG["coherence"])
+CONTRACT_ENABLED = _env_bool(
+    "CONTRACT_ENABLED", COHERENCE_CONFIG.get("contract_enabled", True)
+)
+CONTRACT_MIN_BLOCKS = int(COHERENCE_CONFIG.get("contract_min_blocks", 8))
+if os.environ.get("CONTRACT_MIN_BLOCKS"):
+    try:
+        CONTRACT_MIN_BLOCKS = int(os.environ["CONTRACT_MIN_BLOCKS"])
+    except ValueError:
+        pass
+PROMPT_CACHE = _env_bool("PROMPT_CACHE", COHERENCE_CONFIG.get("prompt_cache", True))
+SINGLE_CALL_FIRST = _env_bool(
+    "SINGLE_CALL_FIRST", COHERENCE_CONFIG.get("single_call_first", False)
+)
+SINGLE_CALL_MAX_FRACTION = _env_float(
+    "SINGLE_CALL_MAX_FRACTION", COHERENCE_CONFIG.get("single_call_max_fraction", 0.7)
+)
+SWEEP_ENABLED = _env_bool("SWEEP_ENABLED", COHERENCE_CONFIG.get("sweep_enabled", True))
 
 SECRET_KEY = WEB_CONFIG["secret_key"]
 WEB_HOST = WEB_CONFIG["host"]
