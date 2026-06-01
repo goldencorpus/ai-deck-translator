@@ -100,6 +100,7 @@ DEFAULT_CONFIG = {
         "single_call_first": False,  # P1: attempt one full-deck JSONL call when it fits (opt-in)
         "single_call_max_fraction": 0.7,  # only single-call when est. output < this * max_tokens
         "sweep_enabled": True,  # P2: deterministic sweep + one surgical patch call
+        "max_concurrent_batches": 8,  # post-seed fan-out cap (bounded by account rate limits)
     },
     "recovery": {"enabled": True, "directory": "translation_recovery"},
     "web": {
@@ -375,6 +376,12 @@ SINGLE_CALL_MAX_FRACTION = _env_float(
     "SINGLE_CALL_MAX_FRACTION", COHERENCE_CONFIG.get("single_call_max_fraction", 0.7)
 )
 SWEEP_ENABLED = _env_bool("SWEEP_ENABLED", COHERENCE_CONFIG.get("sweep_enabled", True))
+MAX_CONCURRENT_BATCHES = int(COHERENCE_CONFIG.get("max_concurrent_batches", 8))
+if os.environ.get("MAX_CONCURRENT_BATCHES"):
+    try:
+        MAX_CONCURRENT_BATCHES = int(os.environ["MAX_CONCURRENT_BATCHES"])
+    except ValueError:
+        pass
 
 SECRET_KEY = WEB_CONFIG["secret_key"]
 WEB_HOST = WEB_CONFIG["host"]

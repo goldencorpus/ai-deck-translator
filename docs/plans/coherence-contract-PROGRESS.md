@@ -24,9 +24,10 @@ EXTRACT → COMPILE (P0 contract) → EXECUTE (P1 cached JSONL batches) → VERI
 would each need full engine context and risk divergence. Building directly + deterministic tests/phase.
 
 ## Status
-- [ ] P0  contract.py (build/format/enrich) + config flags + wire into translate_text + tests
-- [ ] P0a block enrichment (role/slide/reading_order) — extractor role hint + enrich_blocks fallback
-- [ ] P1  jsonl.py parser + JSONL output in translate_batch + prompt caching + seed-then-fanout + adaptive sizing
+- [x] P0  contract.py — DONE, committed c19176c (84 passed)
+- [x] P0a block enrichment — DONE (in c19176c)
+- [x] P1  jsonl.py + JSONL output + caching + seed-then-fanout + adaptive sizing — DONE (94 passed)
+      Note: cost_tracker token counts may slightly undercount under parallel fan-out (advisory metrics only, not correctness). MAX_CONCURRENT_BATCHES=8 default; tier-discovery is a future refinement.
 - [ ] P2  verify.py sweep + patch + wire after assembly (before completeness gate stays)
 - [ ] Real paid E2E (NTT/Forum) — LAST, needs confirmation
 - Each phase: deterministic no-API tests, per-phase commit. NO PUSH without confirmation.

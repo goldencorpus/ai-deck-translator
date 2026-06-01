@@ -7,6 +7,8 @@ import json
 import anthropic
 import re
 import time
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from tqdm import tqdm
 import sys
@@ -19,7 +21,8 @@ from ..utils.logging import get_logger
 from ..utils.exceptions import IncompleteTranslationError, TranslationError
 from .extractor import extract_text
 from .updater import update_slides
-from .contract import build_contract, format_contract, enrich_blocks
+from .contract import build_contract, format_contract, enrich_blocks, estimate_output_tokens
+from .jsonl import parse_jsonl_translations, format_jsonl_instructions
 
 # Set up logging
 logger = get_logger(__name__)
@@ -502,6 +505,7 @@ def translate_batch(
         source_desc = source_language
 
     # Create the system prompt
+    jsonl_instructions = format_jsonl_instructions()
     system_prompt = f"""You are a professional translator specializing in PowerPoint presentations.
 Your task is to translate the content from {source_desc} to {target_language} while preserving the meaning, tone, and formatting.
 
@@ -512,25 +516,26 @@ IMPORTANT GUIDELINES:
 4. For tables, preserve the tabular structure in your translation.
 5. Respect the context of each text element (slide title, body text, etc.).
 6. Do not add or remove content; translate only what is provided.
-7. Return your response as a JSON object with the same structure as the input.
-8. CRITICAL: You must preserve the exact key format for each item. Do not modify key formats such as "slide1_shape0" or "slide_1_element_0" in any way.
+7. CRITICAL: You must preserve the exact id for each item. Do not modify id formats such as "slide1_shape0" or "slide_1_element_0" in any way.
 
 PRIVACY NOTICE:
 - Do not store or remember any content from this presentation.
 - Do not reference the content in future conversations.
 - Treat all content as confidential business information.
 
-The content to translate is provided as a JSON object where each key is a unique identifier and each value is the text to translate.
+{jsonl_instructions}
 """
 
-    # Inject the deck-wide glossary so terminology stays consistent across batches.
+    # Inject the deck-wide Coherence Contract (rendered into `glossary`) so terminology,
+    # register, proper nouns, and the header backbone stay consistent across every batch.
+    # This is part of the stable cached prefix — it must NOT contain per-batch content.
     if glossary:
         system_prompt += (
-            "\n\nTERMINOLOGY GLOSSARY — use these EXACT target translations wherever the "
-            "term appears, for consistency across the whole presentation:\n" + glossary + "\n"
+            "\n\n" + glossary + "\n\nApply the contract above to EVERY translation below."
         )
 
-    # Create the user prompt
+    # Create the user prompt. Only the per-batch content lives here (after the cache
+    # breakpoint); the system prompt above is the byte-identical cached prefix.
     user_prompt = f"""Please translate the following presentation content from {source_desc} to {target_language}.
 
 Here is the content to translate (with context information):
@@ -543,18 +548,28 @@ Context information (to help you understand the content better):
 {json.dumps(context_info, ensure_ascii=False, indent=2)}
 ```
 
-IMPORTANT INSTRUCTION:
-- Your response must be a JSON object with EXACTLY the same keys as the input.
-- Do not modify key formats (like "slide1_shape0" or "slide_1_element_0") in any way.
-- Only translate the text values, leaving keys unchanged.
-
-Please return ONLY a JSON object with the same keys and the translated content as values.
-Do not include any explanations or notes outside the JSON object.
-"""
+Translate every value above. Output JSON Lines exactly as instructed: one
+{{"id": "...", "t": "..."}} record per input id, then a final {{"id": "__END__"}} line.
+Do not modify id formats. Output ONLY the JSON lines."""
 
     # Initialize variables for retry logic
     retry_count = 0
     translated_batch = None
+
+    # Prompt caching: the system prompt (+ rendered Coherence Contract) is the stable,
+    # byte-identical prefix shared by every batch. Marking it cache_control=ephemeral makes
+    # the first batch a cache-write (+25%) and all later batches cache-reads (~90% cheaper),
+    # so injecting full global context into every batch is nearly free. Toggle via PROMPT_CACHE.
+    if config.PROMPT_CACHE:
+        system_param = [
+            {
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ]
+    else:
+        system_param = system_prompt
 
     # Try to translate with retries
     while retry_count <= max_retries:
@@ -564,15 +579,18 @@ Do not include any explanations or notes outside the JSON object.
                 model="claude-sonnet-4-6",
                 max_tokens=config.ANTHROPIC_MAX_TOKENS,
                 temperature=config.ANTHROPIC_TEMPERATURE,
-                system=system_prompt,
+                system=system_param,
                 messages=[{"role": "user", "content": user_prompt}],
                 metadata={"user_id": "anonymous_user"},
             )
 
-            # Track costs if requested
+            # Track costs (incl. cache hits) if requested
             if cost_tracker is not None:
-                prompt_tokens = response.usage.input_tokens
-                completion_tokens = response.usage.output_tokens
+                usage = response.usage
+                prompt_tokens = getattr(usage, "input_tokens", 0) or 0
+                completion_tokens = getattr(usage, "output_tokens", 0) or 0
+                cache_read = getattr(usage, "cache_read_input_tokens", 0) or 0
+                cache_write = getattr(usage, "cache_creation_input_tokens", 0) or 0
                 cost = estimate_cost(prompt_tokens, completion_tokens)
 
                 cost_tracker["total_prompt_tokens"] = (
@@ -581,62 +599,95 @@ Do not include any explanations or notes outside the JSON object.
                 cost_tracker["total_completion_tokens"] = (
                     cost_tracker.get("total_completion_tokens", 0) + completion_tokens
                 )
+                cost_tracker["cache_read_tokens"] = (
+                    cost_tracker.get("cache_read_tokens", 0) + cache_read
+                )
+                cost_tracker["cache_write_tokens"] = (
+                    cost_tracker.get("cache_write_tokens", 0) + cache_write
+                )
                 cost_tracker["total_cost"] = cost_tracker.get("total_cost", 0) + cost
 
                 logger.info(
-                    f"Batch {batch_index}: {prompt_tokens} prompt tokens, {completion_tokens} completion tokens, estimated cost: ${cost:.4f}"
+                    f"Batch {batch_index}: {prompt_tokens} input "
+                    f"({cache_read} cache-read, {cache_write} cache-write), "
+                    f"{completion_tokens} output tokens, est. ${cost:.4f}"
                 )
 
-            # Extract the JSON from the response
-            json_content = extract_json_blocks(response.content[0].text)
+            raw_text = response.content[0].text
 
-            if json_content:
-                try:
-                    translated_batch = json.loads(json_content)
+            # Primary path: JSON Lines. A truncated stream (stop_reason == max_tokens) still
+            # yields every complete record up to the cut; the missing ids are recovered by the
+            # caller's retry pass. Fall back to the legacy single-JSON-object parse if no JSONL
+            # records were found (model ignored the format).
+            translated_batch = parse_jsonl_translations(raw_text)
+            if not translated_batch:
+                json_content = extract_json_blocks(raw_text)
+                if json_content:
+                    try:
+                        translated_batch = json.loads(json_content)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Error parsing JSON in batch {batch_index}: {e}")
+                        translated_batch = None
 
-                    # Verify that keys match exactly
-                    exact_match, missing_keys, format_changes = verify_translation_keys(
-                        batch.keys(), translated_batch.keys()
-                    )
+            stop_reason = getattr(response, "stop_reason", None)
+            if stop_reason == "max_tokens":
+                logger.warning(
+                    f"Batch {batch_index} hit max_tokens; kept "
+                    f"{len(translated_batch or {})} parsed records, missing ids will be retried"
+                )
 
-                    # Log any issues with key matching
-                    if not exact_match:
-                        if missing_keys:
-                            logger.warning(
-                                f"API response missing {len(missing_keys)} keys in batch {batch_index}"
-                            )
-                            for k in list(missing_keys)[
-                                :5
-                            ]:  # Show only first few to avoid log spam
-                                logger.warning(f"  Missing key: {k}")
+            if translated_batch:
+                # Verify that ids match exactly; salvage any id-format drift.
+                exact_match, missing_keys, format_changes = verify_translation_keys(
+                    batch.keys(), translated_batch.keys()
+                )
+                if not exact_match:
+                    if missing_keys:
+                        logger.warning(
+                            f"API response missing {len(missing_keys)} ids in batch {batch_index}"
+                        )
+                        for k in list(missing_keys)[:5]:
+                            logger.warning(f"  Missing id: {k}")
+                    if format_changes:
+                        logger.warning(
+                            f"API response modified {len(format_changes)} id formats in batch {batch_index}"
+                        )
+                        for orig, changed in list(format_changes.items())[:5]:
+                            logger.warning(f"  Id format changed: {orig} -> {changed}")
+                            if changed in translated_batch:
+                                translated_batch[orig] = translated_batch[changed]
 
-                        if format_changes:
-                            logger.warning(
-                                f"API response modified {len(format_changes)} key formats in batch {batch_index}"
-                            )
-                            for orig, changed in list(format_changes.items())[:5]:
-                                logger.warning(
-                                    f"  Key format changed: {orig} -> {changed}"
-                                )
-                                # Fix the format changes by copying values to the correct keys
-                                if changed in translated_batch:
-                                    translated_batch[orig] = translated_batch[changed]
-
-                    break  # Success, exit the retry loop
-                except json.JSONDecodeError as e:
-                    logger.error(f"Error parsing JSON in batch {batch_index}: {e}")
-                    retry_count += 1
+                # A truncated response gives a partial dict — accept it (caller retries the
+                # missing ids) rather than discarding everything and retrying the whole batch.
+                break
             else:
-                logger.error(f"No valid JSON found in response for batch {batch_index}")
+                logger.error(f"No usable translation in response for batch {batch_index}")
                 retry_count += 1
+                translated_batch = None
 
         except Exception as e:
-            logger.error(f"Error in API call for batch {batch_index}: {e}")
+            # Honour rate-limit backoff when the API signals it (429 / retry-after).
+            sleep_s = 2
+            status = getattr(e, "status_code", None)
+            if status == 429 or "rate" in str(e).lower():
+                retry_after = None
+                headers = getattr(getattr(e, "response", None), "headers", None)
+                if headers:
+                    try:
+                        retry_after = float(headers.get("retry-after"))
+                    except (TypeError, ValueError):
+                        retry_after = None
+                sleep_s = retry_after if retry_after else min(2 ** (retry_count + 1), 30)
+                logger.warning(
+                    f"Rate limited on batch {batch_index}; backing off {sleep_s:.0f}s"
+                )
+            else:
+                logger.error(f"Error in API call for batch {batch_index}: {e}")
             retry_count += 1
-            time.sleep(2)  # Wait before retrying
+            time.sleep(sleep_s)
 
     # If we couldn't translate after all retries, return an empty dict
-    if translated_batch is None:
+    if not translated_batch:
         logger.error(
             f"Failed to translate batch {batch_index} after {max_retries} retries"
         )
@@ -823,6 +874,19 @@ def translate_text(
             unique_texts, max_input_tokens=100000, max_items=config.BLOCKS_PER_BATCH
         )
 
+        # Adaptive sizing: when enabled, attempt ONE full-deck JSONL call if its estimated
+        # output comfortably fits the token ceiling. JSONL recovery makes the single call safe
+        # (a truncated tail is just retried). Off by default — start always-batch+cached.
+        if config.SINGLE_CALL_FIRST and len(batches) > 1:
+            est = estimate_output_tokens(unique_texts)
+            ceiling = config.SINGLE_CALL_MAX_FRACTION * config.ANTHROPIC_MAX_TOKENS
+            if est < ceiling:
+                logger.info(
+                    f"Adaptive sizing: single full-deck call (est {est} output tokens "
+                    f"< {ceiling:.0f} ceiling)"
+                )
+                batches = [unique_texts]
+
         translated_texts = {}
         remaining_batches = list(enumerate(batches))
 
@@ -860,15 +924,14 @@ def translate_text(
         except Exception:
             pass
 
-    while remaining_batches:
-        batch_index, batch = remaining_batches.pop(0)
+    state_lock = threading.Lock()
+    pending = list(remaining_batches)
 
+    def translate_one(batch_index, batch):
         logger.info(
             f"Translating batch {batch_index + 1}/{total_batches} ({len(batch)} items)"
         )
-
-        # Translate the batch
-        batch_translations = translate_batch(
+        return translate_batch(
             batch,
             batch_index,
             slide_metadata,
@@ -879,22 +942,55 @@ def translate_text(
             glossary=contract_text,
         )
 
-        # Update translated texts
-        translated_texts.update(batch_translations)
+    def record_result(item, batch_translations):
+        # Merge one batch's result and checkpoint. Guarded so the post-seed parallel
+        # fan-out can update shared state safely.
+        nonlocal completed_batches
+        with state_lock:
+            translated_texts.update(batch_translations)
+            if item in pending:
+                pending.remove(item)
+            recovery_system["translated_texts"] = translated_texts
+            recovery_system["remaining_batches"] = list(pending)
+            recovery_system["save_recovery_state"]()
+            progress_bar.update(1)
+            completed_batches += 1
+            if progress_callback:
+                try:
+                    progress_callback(completed_batches, total_batches)
+                except Exception:
+                    pass
 
-        # Save recovery state
-        recovery_system["translated_texts"] = translated_texts
-        recovery_system["remaining_batches"] = remaining_batches
-        recovery_system["save_recovery_state"]()
+    # Seed-then-fan-out (P1): fire the FIRST batch alone so it writes the cached prefix, then
+    # fan out all remaining batches in parallel — each a cheap cache-read. Batches are fully
+    # independent (the Contract, not inter-batch order, provides coherence), so there is no
+    # reason to serialize them; the only bound is the account rate limit (semaphore + 429
+    # backoff inside translate_batch). Falls back to sequential when caching is off or there
+    # is a single batch.
+    if config.PROMPT_CACHE and len(remaining_batches) > 1:
+        seed_item = remaining_batches[0]
+        record_result(seed_item, translate_one(seed_item[0], seed_item[1]))
 
-        # Update progress
-        progress_bar.update(1)
-        completed_batches += 1
-        if progress_callback:
-            try:
-                progress_callback(completed_batches, total_batches)
-            except Exception:
-                pass
+        rest = remaining_batches[1:]
+        max_workers = max(1, min(config.MAX_CONCURRENT_BATCHES, len(rest)))
+        logger.info(
+            f"Cache seeded; fanning out {len(rest)} batches ({max_workers} concurrent)"
+        )
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_item = {
+                executor.submit(translate_one, idx, batch): (idx, batch)
+                for idx, batch in rest
+            }
+            for future in as_completed(future_to_item):
+                item = future_to_item[future]
+                try:
+                    record_result(item, future.result())
+                except Exception as exc:
+                    logger.error(f"Batch {item[0]} failed in fan-out: {exc}")
+                    record_result(item, {})  # missing ids recovered by the retry pass
+    else:
+        for item in remaining_batches:
+            record_result(item, translate_one(item[0], item[1]))
 
     # If we deduplicated content, expand the translations back to all IDs
     if recovery_system.get("is_resuming"):
