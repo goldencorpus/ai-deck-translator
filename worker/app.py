@@ -32,9 +32,16 @@ import httpx
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
+from ai_deck_translator.auth.google_auth import build_services_from_refresh_token
+from ai_deck_translator.core.native_slides import translate_presentation_native
 from ai_deck_translator.pptx.translator import translate_pptx
-from ai_deck_translator.utils.exceptions import IncompleteTranslationError
-from worker.preview import make_preview
+from ai_deck_translator.utils.exceptions import (
+    AuthenticationError,
+    IncompleteTranslationError,
+    NetworkError,
+)
+from worker.preview import make_gslides_preview, make_preview
+from worker.token_crypto import decrypt_token
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
@@ -44,6 +51,10 @@ WORKER_CONCURRENCY = int(os.environ.get("WORKER_CONCURRENCY", "2"))
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "SlideVerso <noreply@slideverso.com>")
 APP_URL = os.environ.get("APP_URL", "https://slideverso.com")
+# Google Slides (native) — per-customer OAuth. GOOGLE_TOKEN_ENC_KEY is read inside
+# worker.token_crypto. These two must match the values the Next.js app uses.
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "")
+GOOGLE_OAUTH_CLIENT_SECRET = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "")
 
 INPUT_BUCKET = "deck-input"
 OUTPUT_BUCKET = "deck-output"
@@ -133,14 +144,19 @@ async def _user_email(client: httpx.AsyncClient, user_id: str) -> str | None:
     return rows[0].get("email") if rows else None
 
 
-async def _send_email(client: httpx.AsyncClient, to: str | None, subject: str, html: str) -> None:
+async def _send_email(
+    client: httpx.AsyncClient, to: str | None, subject: str, html: str
+) -> None:
     """Best-effort transactional email via Resend. Never raises into the job flow."""
     if not (RESEND_API_KEY and to):
         return
     try:
         await client.post(
             "https://api.resend.com/emails",
-            headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
             json={"from": EMAIL_FROM, "to": [to], "subject": subject, "html": html},
         )
     except Exception:  # noqa: BLE001 — email must never break fulfillment
@@ -164,6 +180,10 @@ async def _process(job_id: str) -> None:
         job = await _claim_job(client, job_id)
         if not job:
             return  # already claimed / not pending — idempotent no-op
+
+        if job.get("source_format") == "gslides":
+            await _process_gslides(client, job)
+            return
 
         input_path = job.get("input_storage_path")
         with tempfile.TemporaryDirectory() as tmp:
@@ -195,7 +215,7 @@ async def _process(job_id: str) -> None:
                     client,
                     await _user_email(client, job["user_id"]),
                     "Your translated deck is ready",
-                    f'<p>Your deck is translated and ready — every slide complete and consistent.</p>'
+                    f"<p>Your deck is translated and ready — every slide complete and consistent.</p>"
                     f'<p><a href="{APP_URL}/app/job/{job_id}">Download it from your dashboard</a>.</p>'
                     f"<p>— Golden Corpus</p>",
                 )
@@ -204,7 +224,11 @@ async def _process(job_id: str) -> None:
                 await _update_job(
                     client,
                     job_id,
-                    {"status": "failed", "error_message": str(exc)[:500], "completed_at": "now()"},
+                    {
+                        "status": "failed",
+                        "error_message": str(exc)[:500],
+                        "completed_at": "now()",
+                    },
                 )
                 await _stripe_refund(client, job.get("stripe_payment_intent_id"))
                 await _send_email(
@@ -216,11 +240,17 @@ async def _process(job_id: str) -> None:
                     f'<p>Sorry about that. You can try again at <a href="{APP_URL}/app">slideverso.com</a>.</p>'
                     f"<p>— Golden Corpus</p>",
                 )
-            except Exception as exc:  # noqa: BLE001 — any failure must refund, never strand
+            except (
+                Exception
+            ) as exc:  # noqa: BLE001 — any failure must refund, never strand
                 await _update_job(
                     client,
                     job_id,
-                    {"status": "failed", "error_message": str(exc)[:500], "completed_at": "now()"},
+                    {
+                        "status": "failed",
+                        "error_message": str(exc)[:500],
+                        "completed_at": "now()",
+                    },
                 )
                 await _stripe_refund(client, job.get("stripe_payment_intent_id"))
                 await _send_email(
@@ -237,6 +267,121 @@ async def _process(job_id: str) -> None:
                     await _storage_delete_input(client, input_path)  # zero-retention
 
 
+async def _process_gslides(client: httpx.AsyncClient, job: dict) -> None:
+    """Translate a Google Slides deck natively, as the customer (their refresh token).
+
+    Nothing of theirs is in our storage — the translated copy lands in their own Drive and
+    we deliver an edit link. The encrypted refresh token is the single customer credential
+    we hold; it is NULLed on EVERY terminal state (success and all failures) below.
+    """
+    job_id = job["id"]
+    file_id = job.get("google_file_id")
+    enc = job.get("google_refresh_token")
+    try:
+        if not (file_id and enc):
+            raise RuntimeError("gslides job missing google_file_id / refresh token")
+        refresh = decrypt_token(enc)
+        slides_service, drive_service = await asyncio.to_thread(
+            build_services_from_refresh_token,
+            refresh,
+            GOOGLE_OAUTH_CLIENT_ID,
+            GOOGLE_OAUTH_CLIENT_SECRET,
+        )
+        _new_id, edit_url = await asyncio.to_thread(
+            translate_presentation_native,
+            file_id,
+            job.get("source_lang", "auto"),
+            job.get("target_lang", "ja"),
+            None,  # api_key (engine reads its own .env CLAUDE_API_KEY)
+            None,  # progress_callback
+            slides_service,
+            drive_service,
+            True,  # cleanup_on_failure — trash the partial copy for a refunded customer
+        )
+        await _update_job(
+            client,
+            job_id,
+            {
+                "status": "completed",
+                "progress": 100,
+                "output_edit_url": edit_url,
+                "google_refresh_token": None,  # zero-retention: drop the credential now
+                "completed_at": "now()",
+            },
+        )
+        await _send_email(
+            client,
+            await _user_email(client, job["user_id"]),
+            "Your translated deck is ready",
+            f"<p>Your Google Slides deck is translated — every slide complete and "
+            f"consistent.</p>"
+            f'<p><a href="{edit_url}">Open it in Google Slides</a>. The translated copy is '
+            f"in your own Google Drive; we keep nothing.</p>"
+            f"<p>— Golden Corpus</p>",
+        )
+    except IncompleteTranslationError as exc:
+        await _fail_gslides(client, job, str(exc), cause="gate")
+    except (AuthenticationError, NetworkError) as exc:
+        await _fail_gslides(client, job, str(exc), cause="google")
+    except Exception as exc:  # noqa: BLE001 — any failure must refund, never strand
+        # A googleapiclient HttpError (revoked grant / file moved) usually lands here; a
+        # 401/403/404 means we lost access to the file rather than a generic engine fault.
+        status = getattr(getattr(exc, "resp", None), "status", None)
+        cause = "google" if status in (401, 403, 404) else "generic"
+        await _fail_gslides(client, job, str(exc), cause=cause)
+
+
+async def _fail_gslides(
+    client: httpx.AsyncClient, job: dict, msg: str, cause: str
+) -> None:
+    """Mark a gslides job failed, NULL its credential, refund, and email the right reason.
+
+    All three causes still auto-refund — the no-HITL guarantee is unchanged; only the
+    message differs (the generic 'completeness check' wording is wrong when we simply lost
+    access to the user's file)."""
+    await _update_job(
+        client,
+        job["id"],
+        {
+            "status": "failed",
+            "error_message": msg[:500],
+            "google_refresh_token": None,  # zero-retention even on failure
+            "completed_at": "now()",
+        },
+    )
+    await _stripe_refund(client, job.get("stripe_payment_intent_id"))
+
+    if cause == "google":
+        subject = "We lost access to your Google file — you've been refunded"
+        html = (
+            "<p>We couldn’t finish translating your deck because we lost access to your "
+            "Google Slides file — this usually means access was revoked, or the file was "
+            "moved or deleted before we ran.</p>"
+            "<p>You’ve been automatically refunded. You can reconnect and try again at "
+            f'<a href="{APP_URL}/app">slideverso.com</a>.</p>'
+            "<p>— Golden Corpus</p>"
+        )
+    elif cause == "gate":
+        subject = "Your translation didn't complete — you've been refunded"
+        html = (
+            "<p>Your deck didn’t pass our completeness check, so we didn’t deliver it — "
+            "and you’ve been automatically refunded.</p>"
+            f'<p>Sorry about that. You can try again at <a href="{APP_URL}/app">'
+            "slideverso.com</a>.</p>"
+            "<p>— Golden Corpus</p>"
+        )
+    else:
+        subject = "Your translation didn't complete — you've been refunded"
+        html = (
+            "<p>Something went wrong translating your deck, so we didn’t deliver it — and "
+            "you’ve been automatically refunded.</p>"
+            f'<p>Sorry about that. You can try again at <a href="{APP_URL}/app">'
+            "slideverso.com</a>.</p>"
+            "<p>— Golden Corpus</p>"
+        )
+    await _send_email(client, await _user_email(client, job["user_id"]), subject, html)
+
+
 @app.post("/run", status_code=202)
 async def run(req: RunRequest, authorization: str = Header(default="")):
     if not SHARED_SECRET or authorization != f"Bearer {SHARED_SECRET}":
@@ -246,13 +391,41 @@ async def run(req: RunRequest, authorization: str = Header(default="")):
     return {"accepted": req.job_id}
 
 
+async def _upload_preview_png(
+    client: httpx.AsyncClient, user_id: str, job_id: str, png_path: str
+) -> None:
+    """Upload a rendered preview PNG to output storage and point the job at it."""
+    preview_path = f"{user_id}/{job_id}/preview.png"
+    with open(png_path, "rb") as f:
+        data = f.read()
+    up = await client.post(
+        f"{SUPABASE_URL}/storage/v1/object/{OUTPUT_BUCKET}/{preview_path}",
+        headers={
+            "Authorization": f"Bearer {SERVICE_KEY}",
+            "Content-Type": "image/png",
+            "x-upsert": "true",
+        },
+        content=data,
+    )
+    up.raise_for_status()
+    await _update_job(client, job_id, {"preview_storage_path": preview_path})
+
+
 async def _preview(job_id: str) -> None:
     """Generate the free watermarked preview for an unpaid job (pre-payment proof).
-    The input deck is NOT deleted here — it's still needed for the paid translation."""
+    Neither the input deck nor (for gslides) the refresh token is dropped here — both are
+    still needed for the paid translation; the credential is only NULLed on terminal states.
+    """
     async with _semaphore, httpx.AsyncClient(timeout=600) as client:
         resp = await client.get(
             f"{SUPABASE_URL}/rest/v1/jobs",
-            params={"id": f"eq.{job_id}", "select": "id,user_id,input_storage_path,source_lang,target_lang"},
+            params={
+                "id": f"eq.{job_id}",
+                "select": (
+                    "id,user_id,source_format,input_storage_path,source_lang,"
+                    "target_lang,google_file_id,google_refresh_token"
+                ),
+            },
             headers=_sb_headers(),
         )
         resp.raise_for_status()
@@ -260,22 +433,43 @@ async def _preview(job_id: str) -> None:
         if not rows:
             return
         job = rows[0]
+
+        if job.get("source_format") == "gslides":
+            file_id = job.get("google_file_id")
+            enc = job.get("google_refresh_token")
+            if not (file_id and enc):
+                return
+            refresh = decrypt_token(enc)
+            slides_service, drive_service = await asyncio.to_thread(
+                build_services_from_refresh_token,
+                refresh,
+                GOOGLE_OAUTH_CLIENT_ID,
+                GOOGLE_OAUTH_CLIENT_SECRET,
+            )
+            with tempfile.TemporaryDirectory() as tmp:
+                png = await asyncio.to_thread(
+                    make_gslides_preview,
+                    file_id,
+                    job.get("source_lang", "auto"),
+                    job.get("target_lang", "ja"),
+                    tmp,
+                    slides_service,
+                    drive_service,
+                )
+                await _upload_preview_png(client, job["user_id"], job_id, png)
+            return
+
         with tempfile.TemporaryDirectory() as tmp:
             src = os.path.join(tmp, "input.pptx")
             await _storage_download(client, job["input_storage_path"], src)
             png = await asyncio.to_thread(
-                make_preview, src, job.get("source_lang", "en"), job.get("target_lang", "ja"), tmp
+                make_preview,
+                src,
+                job.get("source_lang", "en"),
+                job.get("target_lang", "ja"),
+                tmp,
             )
-            preview_path = f"{job['user_id']}/{job_id}/preview.png"
-            with open(png, "rb") as f:
-                data = f.read()
-            up = await client.post(
-                f"{SUPABASE_URL}/storage/v1/object/{OUTPUT_BUCKET}/{preview_path}",
-                headers={"Authorization": f"Bearer {SERVICE_KEY}", "Content-Type": "image/png", "x-upsert": "true"},
-                content=data,
-            )
-            up.raise_for_status()
-            await _update_job(client, job_id, {"preview_storage_path": preview_path})
+            await _upload_preview_png(client, job["user_id"], job_id, png)
 
 
 @app.post("/preview", status_code=202)

@@ -15,13 +15,19 @@ import copy
 import os
 import subprocess
 import tempfile
+import urllib.request
 
 from pptx import Presentation
 from pptx.util import Emu
 
 from PIL import Image, ImageDraw, ImageFont
 
-from ai_deck_translator.pptx.translator import translate_pptx
+from ai_deck_translator.pptx.translator import translate_pptx, translate_text
+from ai_deck_translator.core.native_slides import (
+    _CELL_SEP,
+    _build_replace_requests,
+    _runs_text,
+)
 
 SOFFICE = "/usr/bin/soffice"
 
@@ -72,7 +78,9 @@ def render_png(pptx_path: str, out_dir: str) -> str:
     return png
 
 
-def watermark(png_path: str, out_path: str, text: str = "SlideVerso  ·  PREVIEW") -> None:
+def watermark(
+    png_path: str, out_path: str, text: str = "SlideVerso  ·  PREVIEW"
+) -> None:
     """Stamp a tiled diagonal watermark so the image proves fidelity but isn't usable."""
     img = Image.open(png_path).convert("RGBA")
     w, h = img.size
@@ -107,3 +115,91 @@ def make_preview(input_pptx: str, source_lang: str, target_lang: str, work: str)
     wm = os.path.join(work, "preview.png")
     watermark(raw_png, wm)
     return wm
+
+
+# --- Google Slides (native) preview --------------------------------------------------
+# No upload, no LibreOffice: copy the user's deck in their Drive, translate ONLY the first
+# slide, render it via the Slides thumbnail API, watermark, then trash the copy. Nothing of
+# the user's is in our storage — the source deck never leaves Google.
+
+
+def _extract_first_slide(presentation: dict):
+    """Return (first_slide_page_id, {block_id: text}) for the deck's first slide."""
+    slides = presentation.get("slides", [])
+    if not slides:
+        return None, {}
+    slide = slides[0]
+    page_id = slide.get("objectId")
+    text_dict: dict = {}
+    for element in slide.get("pageElements", []):
+        object_id = element.get("objectId")
+        shape = element.get("shape")
+        if shape and "text" in shape:
+            text = _runs_text(shape.get("text"))
+            if text.strip():
+                text_dict[object_id] = text.strip()
+        table = element.get("table")
+        if table:
+            for r, row in enumerate(table.get("tableRows", [])):
+                for c, cell in enumerate(row.get("tableCells", [])):
+                    text = _runs_text(cell.get("text"))
+                    if text.strip():
+                        text_dict[f"{object_id}{_CELL_SEP}{r}c{c}"] = text.strip()
+    return page_id, text_dict
+
+
+def make_gslides_preview(
+    file_id: str,
+    source_lang: str,
+    target_lang: str,
+    work: str,
+    slides_service,
+    drive_service,
+) -> str:
+    """Copy → translate slide 1 → Slides thumbnail → watermark → trash copy. Returns PNG path.
+
+    The copy is ALWAYS trashed (finally), even on failure — a preview must never leave a
+    stray deck in the user's Drive. The original is never touched.
+    """
+    src = slides_service.presentations().get(presentationId=file_id).execute()
+    title = src.get("title", "Presentation")
+    copied = (
+        drive_service.files()
+        .copy(fileId=file_id, body={"name": f"{title} (preview {target_lang})"})
+        .execute()
+    )
+    new_id = copied["id"]
+    try:
+        pres = slides_service.presentations().get(presentationId=new_id).execute()
+        page_id, text_dict = _extract_first_slide(pres)
+        if page_id is None:
+            raise RuntimeError("presentation has no slides to preview")
+        if text_dict:
+            translated = translate_text(text_dict, [], source_lang, target_lang)
+            requests = _build_replace_requests(translated)
+            if requests:
+                slides_service.presentations().batchUpdate(
+                    presentationId=new_id, body={"requests": requests}
+                ).execute()
+        thumb = (
+            slides_service.presentations()
+            .pages()
+            .getThumbnail(
+                presentationId=new_id,
+                pageObjectId=page_id,
+                thumbnailProperties_thumbnailSize="LARGE",
+                thumbnailProperties_mimeType="PNG",
+            )
+            .execute()
+        )
+        content_url = thumb["contentUrl"]
+        raw_png = os.path.join(work, "gslides_raw.png")
+        urllib.request.urlretrieve(content_url, raw_png)  # short-lived Google URL
+        wm = os.path.join(work, "preview.png")
+        watermark(raw_png, wm)
+        return wm
+    finally:
+        try:
+            drive_service.files().delete(fileId=new_id).execute()
+        except Exception:  # noqa: BLE001 — cleanup must not mask a real error
+            pass

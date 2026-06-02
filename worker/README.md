@@ -22,6 +22,9 @@ uvicorn worker.app:app --host 0.0.0.0 --port 8787
 - `STRIPE_SECRET_KEY` — auto-refund on gate-failure
 - `CLAUDE_API_KEY` — engine COGS key
 - `WORKER_CONCURRENCY` — bounded pool (default 2)
+- `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` — Google Slides (native) per-user OAuth
+- `GOOGLE_TOKEN_ENC_KEY` — base64 32-byte AES key; MUST equal the value in Vercel so the
+  worker can decrypt the refresh token the app encrypted (see `worker/token_crypto.py`)
 
 ## Deploy (systemd) — see `decktr-worker.service`
 Front with HTTPS (caddy/nginx) + the bearer secret; optionally IP-allowlist Vercel egress.
