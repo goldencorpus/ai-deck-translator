@@ -41,6 +41,9 @@ SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 SHARED_SECRET = os.environ.get("WORKER_SHARED_SECRET", "")
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 WORKER_CONCURRENCY = int(os.environ.get("WORKER_CONCURRENCY", "2"))
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+EMAIL_FROM = os.environ.get("EMAIL_FROM", "SlideVerso <noreply@slideverso.com>")
+APP_URL = os.environ.get("APP_URL", "https://slideverso.com")
 
 INPUT_BUCKET = "deck-input"
 OUTPUT_BUCKET = "deck-output"
@@ -118,6 +121,32 @@ async def _storage_delete_input(client: httpx.AsyncClient, path: str) -> None:
     )
 
 
+async def _user_email(client: httpx.AsyncClient, user_id: str) -> str | None:
+    resp = await client.get(
+        f"{SUPABASE_URL}/rest/v1/profiles",
+        params={"id": f"eq.{user_id}", "select": "email"},
+        headers=_sb_headers(),
+    )
+    if resp.status_code != 200:
+        return None
+    rows = resp.json()
+    return rows[0].get("email") if rows else None
+
+
+async def _send_email(client: httpx.AsyncClient, to: str | None, subject: str, html: str) -> None:
+    """Best-effort transactional email via Resend. Never raises into the job flow."""
+    if not (RESEND_API_KEY and to):
+        return
+    try:
+        await client.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+            json={"from": EMAIL_FROM, "to": [to], "subject": subject, "html": html},
+        )
+    except Exception:  # noqa: BLE001 — email must never break fulfillment
+        pass
+
+
 async def _stripe_refund(client: httpx.AsyncClient, payment_intent_id: str) -> None:
     """Auto-refund on gate-failure — the no-HITL guarantee, enforced in code."""
     if not (STRIPE_SECRET_KEY and payment_intent_id):
@@ -162,6 +191,14 @@ async def _process(job_id: str) -> None:
                         "completed_at": "now()",
                     },
                 )
+                await _send_email(
+                    client,
+                    await _user_email(client, job["user_id"]),
+                    "Your translated deck is ready",
+                    f'<p>Your deck is translated and ready — every slide complete and consistent.</p>'
+                    f'<p><a href="{APP_URL}/app/job/{job_id}">Download it from your dashboard</a>.</p>'
+                    f"<p>— Golden Corpus</p>",
+                )
             except IncompleteTranslationError as exc:
                 # 100%-or-fail-loud gate tripped — never ship a partial deck; refund.
                 await _update_job(
@@ -170,6 +207,15 @@ async def _process(job_id: str) -> None:
                     {"status": "failed", "error_message": str(exc)[:500], "completed_at": "now()"},
                 )
                 await _stripe_refund(client, job.get("stripe_payment_intent_id"))
+                await _send_email(
+                    client,
+                    await _user_email(client, job["user_id"]),
+                    "Your translation didn't complete — you've been refunded",
+                    f"<p>Your deck didn't pass our completeness check, so we didn't deliver it — "
+                    f"and you've been automatically refunded.</p>"
+                    f'<p>Sorry about that. You can try again at <a href="{APP_URL}/app">slideverso.com</a>.</p>'
+                    f"<p>— Golden Corpus</p>",
+                )
             except Exception as exc:  # noqa: BLE001 — any failure must refund, never strand
                 await _update_job(
                     client,
@@ -177,6 +223,15 @@ async def _process(job_id: str) -> None:
                     {"status": "failed", "error_message": str(exc)[:500], "completed_at": "now()"},
                 )
                 await _stripe_refund(client, job.get("stripe_payment_intent_id"))
+                await _send_email(
+                    client,
+                    await _user_email(client, job["user_id"]),
+                    "Your translation didn't complete — you've been refunded",
+                    f"<p>Your deck didn't pass our completeness check, so we didn't deliver it — "
+                    f"and you've been automatically refunded.</p>"
+                    f'<p>Sorry about that. You can try again at <a href="{APP_URL}/app">slideverso.com</a>.</p>'
+                    f"<p>— Golden Corpus</p>",
+                )
             finally:
                 if input_path:
                     await _storage_delete_input(client, input_path)  # zero-retention
