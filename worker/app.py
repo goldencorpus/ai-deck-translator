@@ -34,6 +34,7 @@ from pydantic import BaseModel
 
 from ai_deck_translator.pptx.translator import translate_pptx
 from ai_deck_translator.utils.exceptions import IncompleteTranslationError
+from worker.preview import make_preview
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
@@ -187,6 +188,46 @@ async def run(req: RunRequest, authorization: str = Header(default="")):
         raise HTTPException(status_code=401, detail="unauthorized")
     # Fire-and-forget: schedule processing, return 202 immediately (MWT pattern).
     asyncio.create_task(_process(req.job_id))
+    return {"accepted": req.job_id}
+
+
+async def _preview(job_id: str) -> None:
+    """Generate the free watermarked preview for an unpaid job (pre-payment proof).
+    The input deck is NOT deleted here — it's still needed for the paid translation."""
+    async with _semaphore, httpx.AsyncClient(timeout=600) as client:
+        resp = await client.get(
+            f"{SUPABASE_URL}/rest/v1/jobs",
+            params={"id": f"eq.{job_id}", "select": "id,user_id,input_storage_path,source_lang,target_lang"},
+            headers=_sb_headers(),
+        )
+        resp.raise_for_status()
+        rows = resp.json()
+        if not rows:
+            return
+        job = rows[0]
+        with tempfile.TemporaryDirectory() as tmp:
+            src = os.path.join(tmp, "input.pptx")
+            await _storage_download(client, job["input_storage_path"], src)
+            png = await asyncio.to_thread(
+                make_preview, src, job.get("source_lang", "en"), job.get("target_lang", "ja"), tmp
+            )
+            preview_path = f"{job['user_id']}/{job_id}/preview.png"
+            with open(png, "rb") as f:
+                data = f.read()
+            up = await client.post(
+                f"{SUPABASE_URL}/storage/v1/object/{OUTPUT_BUCKET}/{preview_path}",
+                headers={"Authorization": f"Bearer {SERVICE_KEY}", "Content-Type": "image/png", "x-upsert": "true"},
+                content=data,
+            )
+            up.raise_for_status()
+            await _update_job(client, job_id, {"preview_storage_path": preview_path})
+
+
+@app.post("/preview", status_code=202)
+async def preview(req: RunRequest, authorization: str = Header(default="")):
+    if not SHARED_SECRET or authorization != f"Bearer {SHARED_SECRET}":
+        raise HTTPException(status_code=401, detail="unauthorized")
+    asyncio.create_task(_preview(req.job_id))
     return {"accepted": req.job_id}
 
 
