@@ -1,0 +1,28 @@
+# SlideVerso translation worker (FastAPI) — no-HITL SaaS fulfillment.
+# DEPLOYED on the GC VPS (mwt-vps) at /opt/slideverso, modeled on opf-shim.service.
+# Install: copy to /etc/systemd/system/, `systemctl daemon-reload && systemctl enable --now slideverso-worker`.
+# Secrets in /opt/slideverso/worker.env (chmod 600, never committed):
+#   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, WORKER_SHARED_SECRET, CLAUDE_API_KEY,
+#   ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, WORKER_CONCURRENCY
+#   Google Slides (native): GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET,
+#   GOOGLE_TOKEN_ENC_KEY (base64 32-byte; MUST equal the value set in Vercel so the
+#   worker can decrypt the refresh token the app encrypted)
+# Exposed via Apache reverse proxy (conf.d/slideverso-worker.conf) at https://worker.slideverso.com (LE cert).
+[Unit]
+Description=SlideVerso translation worker (FastAPI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=root
+WorkingDirectory=/opt/slideverso
+EnvironmentFile=/opt/slideverso/worker.env
+ExecStart=/opt/slideverso/.venv/bin/uvicorn worker.app:app --host 127.0.0.1 --port 8099
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/opt/slideverso/uvicorn.log
+StandardError=append:/opt/slideverso/uvicorn.log
+
+[Install]
+WantedBy=multi-user.target
