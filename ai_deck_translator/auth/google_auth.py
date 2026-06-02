@@ -126,6 +126,66 @@ def authenticate_google() -> Tuple[Any, Any]:
         raise AuthenticationError(f"Error building service: {str(e)}")
 
 
+def build_services_from_refresh_token(
+    refresh_token: str,
+    client_id: str,
+    client_secret: str,
+    token_uri: str = "https://oauth2.googleapis.com/token",
+    scopes: Optional[List[str]] = None,
+) -> Tuple[Any, Any]:
+    """
+    Build Slides + Drive services from a per-user OAuth refresh token.
+
+    This is the multi-tenant (SaaS) counterpart to authenticate_google(): instead of the
+    single desktop-OAuth token in ~/.gslides_translator/, it acts on behalf of an individual
+    customer who granted access via the web "Sign in with Google" + Picker flow (scope
+    drive.file). The worker stores the customer's refresh token, calls this to mint a fresh
+    access token, and runs the native translation as that customer — so the translated copy
+    lands in the customer's own Drive.
+
+    Args:
+        refresh_token: The customer's long-lived OAuth refresh token.
+        client_id: The web OAuth client id.
+        client_secret: The web OAuth client secret.
+        token_uri: Google's token endpoint (override only for testing).
+        scopes: Optional scope list. Default None — the access token inherits whatever the
+            refresh token was granted (drive.file for the SaaS flow).
+
+    Returns:
+        tuple: (slides_service, drive_service).
+
+    Raises:
+        AuthenticationError: If the refresh token is missing/revoked or the token refresh fails.
+        NetworkError: If building the API services fails.
+    """
+    if not refresh_token:
+        raise AuthenticationError("No refresh token provided")
+    try:
+        creds = Credentials(
+            token=None,
+            refresh_token=refresh_token,
+            token_uri=token_uri,
+            client_id=client_id,
+            client_secret=client_secret,
+            scopes=scopes,
+        )
+        creds.refresh(google.auth.transport.requests.Request())
+    except Exception as e:
+        logger.error(f"Error refreshing user credentials: {str(e)}")
+        raise AuthenticationError(f"Error refreshing user credentials: {str(e)}")
+
+    try:
+        slides_service = build("slides", "v1", credentials=creds)
+        drive_service = build("drive", "v3", credentials=creds)
+        return slides_service, drive_service
+    except HttpError as e:
+        logger.error(f"Error connecting to Google API: {str(e)}")
+        raise NetworkError(f"Error connecting to Google API: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error building service: {str(e)}")
+        raise AuthenticationError(f"Error building service: {str(e)}")
+
+
 def get_presentation(slides_service: Any, presentation_id: str) -> Dict[str, Any]:
     """
     Get a presentation by ID.
